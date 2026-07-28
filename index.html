@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xpert2Min — Connexion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#0A0A0B;
+    --black-2:#141416;
+    --red:#E8161C;
+    --red-dim:#7A0E12;
+    --white:#F5F5F5;
+    --grey:#8A8A8F;
+    --line:#242426;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Inter', sans-serif;
+    background:var(--black);
+    color:var(--white);
+    display:flex;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ---------- LEFT: BRAND PANEL ---------- */
+  .brand{
+    position:relative;
+    flex:1.1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:48px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(232,22,28,0.16), transparent 55%),
+      var(--black);
+    overflow:hidden;
+    min-height:340px;
+  }
+  .brand::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:42px 42px;
+    pointer-events:none;
+  }
+
+  .x-mark{
+    position:relative;
+    width:150px;
+    height:150px;
+    margin-bottom:28px;
+    filter:drop-shadow(0 0 26px rgba(232,22,28,0.45));
+  }
+  .x-mark svg{width:100%; height:100%; display:block;}
+  .stroke-red{ animation:slide-in-red 900ms cubic-bezier(.2,.9,.25,1) both; }
+  .stroke-white{ animation:slide-in-white 900ms cubic-bezier(.2,.9,.25,1) 150ms both; }
+  @keyframes slide-in-red{
+    from{ transform:translate(-14px,-10px); opacity:0; }
+    to{ transform:translate(0,0); opacity:1; }
+  }
+  @keyframes slide-in-white{
+    from{ transform:translate(14px,-10px); opacity:0; }
+    to{ transform:translate(0,0); opacity:1; }
+  }
+
+  .brand-word{
+    font-family:'Archivo Black', sans-serif;
+    font-size:clamp(28px, 4vw, 40px);
+    letter-spacing:-0.01em;
+    text-align:center;
+    line-height:1;
+  }
+  .brand-word span{ color:var(--red); }
+
+  .brand-tag{
+    margin-top:14px;
+    font-size:15px;
+    color:var(--grey);
+    text-align:center;
+    max-width:320px;
+    line-height:1.5;
+  }
+  .brand-tag b{ color:var(--white); font-weight:600; }
+  .brand-tag em{ color:var(--red); font-style:normal; font-weight:600; }
+
+  .brand-strip{
+    position:relative;
+    display:flex;
+    gap:26px;
+    margin-top:40px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+    font-size:12px;
+    color:var(--grey);
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+  }
+  .brand-strip span::before{ content:"— "; color:var(--red); }
+
+  /* ---------- RIGHT: FORM PANEL ---------- */
+  .panel{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px;
+    background:var(--black-2);
+  }
+  .card{
+    width:100%;
+    max-width:380px;
+  }
+
+  .tabs{
+    display:flex;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:4px;
+    margin-bottom:28px;
+    background:var(--black);
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:11px 0;
+    font-size:14px;
+    font-weight:600;
+    color:var(--grey);
+    background:transparent;
+    border:none;
+    border-radius:7px;
+    cursor:pointer;
+    transition:all .18s ease;
+  }
+  .tab.active{
+    background:var(--red);
+    color:#fff;
+  }
+
+  h1.form-title{
+    font-family:'Archivo Black', sans-serif;
+    font-size:22px;
+    margin-bottom:6px;
+  }
+  .form-sub{
+    color:var(--grey);
+    font-size:13.5px;
+    margin-bottom:26px;
+  }
+
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block;
+    font-size:12.5px;
+    color:var(--grey);
+    margin-bottom:6px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+  .field input{
+    width:100%;
+    padding:12px 14px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--white);
+    font-size:14.5px;
+    font-family:'Inter', sans-serif;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .field input:focus{ border-color:var(--red); }
+  .field input::placeholder{ color:#55555a; }
+
+  .submit-btn{
+    width:100%;
+    padding:13px 0;
+    margin-top:6px;
+    background:var(--red);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:14.5px;
+    font-weight:700;
+    font-family:'Inter', sans-serif;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .submit-btn:hover{ background:#c9121a; }
+  .submit-btn:active{ transform:scale(0.98); }
+
+  .switch-line{
+    text-align:center;
+    margin-top:20px;
+    font-size:13px;
+    color:var(--grey);
+  }
+  .switch-line button{
+    background:none;
+    border:none;
+    color:var(--red);
+    font-weight:600;
+    cursor:pointer;
+    font-size:13px;
+    font-family:'Inter', sans-serif;
+  }
+
+  .hidden{ display:none; }
+
+  /* welcome toast : invisible tant qu'aucun compte n'est créé */
+  .toast{
+    display:none;
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(120%);
+    background:var(--black);
+    border:1px solid var(--red);
+    color:var(--white);
+    padding:14px 20px;
+    border-radius:10px;
+    font-size:13.5px;
+    max-width:90vw;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+    transition:transform .35s cubic-bezier(.2,.9,.25,1);
+    z-index:50;
+  }
+  .toast.show{
+    display:block;
+    transform:translateX(-50%) translateY(0);
+  }
+  .toast b{ color:var(--red); }
+
+  @media (max-width:860px){
+    body{ flex-direction:column; }
+    .brand{ padding:36px 24px; min-height:0; }
+    .x-mark{ width:100px; height:100px; margin-bottom:18px; }
+    .brand-strip{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- LEFT BRAND PANEL -->
+  <div class="brand">
+    <div class="x-mark">
+      <svg viewBox="0 0 200 200" fill="none">
+        <polygon class="stroke-red" points="30,30 85,30 170,170 115,170" fill="#E8161C"/>
+        <polygon class="stroke-white" points="170,30 115,30 30,170 85,170" fill="#F5F5F5"/>
+      </svg>
+    </div>
+    <div class="brand-word">XPERT<span>2</span>MIN</div>
+    <p class="brand-tag"><b>Votre expertise. Votre produit.</b><br><em>En 2 minutes.</em></p>
+    <div class="brand-strip">
+      <span>IA de structuration</span>
+      <span>Design pro</span>
+      <span>PDF prêt à vendre</span>
+    </div>
+  </div>
+
+  <!-- RIGHT FORM PANEL -->
+  <div class="panel">
+    <div class="card">
+
+      <div class="tabs">
+        <button class="tab active" id="tab-login" onclick="showForm('login')">Se connecter</button>
+        <button class="tab" id="tab-signup" onclick="showForm('signup')">Créer un compte</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="form-login">
+        <h1 class="form-title">Content de vous revoir</h1>
+        <p class="form-sub">Connectez-vous pour accéder à vos créations.</p>
+
+        <div class="field">
+          <label for="login-email">E-mail</label>
+          <input type="email" id="login-email" placeholder="vous@exemple.com" required>
+        </div>
+        <div class="field">
+          <label for="login-password">Mot de passe</label>
+          <input type="password" id="login-password" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="submit-btn">Se connecter</button>
+        <p class="switch-line">Pas encore de compte ? <button type="button" onclick="showForm('signup')">Créer un compte</button></p>
+      </form>
+
+      <!-- SIGNUP FORM -->
+      <form id="form-signup" class="hidden">
+        <h1 class="form-title">Créez votre compte</h1>
+        <p class="form-sub">2 générations de PDF offertes pour votre premier mois.</p>
+
+        <div class="field">
+          <label for="signup-name">Nom du créateur</label>
+          <input type="text" id="signup-name" placeholder="Votre nom" required>
+        </div>
+        <div class="field">
+          <label for="signup-email">E-mail</label>
+          <input type="email" id="signup-email" placeholder="vous@exemple.com" required>
+        </div>
+        <div class="field">
+          <label for="signup-password">Mot de passe</label>
+          <input type="password" id="signup-password" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="submit-btn">Créer mon compte</button>
+        <p class="switch-line">Déjà un compte ? <button type="button" onclick="showForm('login')">Se connecter</button></p>
+      </form>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    Bienvenue sur <b>Xpert2Min</b>. Vous avez reçu 2 générations de PDF offertes pour votre premier mois.
+  </div>
+
+<script>
+  function showForm(which){
+    document.getElementById('form-login').classList.toggle('hidden', which !== 'login');
+    document.getElementById('form-signup').classList.toggle('hidden', which !== 'signup');
+    document.getElementById('tab-login').classList.toggle('active', which === 'login');
+    document.getElementById('tab-signup').classList.toggle('active', which === 'signup');
+  }
+
+  // Pour l'instant ces formulaires ne sont pas encore connectés à une vraie base de
+  // données (ça viendra avec Back4App, à une étape suivante). On simule juste le
+  // comportement pour valider le design et le message de bienvenue.
+  document.getElementById('form-signup').addEventListener('submit', function(e){
+    e.preventDefault();
+    var toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(function(){ toast.classList.remove('show'); }, 5000);
+  });
+
+  document.getElementById('form-login').addEventListener('submit', function(e){
+    e.preventDefault();
+    alert('Connexion : cette action sera activée une fois la base de données connectée.');
+  });
+</script>
+
+</body>
+  </html>
+  
