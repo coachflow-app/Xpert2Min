@@ -30,30 +30,41 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:16px 24px;
+    gap:12px;
+    padding:14px 18px;
     background:var(--black);
     border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
   }
   .logo{
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:9px;
     font-family:'Archivo Black', sans-serif;
-    font-size:16px;
+    font-size:14px;
+    white-space:nowrap;
   }
-  .logo .x{
-    width:26px; height:26px;
-    background:linear-gradient(135deg, var(--red) 50%, var(--white) 50%);
-    clip-path:polygon(20% 0%, 40% 0%, 100% 100%, 80% 100%, 0% 20%);
-  }
+  .logo .x-icon{ width:22px; height:22px; flex-shrink:0; }
+  .logo .x-icon svg{ width:100%; height:100%; display:block; }
   .logo span{ color:var(--red); }
+  header nav{
+    display:flex;
+    gap:18px;
+    flex-shrink:0;
+  }
   header nav a{
     color:var(--grey);
     text-decoration:none;
-    font-size:13.5px;
-    margin-left:22px;
+    font-size:13px;
+    white-space:nowrap;
   }
   header nav a.active{ color:var(--white); font-weight:600; }
+
+  @media (max-width:420px){
+    .logo{ font-size:12.5px; }
+    header nav{ gap:12px; }
+    header nav a{ font-size:12px; }
+  }
 
   /* STEPS BAR */
   .steps{
@@ -151,6 +162,39 @@
   }
   .import-zone:hover{ border-color:var(--red); }
 
+  .file-list{
+    list-style:none;
+    margin-top:10px;
+  }
+  .file-list li{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:9px 12px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:13px;
+    margin-top:8px;
+  }
+  .file-list li .name{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--white);
+  }
+  .file-list li button{
+    background:none;
+    border:none;
+    color:var(--grey);
+    font-size:15px;
+    cursor:pointer;
+    line-height:1;
+    padding:2px 4px;
+  }
+  .file-list li button:hover{ color:var(--red); }
+
   .next-btn{
     width:100%;
     padding:14px 0;
@@ -177,7 +221,15 @@
 <body>
 
 <header>
-  <div class="logo"><div class="x"></div>XPERT<span>2</span>MIN</div>
+  <div class="logo">
+    <div class="x-icon">
+      <svg viewBox="0 0 200 200" fill="none">
+        <polygon points="30,30 85,30 170,170 115,170" fill="#E8161C"/>
+        <polygon points="170,30 115,30 30,170 85,170" fill="#F5F5F5"/>
+      </svg>
+    </div>
+    XPERT<span>2</span>MIN
+  </div>
   <nav>
     <a href="app.html" class="active">Créer</a>
     <a href="dashboard.html">Tableau de bord</a>
@@ -241,6 +293,7 @@
         Cliquez pour importer un ou plusieurs documents
       </div>
       <input type="file" id="file-input" multiple style="display:none">
+      <ul class="file-list" id="file-list"></ul>
     </div>
 
     <button type="submit" class="next-btn">Continuer</button>
@@ -262,8 +315,39 @@
     // Cette étape sera connectée à l'IA Groq à la prochaine action.
     document.getElementById('info-msg').textContent = "Étape suivante (design + IA) à venir.";
   });
+
+  // Gestion de l'affichage des fichiers importés
+  var importedFiles = [];
+
+  function renderFileList(){
+    var list = document.getElementById('file-list');
+    list.innerHTML = '';
+    importedFiles.forEach(function(file, index){
+      var li = document.createElement('li');
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'name';
+      nameSpan.textContent = file.name;
+      var removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.textContent = '✕';
+      removeBtn.onclick = function(){
+        importedFiles.splice(index, 1);
+        renderFileList();
+      };
+      li.appendChild(nameSpan);
+      li.appendChild(removeBtn);
+      list.appendChild(li);
+    });
+  }
+
+  document.getElementById('file-input').addEventListener('change', function(e){
+    Array.from(e.target.files).forEach(function(file){
+      importedFiles.push(file);
+    });
+    renderFileList();
+    e.target.value = ''; // permet de réimporter le même fichier si besoin
+  });
 </script>
 
 </body>
-        </html>
-        
+</html>
