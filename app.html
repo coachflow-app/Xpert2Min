@@ -209,6 +209,45 @@
   }
   .next-btn:hover{ background:#c9121a; }
 
+  .btn-row{ display:flex; gap:10px; margin-top:12px; }
+  .btn-row .next-btn{ margin-top:0; }
+  .back-btn{
+    flex:0 0 auto;
+    padding:14px 20px;
+    background:transparent;
+    color:var(--grey);
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .back-btn:hover{ border-color:var(--grey); color:var(--white); }
+
+  .step-screen{ display:none; }
+  .step-screen.active{ display:block; }
+
+  .soon-box{
+    border:1px dashed var(--line);
+    border-radius:10px;
+    padding:34px 20px;
+    text-align:center;
+    color:var(--grey);
+    font-size:13.5px;
+  }
+  .soon-btn{
+    width:100%;
+    padding:14px 0;
+    margin-top:16px;
+    background:var(--line);
+    color:var(--grey);
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:700;
+    cursor:not-allowed;
+  }
+
   .form-msg{
     min-height:16px;
     font-size:13px;
@@ -244,11 +283,13 @@
 </div>
 
 <main>
-  <div class="eyebrow">Étape 1 / 4</div>
-  <h1>Parlez-nous de votre PDF</h1>
-  <p class="lead">Ces informations aident l'IA à structurer un contenu adapté à votre sujet et à votre public.</p>
 
-  <form id="info-form">
+  <!-- ÉTAPE 1 : Informations générales -->
+  <div class="step-screen active" id="screen-1">
+    <div class="eyebrow">Étape 1 / 4</div>
+    <h1>Parlez-nous de votre PDF</h1>
+    <p class="lead">Ces informations aident l'IA à structurer un contenu adapté à votre sujet et à votre public.</p>
+
     <div class="field">
       <label for="titre">Titre du PDF</label>
       <input type="text" id="titre" placeholder="Ex. : Les fondamentaux du copywriting" required>
@@ -282,6 +323,16 @@
       </div>
     </div>
 
+    <button type="button" class="next-btn" onclick="validateStep1()">Continuer</button>
+    <p class="form-msg" id="msg-1"></p>
+  </div>
+
+  <!-- ÉTAPE 2 : Connaissances -->
+  <div class="step-screen" id="screen-2">
+    <div class="eyebrow">Étape 2 / 4</div>
+    <h1>Ajoutez vos connaissances</h1>
+    <p class="lead">Écrivez ce que vous savez, ou importez des documents. L'IA s'appuiera dessus pour construire le contenu.</p>
+
     <div class="field">
       <label for="connaissances">Vos connaissances (texte)</label>
       <textarea id="connaissances" placeholder="Écrivez ou collez ici tout ce que vous savez sur le sujet..."></textarea>
@@ -296,9 +347,45 @@
       <ul class="file-list" id="file-list"></ul>
     </div>
 
-    <button type="submit" class="next-btn">Continuer</button>
-    <p class="form-msg" id="info-msg"></p>
-  </form>
+    <div class="btn-row">
+      <button type="button" class="back-btn" onclick="goToStep(1)">Retour</button>
+      <button type="button" class="next-btn" onclick="validateStep2()">Continuer</button>
+    </div>
+    <p class="form-msg" id="msg-2"></p>
+  </div>
+
+  <!-- ÉTAPE 3 : Design -->
+  <div class="step-screen" id="screen-3">
+    <div class="eyebrow">Étape 3 / 4</div>
+    <h1>Personnalisez le design</h1>
+    <p class="lead">Choisissez le style, les couleurs et la mise en page de votre PDF.</p>
+
+    <div class="soon-box">
+      Cette étape (style, couleurs, typographie, couverture, mise en page) sera activée à une prochaine étape du guide.
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="back-btn" onclick="goToStep(2)">Retour</button>
+      <button type="button" class="soon-btn" disabled>Bientôt disponible</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 4 : Génération -->
+  <div class="step-screen" id="screen-4">
+    <div class="eyebrow">Étape 4 / 4</div>
+    <h1>Génération et prévisualisation</h1>
+    <p class="lead">L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.</p>
+
+    <div class="soon-box">
+      La génération du PDF (via l'IA Groq) sera activée à une prochaine étape du guide.
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="back-btn" onclick="goToStep(3)">Retour</button>
+      <button type="button" class="soon-btn" disabled>Bientôt disponible</button>
+    </div>
+  </div>
+
 </main>
 
 <script>
@@ -310,11 +397,32 @@
     window.location.href = "index.html";
   }
 
-  document.getElementById('info-form').addEventListener('submit', function(e){
-    e.preventDefault();
-    // Cette étape sera connectée à l'IA Groq à la prochaine action.
-    document.getElementById('info-msg').textContent = "Étape suivante (design + IA) à venir.";
-  });
+  // Navigation entre les étapes
+  function goToStep(n){
+    document.querySelectorAll('.step-screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById('screen-' + n).classList.add('active');
+    document.querySelectorAll('.step-dot').forEach(function(dot, i){
+      dot.classList.toggle('active', i < n);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function validateStep1(){
+    var required = ['titre', 'sujet', 'objectif', 'public', 'createur'];
+    for (var i = 0; i < required.length; i++){
+      if (!document.getElementById(required[i]).value.trim()){
+        document.getElementById('msg-1').textContent = 'Merci de remplir tous les champs.';
+        return;
+      }
+    }
+    document.getElementById('msg-1').textContent = '';
+    goToStep(2);
+  }
+
+  function validateStep2(){
+    document.getElementById('msg-2').textContent = '';
+    goToStep(3);
+  }
 
   // Gestion de l'affichage des fichiers importés
   var importedFiles = [];
