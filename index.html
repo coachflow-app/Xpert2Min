@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
 <style>
   :root{
     --black:#0A0A0B;
@@ -217,6 +218,15 @@
 
   .hidden{ display:none; }
 
+  .form-msg{
+    min-height:16px;
+    font-size:13px;
+    margin-top:10px;
+    text-align:center;
+  }
+  .form-msg.error{ color:var(--red); }
+  .form-msg.success{ color:#4CAF50; }
+
   /* welcome toast : invisible tant qu'aucun compte n'est créé */
   .toast{
     display:none;
@@ -292,13 +302,14 @@
         </div>
 
         <button type="submit" class="submit-btn">Se connecter</button>
+        <p class="form-msg" id="login-msg"></p>
         <p class="switch-line">Pas encore de compte ? <button type="button" onclick="showForm('signup')">Créer un compte</button></p>
       </form>
 
       <!-- SIGNUP FORM -->
       <form id="form-signup" class="hidden">
         <h1 class="form-title">Créez votre compte</h1>
-        <p class="form-sub">Commencez à transformer votre expertise en PDF.</p>
+        <p class="form-sub">Votre expertise. Votre produit. En 2 minutes.</p>
 
         <div class="field">
           <label for="signup-email">E-mail</label>
@@ -310,6 +321,7 @@
         </div>
 
         <button type="submit" class="submit-btn">Créer mon compte</button>
+        <p class="form-msg" id="signup-msg"></p>
         <p class="switch-line">Déjà un compte ? <button type="button" onclick="showForm('login')">Se connecter</button></p>
       </form>
 
@@ -321,6 +333,10 @@
   </div>
 
 <script>
+  // Connexion à Back4App (Parse)
+  Parse.initialize("s1YvHg4CRjirbCydEjFLoBnkSxnNHBlXeBLSmJxq", "WgwearpWgCysVARQz6etPeujBL0ZspvkRCafYuZT");
+  Parse.serverURL = "https://parseapi.back4app.com/";
+
   function showForm(which){
     document.getElementById('form-login').classList.toggle('hidden', which !== 'login');
     document.getElementById('form-signup').classList.toggle('hidden', which !== 'signup');
@@ -328,19 +344,63 @@
     document.getElementById('tab-signup').classList.toggle('active', which === 'signup');
   }
 
-  // Pour l'instant ces formulaires ne sont pas encore connectés à une vraie base de
-  // données (ça viendra avec Back4App, à une étape suivante). On simule juste le
-  // comportement pour valider le design et le message de bienvenue.
-  document.getElementById('form-signup').addEventListener('submit', function(e){
+  function setMsg(id, text, type){
+    var el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'form-msg ' + (type || '');
+  }
+
+  // ----- Créer un compte -----
+  document.getElementById('form-signup').addEventListener('submit', async function(e){
     e.preventDefault();
-    var toast = document.getElementById('toast');
-    toast.classList.add('show');
-    setTimeout(function(){ toast.classList.remove('show'); }, 5000);
+    var email = document.getElementById('signup-email').value.trim();
+    var password = document.getElementById('signup-password').value;
+    var btn = e.target.querySelector('.submit-btn');
+
+    setMsg('signup-msg', '', '');
+    btn.disabled = true;
+    btn.textContent = 'Création en cours...';
+
+    var user = new Parse.User();
+    user.set('username', email);
+    user.set('email', email);
+    user.set('password', password);
+
+    try {
+      await user.signUp();
+      var toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(function(){ toast.classList.remove('show'); }, 5000);
+      e.target.reset();
+      setMsg('signup-msg', 'Compte créé avec succès !', 'success');
+    } catch (error) {
+      setMsg('signup-msg', 'Erreur : ' + error.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Créer mon compte';
+    }
   });
 
-  document.getElementById('form-login').addEventListener('submit', function(e){
+  // ----- Se connecter -----
+  document.getElementById('form-login').addEventListener('submit', async function(e){
     e.preventDefault();
-    alert('Connexion : cette action sera activée une fois la base de données connectée.');
+    var email = document.getElementById('login-email').value.trim();
+    var password = document.getElementById('login-password').value;
+    var btn = e.target.querySelector('.submit-btn');
+
+    setMsg('login-msg', '', '');
+    btn.disabled = true;
+    btn.textContent = 'Connexion en cours...';
+
+    try {
+      await Parse.User.logIn(email, password);
+      setMsg('login-msg', 'Connexion réussie !', 'success');
+    } catch (error) {
+      setMsg('login-msg', 'Erreur : ' + error.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Se connecter';
+    }
   });
 </script>
 
