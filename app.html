@@ -164,6 +164,73 @@
   }
   .import-zone:hover{ border-color:var(--red); }
 
+  /* ÉTAPE 3 : Design */
+  .style-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .style-card{
+    padding:12px 10px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--grey);
+    font-size:13.5px;
+    font-weight:600;
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+    text-align:center;
+  }
+  .style-card.selected{
+    border-color:var(--red);
+    color:var(--white);
+    background:rgba(232,22,28,0.08);
+  }
+
+  .color-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .color-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    font-size:11.5px;
+    color:var(--grey);
+    text-align:center;
+    width:78px;
+  }
+  .color-item input[type="color"]{
+    width:44px;
+    height:44px;
+    padding:0;
+    border:1px solid var(--line);
+    border-radius:50%;
+    background:none;
+    cursor:pointer;
+  }
+
+  .checkbox-line{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:9px 0;
+    font-size:13.5px;
+    color:var(--white);
+    text-transform:none;
+    letter-spacing:normal;
+    cursor:pointer;
+  }
+  .checkbox-line input{
+    width:16px;
+    height:16px;
+    accent-color:var(--red);
+    cursor:pointer;
+  }
+
   .file-list{
     list-style:none;
     margin-top:10px;
@@ -199,13 +266,13 @@
 
   .next-btn{
     width:100%;
-    padding:14px 0;
-    margin-top:12px;
+    padding:11px 0;
+    margin-top:10px;
     background:var(--red);
     color:#fff;
     border:none;
     border-radius:8px;
-    font-size:15px;
+    font-size:14px;
     font-weight:700;
     cursor:pointer;
   }
@@ -215,12 +282,12 @@
   .btn-row .next-btn{ margin-top:0; }
   .back-btn{
     flex:0 0 auto;
-    padding:14px 20px;
+    padding:11px 18px;
     background:transparent;
     color:var(--grey);
     border:1px solid var(--line);
     border-radius:8px;
-    font-size:14px;
+    font-size:13px;
     font-weight:600;
     cursor:pointer;
   }
@@ -239,13 +306,13 @@
   }
   .soon-btn{
     width:100%;
-    padding:14px 0;
+    padding:11px 0;
     margin-top:16px;
     background:var(--line);
     color:var(--grey);
     border:none;
     border-radius:8px;
-    font-size:15px;
+    font-size:14px;
     font-weight:700;
     cursor:not-allowed;
   }
@@ -362,13 +429,120 @@
     <h1>Personnalisez le design</h1>
     <p class="lead">Choisissez le style, les couleurs et la mise en page de votre PDF.</p>
 
-    <div class="soon-box">
-      Cette étape (style, couleurs, typographie, couverture, mise en page) sera activée à une prochaine étape du guide.
+    <div class="field">
+      <label>Style du PDF</label>
+      <div class="style-grid" id="style-grid">
+        <button type="button" class="style-card" data-value="professionnel">Professionnel</button>
+        <button type="button" class="style-card" data-value="luxe">Luxe</button>
+        <button type="button" class="style-card" data-value="minimaliste">Minimaliste</button>
+        <button type="button" class="style-card" data-value="moderne">Moderne</button>
+        <button type="button" class="style-card" data-value="creatif">Créatif</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Couleurs</label>
+      <div class="color-row">
+        <div class="color-item">
+          <input type="color" id="couleur-principale" value="#E8161C">
+          <span>Couleur principale</span>
+        </div>
+        <div class="color-item">
+          <input type="color" id="couleur-secondaire" value="#0A0A0B">
+          <span>Couleur secondaire</span>
+        </div>
+        <div class="color-item">
+          <input type="color" id="couleur-texte" value="#F5F5F5">
+          <span>Couleur du texte</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="police">Style de police</label>
+      <select id="police">
+        <option>Inter</option>
+        <option>Archivo Black</option>
+        <option>Georgia</option>
+        <option>Times New Roman</option>
+        <option>Montserrat</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="taille-texte">Taille du texte</label>
+      <select id="taille-texte">
+        <option value="petit">Petit</option>
+        <option value="moyen" selected>Moyen</option>
+        <option value="grand">Grand</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="titre-couverture">Titre (couverture)</label>
+      <input type="text" id="titre-couverture" placeholder="Repris automatiquement de l'étape 1">
+    </div>
+
+    <div class="field">
+      <label>Image / logo (optionnel)</label>
+      <div class="import-zone" onclick="document.getElementById('cover-file-input').click()">
+        Importez une image ou un logo
+      </div>
+      <input type="file" id="cover-file-input" accept="image/*" style="display:none">
+      <ul class="file-list" id="cover-file-list"></ul>
+    </div>
+
+    <div class="field">
+      <label for="style-couverture">Style de couverture</label>
+      <select id="style-couverture">
+        <option>Image pleine page</option>
+        <option>Bandeau coloré</option>
+        <option>Cadre centré</option>
+        <option>Épuré (texte seul)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="citation">Citation éventuelle (optionnel)</label>
+      <input type="text" id="citation" placeholder="Une citation à afficher sur la couverture">
+    </div>
+
+    <div class="field">
+      <label for="style-chapitres">Style des chapitres</label>
+      <select id="style-chapitres">
+        <option>Numérotés</option>
+        <option>Avec icônes</option>
+        <option>Titres pleine largeur</option>
+        <option>Minimaliste</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="position-images">Position des images</label>
+      <select id="position-images">
+        <option>Centrées</option>
+        <option>Alignées à gauche</option>
+        <option>Alignées à droite</option>
+        <option>Pleine largeur</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="checkbox-line"><input type="checkbox" id="numero-pages" checked><span>Numéro de page</span></label>
+      <label class="checkbox-line"><input type="checkbox" id="entete-pied" checked><span>En-tête / pied de page</span></label>
+    </div>
+
+    <div class="field">
+      <label>Éléments supplémentaires</label>
+      <label class="checkbox-line"><input type="checkbox" id="elt-copyright"><span>Copyright</span></label>
+      <label class="checkbox-line"><input type="checkbox" id="elt-page-auteur"><span>Page auteur</span></label>
+      <label class="checkbox-line"><input type="checkbox" id="elt-page-contact"><span>Page contact</span></label>
+      <label class="checkbox-line"><input type="checkbox" id="elt-reseaux"><span>Réseaux sociaux</span></label>
     </div>
 
     <div class="btn-row">
       <button type="button" class="back-btn" onclick="goToStep(2)">Retour</button>
-      <button type="button" class="soon-btn" disabled>Bientôt disponible</button>
+      <button type="button" class="next-btn" onclick="goToStep(4)">Continuer</button>
     </div>
   </div>
 
@@ -423,8 +597,46 @@
 
   function validateStep2(){
     document.getElementById('msg-2').textContent = '';
+    // Pré-remplit le titre de couverture avec le titre saisi à l'étape 1
+    document.getElementById('titre-couverture').value = document.getElementById('titre').value;
     goToStep(3);
   }
+
+  // Sélection du style de PDF (étape 3)
+  document.querySelectorAll('.style-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      document.querySelectorAll('.style-card').forEach(function(c){ c.classList.remove('selected'); });
+      card.classList.add('selected');
+    });
+  });
+
+  // Import du logo/image de couverture (étape 3)
+  var coverFiles = [];
+  function renderCoverFileList(){
+    var list = document.getElementById('cover-file-list');
+    list.innerHTML = '';
+    coverFiles.forEach(function(file, index){
+      var li = document.createElement('li');
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'name';
+      nameSpan.textContent = file.name;
+      var removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.textContent = '✕';
+      removeBtn.onclick = function(){
+        coverFiles.splice(index, 1);
+        renderCoverFileList();
+      };
+      li.appendChild(nameSpan);
+      li.appendChild(removeBtn);
+      list.appendChild(li);
+    });
+  }
+  document.getElementById('cover-file-input').addEventListener('change', function(e){
+    Array.from(e.target.files).forEach(function(file){ coverFiles.push(file); });
+    renderCoverFileList();
+    e.target.value = '';
+  });
 
   // Gestion de l'affichage des fichiers importés
   var importedFiles = [];
