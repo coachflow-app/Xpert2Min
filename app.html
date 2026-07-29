@@ -59,6 +59,18 @@
     white-space:nowrap;
   }
   header nav a.active{ color:var(--white); font-weight:600; }
+  .lang-switch{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--white);
+    font-size:11.5px;
+    font-weight:700;
+    padding:5px 9px;
+    border-radius:6px;
+    cursor:pointer;
+    font-family:'Inter', sans-serif;
+  }
+  .lang-switch:hover{ border-color:var(--red); }
 
   @media (max-width:420px){
     .logo{ font-size:12.5px; }
@@ -473,6 +485,64 @@
     margin-top:6px;
   }
 
+  /* Bouton Prévisualiser */
+  .preview-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    margin:14px auto 0;
+    padding:11px 0;
+    background:transparent;
+    color:var(--white);
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:14px;
+    font-weight:600;
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+  }
+  .preview-btn:hover{ border-color:var(--red); }
+  .preview-btn .eye-icon{ font-size:15px; }
+
+  /* Overlay plein écran de prévisualisation */
+  .preview-overlay{
+    position:fixed;
+    inset:0;
+    background:#0A0A0B;
+    z-index:100;
+    display:flex;
+    flex-direction:column;
+  }
+  .preview-overlay.hidden{ display:none; }
+  .preview-overlay-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 18px;
+    background:var(--black);
+    border-bottom:1px solid var(--line);
+    color:var(--white);
+    font-size:14px;
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .preview-close-btn{
+    background:none;
+    border:none;
+    color:var(--grey);
+    font-size:20px;
+    cursor:pointer;
+    line-height:1;
+    padding:4px 8px;
+  }
+  .preview-close-btn:hover{ color:var(--red); }
+  .preview-overlay-body{
+    flex:1;
+    overflow-y:auto;
+  }
+
   .file-list{
     list-style:none;
     margin-top:10px;
@@ -581,8 +651,9 @@
     XPERT<span>2</span>MIN
   </div>
   <nav>
-    <a href="app.html" class="active">Créer</a>
-    <a href="dashboard.html">Tableau de bord</a>
+    <a href="app.html" class="active" data-i18n="nav_creer">Créer</a>
+    <a href="dashboard.html" data-i18n="nav_dashboard">Tableau de bord</a>
+    <button type="button" class="lang-switch" id="lang-switch" onclick="toggleLangue()">EN</button>
   </nav>
 </header>
 
@@ -597,61 +668,61 @@
 
   <!-- ÉTAPE 1 : Informations générales -->
   <div class="step-screen active" id="screen-1">
-    <div class="eyebrow">Étape 1 / 4</div>
-    <h1>Parlez-nous de votre expertise</h1>
-    <p class="lead">Ces informations permettent à l'IA de transformer votre expertise en un PDF professionnel prêt à vendre.</p>
+    <div class="eyebrow" data-i18n="step_label_1">Étape 1 / 4</div>
+    <h1 data-i18n="s1_title">Parlez-nous de votre expertise</h1>
+    <p class="lead" data-i18n="s1_lead">Ces informations permettent à l'IA de transformer votre expertise en un PDF professionnel prêt à vendre.</p>
 
     <div class="field">
-      <label for="titre">Titre du PDF</label>
-      <input type="text" id="titre" placeholder="Ex. : Les fondamentaux du copywriting" required>
+      <label for="titre" data-i18n="lbl_titre">Titre du PDF</label>
+      <input type="text" id="titre" placeholder="Ex. : Les fondamentaux du copywriting" data-i18n-placeholder="ph_titre" required>
     </div>
 
     <div class="field">
-      <label for="sujet">Sujet</label>
-      <input type="text" id="sujet" placeholder="Ex. : Rédaction persuasive pour entrepreneurs" required>
+      <label for="sujet" data-i18n="lbl_sujet">Sujet</label>
+      <input type="text" id="sujet" placeholder="Ex. : Rédaction persuasive pour entrepreneurs" data-i18n-placeholder="ph_sujet" required>
     </div>
 
     <div class="field">
-      <label for="objectif">Objectif</label>
-      <input type="text" id="objectif" placeholder="Ex. : Aider les lecteurs à rédiger des textes qui vendent" required>
+      <label for="objectif" data-i18n="lbl_objectif">Objectif</label>
+      <input type="text" id="objectif" placeholder="Ex. : Aider les lecteurs à rédiger des textes qui vendent" data-i18n-placeholder="ph_objectif" required>
     </div>
 
     <div class="field">
-      <label for="public">Public cible</label>
-      <input type="text" id="public" placeholder="Ex. : Entrepreneurs et freelances débutants" required>
+      <label for="public" data-i18n="lbl_public">Public cible</label>
+      <input type="text" id="public" placeholder="Ex. : Entrepreneurs et freelances débutants" data-i18n-placeholder="ph_public" required>
     </div>
 
     <div class="field">
-      <label for="createur">Nom du créateur</label>
-      <input type="text" id="createur" placeholder="Votre nom" required>
+      <label for="createur" data-i18n="lbl_createur">Nom du créateur</label>
+      <input type="text" id="createur" placeholder="Votre nom" data-i18n-placeholder="ph_createur" required>
     </div>
 
     <div class="field">
-      <label>Langue du document</label>
+      <label data-i18n="lbl_langue_doc">Langue du document</label>
       <div class="lang-choice">
-        <label><input type="radio" name="langue" value="fr" checked><span>Français</span></label>
-        <label><input type="radio" name="langue" value="en"><span>Anglais</span></label>
+        <label><input type="radio" name="langue" value="fr" checked><span data-i18n="opt_francais">Français</span></label>
+        <label><input type="radio" name="langue" value="en"><span data-i18n="opt_anglais">Anglais</span></label>
       </div>
     </div>
 
-    <button type="button" class="next-btn" onclick="validateStep1()">Continuer</button>
+    <button type="button" class="next-btn" onclick="validateStep1()" data-i18n="btn_continuer">Continuer</button>
     <p class="form-msg" id="msg-1"></p>
   </div>
 
   <!-- ÉTAPE 2 : Connaissances -->
   <div class="step-screen" id="screen-2">
-    <div class="eyebrow">Étape 2 / 4</div>
-    <h1>Ajoutez vos connaissances</h1>
-    <p class="lead">Écrivez ce que vous savez, ou importez des documents. L'IA s'appuiera dessus pour construire le contenu.</p>
+    <div class="eyebrow" data-i18n="step_label_2">Étape 2 / 4</div>
+    <h1 data-i18n="s2_title">Ajoutez vos connaissances</h1>
+    <p class="lead" data-i18n="s2_lead">Écrivez ce que vous savez, ou importez des documents. L'IA s'appuiera dessus pour construire le contenu.</p>
 
     <div class="field">
-      <label for="connaissances">Votre expertise (texte)</label>
-      <textarea id="connaissances" placeholder="Écrivez ou collez ici votre expertise, vos idées ou votre contenu brut..."></textarea>
+      <label for="connaissances" data-i18n="lbl_expertise">Votre expertise (texte)</label>
+      <textarea id="connaissances" placeholder="Écrivez ou collez ici votre expertise, vos idées ou votre contenu brut..." data-i18n-placeholder="ph_expertise"></textarea>
     </div>
 
     <div class="field">
-      <label>Documents de votre expertise (optionnel)</label>
-      <div class="import-zone" onclick="document.getElementById('file-input').click()">
+      <label data-i18n="lbl_documents">Documents de votre expertise (optionnel)</label>
+      <div class="import-zone" onclick="document.getElementById('file-input').click()" data-i18n="import_docs">
         Importez vos documents (Word, PDF, TXT...)
       </div>
       <input type="file" id="file-input" multiple style="display:none">
@@ -659,49 +730,49 @@
     </div>
 
     <div class="btn-row">
-      <button type="button" class="back-btn" onclick="goToStep(1)">Retour</button>
-      <button type="button" class="next-btn" onclick="validateStep2()">Continuer</button>
+      <button type="button" class="back-btn" onclick="goToStep(1)" data-i18n="btn_retour">Retour</button>
+      <button type="button" class="next-btn" onclick="validateStep2()" data-i18n="btn_continuer">Continuer</button>
     </div>
     <p class="form-msg" id="msg-2"></p>
   </div>
 
   <!-- ÉTAPE 3 : Design -->
   <div class="step-screen" id="screen-3">
-    <div class="eyebrow">Étape 3 / 4</div>
-    <h1>Personnalisez le design</h1>
-    <p class="lead">Choisissez le style, les couleurs et la mise en page de votre PDF.</p>
+    <div class="eyebrow" data-i18n="step_label_3">Étape 3 / 4</div>
+    <h1 data-i18n="s3_title">Personnalisez le design</h1>
+    <p class="lead" data-i18n="s3_lead">Choisissez le style, les couleurs et la mise en page de votre PDF.</p>
 
     <div class="field">
-      <label>Style du PDF</label>
+      <label data-i18n="lbl_style_pdf">Style du PDF</label>
       <div class="style-grid" id="style-grid">
-        <button type="button" class="style-card" data-value="professionnel">Professionnel</button>
-        <button type="button" class="style-card" data-value="luxe">Luxe</button>
-        <button type="button" class="style-card" data-value="minimaliste">Minimaliste</button>
-        <button type="button" class="style-card" data-value="moderne">Moderne</button>
-        <button type="button" class="style-card" data-value="creatif">Créatif</button>
+        <button type="button" class="style-card" data-value="professionnel" data-i18n="style_pro">Professionnel</button>
+        <button type="button" class="style-card" data-value="luxe" data-i18n="style_luxe">Luxe</button>
+        <button type="button" class="style-card" data-value="minimaliste" data-i18n="style_min">Minimaliste</button>
+        <button type="button" class="style-card" data-value="moderne" data-i18n="style_mod">Moderne</button>
+        <button type="button" class="style-card" data-value="creatif" data-i18n="style_crea">Créatif</button>
       </div>
     </div>
 
     <div class="field">
-      <label>Couleurs</label>
+      <label data-i18n="lbl_couleurs">Couleurs</label>
       <div class="color-row">
         <div class="color-item">
           <input type="color" id="couleur-principale" value="#E8161C">
-          <span>Couleur principale</span>
+          <span data-i18n="col_principale">Couleur principale</span>
         </div>
         <div class="color-item">
           <input type="color" id="couleur-secondaire" value="#0A0A0B">
-          <span>Couleur secondaire</span>
+          <span data-i18n="col_secondaire">Couleur secondaire</span>
         </div>
         <div class="color-item">
           <input type="color" id="couleur-texte" value="#F5F5F5">
-          <span>Couleur du texte</span>
+          <span data-i18n="col_texte">Couleur du texte</span>
         </div>
       </div>
     </div>
 
     <div class="field">
-      <label for="police">Style de police</label>
+      <label for="police" data-i18n="lbl_police">Style de police</label>
       <select id="police">
         <option>Inter</option>
         <option>Archivo Black</option>
@@ -712,22 +783,22 @@
     </div>
 
     <div class="field">
-      <label for="taille-texte">Taille du texte</label>
+      <label for="taille-texte" data-i18n="lbl_taille">Taille du texte</label>
       <select id="taille-texte">
-        <option value="petit">Petit</option>
-        <option value="moyen" selected>Moyen</option>
-        <option value="grand">Grand</option>
+        <option value="petit" data-i18n="taille_petit">Petit</option>
+        <option value="moyen" selected data-i18n="taille_moyen">Moyen</option>
+        <option value="grand" data-i18n="taille_grand">Grand</option>
       </select>
     </div>
 
     <div class="field">
-      <label for="titre-couverture">Titre (couverture)</label>
-      <input type="text" id="titre-couverture" placeholder="Repris automatiquement de l'étape 1">
+      <label for="titre-couverture" data-i18n="lbl_titre_couv">Titre (couverture)</label>
+      <input type="text" id="titre-couverture" placeholder="Repris automatiquement de l'étape 1" data-i18n-placeholder="ph_titre_couv">
     </div>
 
     <div class="field">
-      <label>Image / logo (optionnel)</label>
-      <div class="import-zone" onclick="document.getElementById('cover-file-input').click()">
+      <label data-i18n="lbl_logo">Image / logo (optionnel)</label>
+      <div class="import-zone" onclick="document.getElementById('cover-file-input').click()" data-i18n="import_logo">
         Importez une image ou un logo
       </div>
       <input type="file" id="cover-file-input" accept="image/*" style="display:none">
@@ -735,81 +806,187 @@
     </div>
 
     <div class="field">
-      <label for="style-couverture">Style de couverture</label>
+      <label for="style-couverture" data-i18n="lbl_style_couv">Style de couverture</label>
       <select id="style-couverture">
-        <option>Image pleine page</option>
-        <option>Bandeau coloré</option>
-        <option>Cadre centré</option>
-        <option>Épuré (texte seul)</option>
+        <option data-i18n="couv_image">Image pleine page</option>
+        <option data-i18n="couv_bandeau">Bandeau coloré</option>
+        <option data-i18n="couv_cadre">Cadre centré</option>
+        <option data-i18n="couv_epure">Épuré (texte seul)</option>
       </select>
     </div>
 
     <div class="field">
-      <label for="citation">Citation éventuelle (optionnel)</label>
-      <input type="text" id="citation" placeholder="Une citation à afficher sur la couverture">
+      <label for="citation" data-i18n="lbl_citation">Citation éventuelle (optionnel)</label>
+      <input type="text" id="citation" placeholder="Une citation à afficher sur la couverture" data-i18n-placeholder="ph_citation">
     </div>
 
     <div class="field">
-      <label for="style-chapitres">Style des chapitres</label>
+      <label for="style-chapitres" data-i18n="lbl_style_chap">Style des chapitres</label>
       <select id="style-chapitres">
-        <option>Numérotés</option>
-        <option>Avec icônes</option>
-        <option>Titres pleine largeur</option>
-        <option>Minimaliste</option>
+        <option data-i18n="chap_numerotes">Numérotés</option>
+        <option data-i18n="chap_icones">Avec icônes</option>
+        <option data-i18n="chap_pleine">Titres pleine largeur</option>
+        <option data-i18n="chap_min">Minimaliste</option>
       </select>
     </div>
 
     <div class="field">
-      <label for="position-images">Position des images</label>
+      <label for="position-images" data-i18n="lbl_position_img">Position des images</label>
       <select id="position-images">
-        <option>Centrées</option>
-        <option>Alignées à gauche</option>
-        <option>Alignées à droite</option>
-        <option>Pleine largeur</option>
+        <option data-i18n="pos_centrees">Centrées</option>
+        <option data-i18n="pos_gauche">Alignées à gauche</option>
+        <option data-i18n="pos_droite">Alignées à droite</option>
+        <option data-i18n="pos_pleine">Pleine largeur</option>
       </select>
     </div>
 
     <div class="field">
-      <label class="checkbox-line"><input type="checkbox" id="numero-pages" checked><span>Numéro de page</span></label>
-      <label class="checkbox-line"><input type="checkbox" id="entete-pied" checked><span>En-tête / pied de page</span></label>
+      <label class="checkbox-line"><input type="checkbox" id="numero-pages" checked><span data-i18n="chk_numero_page">Numéro de page</span></label>
+      <label class="checkbox-line"><input type="checkbox" id="entete-pied" checked><span data-i18n="chk_entete">En-tête / pied de page</span></label>
     </div>
 
     <div class="field">
-      <label>Éléments supplémentaires</label>
-      <label class="checkbox-line"><input type="checkbox" id="elt-copyright"><span>Copyright</span></label>
-      <label class="checkbox-line"><input type="checkbox" id="elt-page-auteur"><span>Page auteur</span></label>
-      <label class="checkbox-line"><input type="checkbox" id="elt-page-contact"><span>Page contact</span></label>
-      <label class="checkbox-line"><input type="checkbox" id="elt-reseaux"><span>Réseaux sociaux</span></label>
+      <label data-i18n="lbl_elements_supp">Éléments supplémentaires</label>
+      <label class="checkbox-line"><input type="checkbox" id="elt-copyright"><span data-i18n="chk_copyright">Copyright</span></label>
+      <label class="checkbox-line"><input type="checkbox" id="elt-page-auteur"><span data-i18n="chk_page_auteur">Page auteur</span></label>
+      <label class="checkbox-line"><input type="checkbox" id="elt-page-contact"><span data-i18n="chk_page_contact">Page contact</span></label>
+      <label class="checkbox-line"><input type="checkbox" id="elt-reseaux"><span data-i18n="chk_reseaux">Réseaux sociaux</span></label>
     </div>
 
     <div class="btn-row">
-      <button type="button" class="back-btn" onclick="goToStep(2)">Retour</button>
-      <button type="button" class="next-btn" onclick="goToStep(4)">Continuer</button>
+      <button type="button" class="back-btn" onclick="goToStep(2)" data-i18n="btn_retour">Retour</button>
+      <button type="button" class="next-btn" onclick="goToStep(4)" data-i18n="btn_continuer">Continuer</button>
     </div>
   </div>
 
   <!-- ÉTAPE 4 : Génération -->
   <div class="step-screen" id="screen-4">
-    <div class="eyebrow">Étape 4 / 4</div>
-    <h1>Génération et prévisualisation</h1>
-    <p class="lead">L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.</p>
+    <div class="eyebrow" data-i18n="step_label_4">Étape 4 / 4</div>
+    <h1 data-i18n="s4_title">Génération et prévisualisation</h1>
+    <p class="lead" data-i18n="s4_lead">L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.</p>
 
     <div class="recap-box" id="recap-box"></div>
 
-    <button type="button" class="next-btn" id="generate-btn" onclick="genererContenu()">Générer mon contenu</button>
+    <button type="button" class="next-btn" id="generate-btn" onclick="genererContenu()" data-i18n="btn_generer">Générer mon contenu</button>
     <p class="form-msg" id="msg-4"></p>
 
+    <button type="button" class="preview-btn hidden" id="preview-btn" onclick="ouvrirPrevisualisation()">
+      <span class="eye-icon">👁️</span> <span data-i18n="btn_previsualiser">Prévisualiser</span>
+    </button>
+
     <textarea class="result-box hidden" id="result-box" readonly></textarea>
-    <div class="pdf-preview hidden" id="pdf-preview"></div>
 
     <div class="btn-row">
-      <button type="button" class="back-btn" onclick="goToStep(3)">Retour</button>
+      <button type="button" class="back-btn" onclick="goToStep(3)" data-i18n="btn_retour">Retour</button>
     </div>
   </div>
 
 </main>
 
+<!-- FENÊTRE DE PRÉVISUALISATION PLEIN ÉCRAN -->
+<div class="preview-overlay hidden" id="preview-overlay">
+  <div class="preview-overlay-header">
+    <span data-i18n="preview_titre">Prévisualisation du PDF</span>
+    <button type="button" class="preview-close-btn" onclick="fermerPrevisualisation()">✕</button>
+  </div>
+  <div class="preview-overlay-body">
+    <div class="pdf-preview" id="pdf-preview"></div>
+  </div>
+</div>
+
 <script>
+  // ----- Système de langue de l'interface (FR / EN) -----
+  var traductions = {
+    fr: {
+      nav_creer: "Créer", nav_dashboard: "Tableau de bord",
+      step_label_1: "Étape 1 / 4", s1_title: "Parlez-nous de votre expertise",
+      s1_lead: "Ces informations permettent à l'IA de transformer votre expertise en un PDF professionnel prêt à vendre.",
+      lbl_titre: "Titre du PDF", ph_titre: "Ex. : Les fondamentaux du copywriting",
+      lbl_sujet: "Sujet", ph_sujet: "Ex. : Rédaction persuasive pour entrepreneurs",
+      lbl_objectif: "Objectif", ph_objectif: "Ex. : Aider les lecteurs à rédiger des textes qui vendent",
+      lbl_public: "Public cible", ph_public: "Ex. : Entrepreneurs et freelances débutants",
+      lbl_createur: "Nom du créateur", ph_createur: "Votre nom",
+      lbl_langue_doc: "Langue du document", opt_francais: "Français", opt_anglais: "Anglais",
+      btn_continuer: "Continuer", btn_retour: "Retour",
+      step_label_2: "Étape 2 / 4", s2_title: "Ajoutez vos connaissances",
+      s2_lead: "Écrivez ce que vous savez, ou importez des documents. L'IA s'appuiera dessus pour construire le contenu.",
+      lbl_expertise: "Votre expertise (texte)", ph_expertise: "Écrivez ou collez ici votre expertise, vos idées ou votre contenu brut...",
+      lbl_documents: "Documents de votre expertise (optionnel)", import_docs: "Importez vos documents (Word, PDF, TXT...)",
+      step_label_3: "Étape 3 / 4", s3_title: "Personnalisez le design",
+      s3_lead: "Choisissez le style, les couleurs et la mise en page de votre PDF.",
+      lbl_style_pdf: "Style du PDF", style_pro: "Professionnel", style_luxe: "Luxe", style_min: "Minimaliste", style_mod: "Moderne", style_crea: "Créatif",
+      lbl_couleurs: "Couleurs", col_principale: "Couleur principale", col_secondaire: "Couleur secondaire", col_texte: "Couleur du texte",
+      lbl_police: "Style de police", lbl_taille: "Taille du texte", taille_petit: "Petit", taille_moyen: "Moyen", taille_grand: "Grand",
+      lbl_titre_couv: "Titre (couverture)", ph_titre_couv: "Repris automatiquement de l'étape 1",
+      lbl_logo: "Image / logo (optionnel)", import_logo: "Importez une image ou un logo",
+      lbl_style_couv: "Style de couverture", couv_image: "Image pleine page", couv_bandeau: "Bandeau coloré", couv_cadre: "Cadre centré", couv_epure: "Épuré (texte seul)",
+      lbl_citation: "Citation éventuelle (optionnel)", ph_citation: "Une citation à afficher sur la couverture",
+      lbl_style_chap: "Style des chapitres", chap_numerotes: "Numérotés", chap_icones: "Avec icônes", chap_pleine: "Titres pleine largeur", chap_min: "Minimaliste",
+      lbl_position_img: "Position des images", pos_centrees: "Centrées", pos_gauche: "Alignées à gauche", pos_droite: "Alignées à droite", pos_pleine: "Pleine largeur",
+      chk_numero_page: "Numéro de page", chk_entete: "En-tête / pied de page",
+      lbl_elements_supp: "Éléments supplémentaires", chk_copyright: "Copyright", chk_page_auteur: "Page auteur", chk_page_contact: "Page contact", chk_reseaux: "Réseaux sociaux",
+      step_label_4: "Étape 4 / 4", s4_title: "Génération et prévisualisation",
+      s4_lead: "L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.",
+      btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF",
+      recap_titre: "Titre", recap_sujet: "Sujet", recap_objectif: "Objectif", recap_public: "Public cible"
+    },
+    en: {
+      nav_creer: "Create", nav_dashboard: "Dashboard",
+      step_label_1: "Step 1 / 4", s1_title: "Tell us about your expertise",
+      s1_lead: "This information helps the AI turn your expertise into a professional, sales-ready PDF.",
+      lbl_titre: "PDF title", ph_titre: "E.g.: Copywriting fundamentals",
+      lbl_sujet: "Subject", ph_sujet: "E.g.: Persuasive writing for entrepreneurs",
+      lbl_objectif: "Goal", ph_objectif: "E.g.: Help readers write copy that sells",
+      lbl_public: "Target audience", ph_public: "E.g.: Beginner entrepreneurs and freelancers",
+      lbl_createur: "Creator name", ph_createur: "Your name",
+      lbl_langue_doc: "Document language", opt_francais: "French", opt_anglais: "English",
+      btn_continuer: "Continue", btn_retour: "Back",
+      step_label_2: "Step 2 / 4", s2_title: "Add your knowledge",
+      s2_lead: "Write what you know, or import documents. The AI will use this to build the content.",
+      lbl_expertise: "Your expertise (text)", ph_expertise: "Write or paste your expertise, ideas or raw content here...",
+      lbl_documents: "Expertise documents (optional)", import_docs: "Import your documents (Word, PDF, TXT...)",
+      step_label_3: "Step 3 / 4", s3_title: "Customize the design",
+      s3_lead: "Choose the style, colors and layout of your PDF.",
+      lbl_style_pdf: "PDF style", style_pro: "Professional", style_luxe: "Luxury", style_min: "Minimalist", style_mod: "Modern", style_crea: "Creative",
+      lbl_couleurs: "Colors", col_principale: "Primary color", col_secondaire: "Secondary color", col_texte: "Text color",
+      lbl_police: "Font style", lbl_taille: "Text size", taille_petit: "Small", taille_moyen: "Medium", taille_grand: "Large",
+      lbl_titre_couv: "Title (cover)", ph_titre_couv: "Auto-filled from step 1",
+      lbl_logo: "Image / logo (optional)", import_logo: "Import an image or logo",
+      lbl_style_couv: "Cover style", couv_image: "Full-page image", couv_bandeau: "Colored banner", couv_cadre: "Centered frame", couv_epure: "Clean (text only)",
+      lbl_citation: "Optional quote", ph_citation: "A quote to display on the cover",
+      lbl_style_chap: "Chapter style", chap_numerotes: "Numbered", chap_icones: "With icons", chap_pleine: "Full-width titles", chap_min: "Minimalist",
+      lbl_position_img: "Image position", pos_centrees: "Centered", pos_gauche: "Left-aligned", pos_droite: "Right-aligned", pos_pleine: "Full width",
+      chk_numero_page: "Page number", chk_entete: "Header / footer",
+      lbl_elements_supp: "Additional elements", chk_copyright: "Copyright", chk_page_auteur: "Author page", chk_page_contact: "Contact page", chk_reseaux: "Social media",
+      step_label_4: "Step 4 / 4", s4_title: "Generation and preview",
+      s4_lead: "The AI combines your knowledge, structure and design to create your final PDF.",
+      btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview",
+      recap_titre: "Title", recap_sujet: "Subject", recap_objectif: "Goal", recap_public: "Target audience"
+    }
+  };
+
+  function appliquerLangue(langue){
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var cle = el.getAttribute('data-i18n');
+      if (traductions[langue][cle] !== undefined) el.textContent = traductions[langue][cle];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+      var cle = el.getAttribute('data-i18n-placeholder');
+      if (traductions[langue][cle] !== undefined) el.placeholder = traductions[langue][cle];
+    });
+    document.getElementById('lang-switch').textContent = (langue === 'fr') ? 'EN' : 'FR';
+    document.documentElement.lang = langue;
+    localStorage.setItem('xpert2min_langue', langue);
+  }
+
+  function toggleLangue(){
+    var actuelle = localStorage.getItem('xpert2min_langue') || 'fr';
+    var nouvelle = actuelle === 'fr' ? 'en' : 'fr';
+    appliquerLangue(nouvelle);
+  }
+
+  appliquerLangue(localStorage.getItem('xpert2min_langue') || 'fr');
+
   Parse.initialize("s1YvHg4CRjirbCydEjFLoBnkSxnNHBlXeBLSmJxq", "WgwearpWgCysVARQz6etPeujBL0ZspvkRCafYuZT");
   Parse.serverURL = "https://parseapi.back4app.com/";
 
@@ -833,11 +1010,13 @@
 
   function remplirRecap(){
     var recap = document.getElementById('recap-box');
+    var langue = localStorage.getItem('xpert2min_langue') || 'fr';
+    var t = traductions[langue];
     recap.innerHTML =
-      '<p><b>Titre :</b> ' + (document.getElementById('titre').value || '—') + '</p>' +
-      '<p><b>Sujet :</b> ' + (document.getElementById('sujet').value || '—') + '</p>' +
-      '<p><b>Objectif :</b> ' + (document.getElementById('objectif').value || '—') + '</p>' +
-      '<p><b>Public cible :</b> ' + (document.getElementById('public').value || '—') + '</p>';
+      '<p><b>' + t.recap_titre + ' :</b> ' + (document.getElementById('titre').value || '—') + '</p>' +
+      '<p><b>' + t.recap_sujet + ' :</b> ' + (document.getElementById('sujet').value || '—') + '</p>' +
+      '<p><b>' + t.recap_objectif + ' :</b> ' + (document.getElementById('objectif').value || '—') + '</p>' +
+      '<p><b>' + t.recap_public + ' :</b> ' + (document.getElementById('public').value || '—') + '</p>';
   }
 
   async function genererContenu(){
@@ -845,12 +1024,14 @@
     var msg = document.getElementById('msg-4');
     var resultBox = document.getElementById('result-box');
     var preview = document.getElementById('pdf-preview');
+    var previewBtn = document.getElementById('preview-btn');
 
     msg.textContent = '';
     msg.className = 'form-msg';
     resultBox.classList.add('hidden');
     preview.classList.add('hidden');
     preview.innerHTML = '';
+    previewBtn.classList.add('hidden');
     btn.disabled = true;
     btn.textContent = 'Génération en cours...';
 
@@ -866,12 +1047,11 @@
       var contenu = decouperReponseIA(resultat);
 
       if (!contenu) {
-        // Si le découpage échoue (balises absentes), on retombe sur le texte brut
         resultBox.value = resultat;
         resultBox.classList.remove('hidden');
       } else {
         construirePrevisualisation(contenu);
-        preview.classList.remove('hidden');
+        previewBtn.classList.remove('hidden');
       }
     } catch (error) {
       msg.textContent = 'Erreur : impossible de générer le contenu. Réessayez.';
@@ -880,6 +1060,15 @@
       btn.disabled = false;
       btn.textContent = 'Générer mon contenu';
     }
+  }
+
+  function ouvrirPrevisualisation(){
+    document.getElementById('pdf-preview').classList.remove('hidden');
+    document.getElementById('preview-overlay').classList.remove('hidden');
+  }
+
+  function fermerPrevisualisation(){
+    document.getElementById('preview-overlay').classList.add('hidden');
   }
 
   // Découpe le texte brut de l'IA en morceaux, à partir des balises [SOMMAIRE], [INTRODUCTION], [CHAPITRE X: titre], [CONCLUSION]
