@@ -265,17 +265,24 @@
     margin-top:16px;
     display:flex;
     flex-direction:column;
-    gap:24px;
+    align-items:center;
+    gap:22px;
+    background:#1a1a1c;
+    padding:20px 10px;
+    border-radius:12px;
   }
   .pdf-page{
     background:#fff;
     color:#1a1a1a;
-    border-radius:6px;
-    padding:32px 26px;
-    box-shadow:0 8px 30px rgba(0,0,0,.45);
-    min-height:360px;
+    border-radius:3px;
+    padding:28px 24px;
+    box-shadow:0 10px 34px rgba(0,0,0,.55);
     position:relative;
     font-family:'Inter', sans-serif;
+    width:100%;
+    max-width:380px;
+    aspect-ratio:210 / 297;
+    overflow-y:auto;
   }
   .pdf-page.cover{
     display:flex;
@@ -285,12 +292,13 @@
     text-align:center;
     color:#fff;
     gap:14px;
+    overflow:hidden;
+    padding:0;
   }
   .pdf-page.cover img{
-    max-width:110px;
-    max-height:110px;
+    max-width:100px;
+    max-height:100px;
     object-fit:contain;
-    margin-bottom:6px;
   }
   .pdf-page.cover .cover-title{
     font-family:'Archivo Black', sans-serif;
@@ -298,18 +306,112 @@
     line-height:1.2;
   }
   .pdf-page.cover .cover-quote{
-    font-size:13px;
+    font-size:12.5px;
     font-style:italic;
+    opacity:0.9;
+    max-width:78%;
+  }
+  .pdf-page.cover .cover-auteur{
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
     opacity:0.85;
-    max-width:80%;
   }
   .pdf-page.cover .cover-auto-tag{
-    margin-top:10px;
-    font-size:10.5px;
+    font-size:10px;
     letter-spacing:0.06em;
     text-transform:uppercase;
-    opacity:0.6;
+    opacity:0.55;
   }
+
+  /* --- Composition PROFESSIONNEL : bloc diagonal net --- */
+  .cover-professionnel{
+    background:#fff;
+    color:#161616;
+    position:relative;
+    padding:40px 30px;
+  }
+  .cover-professionnel .diag-block{
+    position:absolute;
+    inset:0;
+    clip-path:polygon(0 62%, 100% 38%, 100% 100%, 0 100%);
+    z-index:0;
+  }
+  .cover-professionnel .cover-content{ position:relative; z-index:1; display:flex; flex-direction:column; gap:12px; align-items:center; }
+  .cover-professionnel .logo-box{
+    width:56px; height:56px;
+    border:2px solid currentColor;
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:6px;
+    overflow:hidden;
+  }
+  .cover-professionnel .cover-title{ color:#161616; }
+  .cover-professionnel.has-block-title .cover-title{ color:#fff; }
+
+  /* --- Composition LUXE : cadre fin + séparateur --- */
+  .cover-luxe{
+    background:#0d0d0d;
+    padding:26px;
+  }
+  .cover-luxe .luxe-frame{
+    border:1px solid rgba(255,255,255,0.5);
+    padding:38px 26px;
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    position:relative;
+  }
+  .cover-luxe .luxe-frame::before, .cover-luxe .luxe-frame::after{
+    content:"";
+    position:absolute;
+    width:18px; height:18px;
+    border-top:1px solid; border-left:1px solid;
+  }
+  .cover-luxe .luxe-frame::before{ top:8px; left:8px; }
+  .cover-luxe .luxe-frame::after{ bottom:8px; right:8px; border:none; border-bottom:1px solid; border-right:1px solid; }
+  .cover-luxe .cover-title{ font-family:'Archivo Black', sans-serif; letter-spacing:0.04em; font-size:22px; }
+  .cover-luxe .luxe-sep{ width:60px; height:1px; background:currentColor; opacity:0.6; }
+
+  /* --- Composition MINIMALISTE : blanc, épuré --- */
+  .cover-minimaliste{
+    background:#fdfdfd;
+    color:#161616;
+    padding:50px 30px;
+  }
+  .cover-minimaliste .cover-title{ font-size:24px; }
+  .cover-minimaliste .min-underline{ width:44px; height:3px; }
+
+  /* --- Composition MODERNE : cercles superposés --- */
+  .cover-moderne{
+    background:#111;
+    position:relative;
+    padding:40px 26px;
+  }
+  .cover-moderne .blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(2px);
+    opacity:0.85;
+  }
+  .cover-moderne .cover-content{ position:relative; z-index:1; display:flex; flex-direction:column; gap:12px; align-items:flex-start; text-align:left; width:100%; }
+
+  /* --- Composition CRÉATIF : blocs superposés asymétriques --- */
+  .cover-creatif{
+    background:#111;
+    position:relative;
+    padding:36px 24px;
+  }
+  .cover-creatif .shard{
+    position:absolute;
+    opacity:0.9;
+  }
+  .cover-creatif .cover-content{ position:relative; z-index:2; }
+  .cover-creatif .cover-title{ font-size:24px; }
 
   .pdf-page .page-label{
     position:absolute;
@@ -819,22 +921,65 @@
     var afficherCopyright = document.getElementById('elt-copyright').checked;
     var logoImporte = coverFiles.length > 0 ? coverFiles[0] : null;
 
+    // --- Style choisi à l'étape 3 (par défaut "professionnel" si rien n'est sélectionné) ---
+    var styleCardSelectionnee = document.querySelector('.style-card.selected');
+    var styleChoisi = styleCardSelectionnee ? styleCardSelectionnee.getAttribute('data-value') : 'professionnel';
+
     // --- Page de couverture ---
     var cover = document.createElement('div');
-    cover.className = 'pdf-page cover';
-    cover.style.background = 'linear-gradient(160deg,' + couleurPrincipale + ',' + couleurSecondaire + ')';
+    cover.className = 'pdf-page cover cover-' + styleChoisi;
     cover.style.fontFamily = police;
 
-    var coverHTML = '';
+    var logoHTML = '';
     if (logoImporte) {
       var url = URL.createObjectURL(logoImporte);
-      coverHTML += '<img src="' + url + '" alt="Logo">';
-    } else {
-      coverHTML += '<div class="cover-auto-tag">Couverture générée automatiquement par Xpert2Min</div>';
+      logoHTML = '<img src="' + url + '" alt="Logo">';
     }
-    coverHTML += '<div class="cover-title">' + escapeHTML(titreCouverture) + '</div>';
-    if (citation) coverHTML += '<div class="cover-quote">« ' + escapeHTML(citation) + ' »</div>';
-    cover.innerHTML = coverHTML;
+    var autoTagHTML = logoImporte ? '' : '<div class="cover-auto-tag">Couverture générée automatiquement par Xpert2Min</div>';
+    var quoteHTML = citation ? '<div class="cover-quote">« ' + escapeHTML(citation) + ' »</div>' : '';
+    var auteurHTML = '<div class="cover-auteur">' + escapeHTML(document.getElementById('createur').value) + '</div>';
+    var titreHTML = '<div class="cover-title">' + escapeHTML(titreCouverture) + '</div>';
+
+    if (styleChoisi === 'professionnel') {
+      cover.style.color = '#161616';
+      cover.innerHTML =
+        '<div class="diag-block" style="background:' + couleurPrincipale + '"></div>' +
+        '<div class="cover-content">' +
+          '<div class="logo-box">' + (logoImporte ? logoHTML : '<span style="font-size:18px;font-weight:800;color:' + couleurPrincipale + '">X2M</span>') + '</div>' +
+          titreHTML + quoteHTML + auteurHTML + autoTagHTML +
+        '</div>';
+    }
+    else if (styleChoisi === 'luxe') {
+      cover.style.color = '#fff';
+      cover.innerHTML =
+        '<div class="luxe-frame" style="border-color:' + couleurPrincipale + '55">' +
+          logoHTML + titreHTML +
+          '<div class="luxe-sep" style="background:' + couleurPrincipale + '"></div>' +
+          quoteHTML + auteurHTML + autoTagHTML +
+        '</div>';
+    }
+    else if (styleChoisi === 'minimaliste') {
+      cover.innerHTML =
+        '<div class="cover-content">' +
+          logoHTML + titreHTML +
+          '<div class="min-underline" style="background:' + couleurPrincipale + '"></div>' +
+          quoteHTML + auteurHTML + autoTagHTML +
+        '</div>';
+    }
+    else if (styleChoisi === 'moderne') {
+      cover.style.color = '#fff';
+      cover.innerHTML =
+        '<div class="blob" style="width:220px;height:220px;top:-60px;right:-60px;background:' + couleurPrincipale + '"></div>' +
+        '<div class="blob" style="width:150px;height:150px;bottom:-40px;left:-30px;background:' + couleurSecondaire + ';opacity:0.7"></div>' +
+        '<div class="cover-content">' + logoHTML + titreHTML + quoteHTML + auteurHTML + autoTagHTML + '</div>';
+    }
+    else { // créatif
+      cover.style.color = '#fff';
+      cover.innerHTML =
+        '<div class="shard" style="width:70%;height:55%;top:-10%;left:-15%;background:' + couleurPrincipale + ';clip-path:polygon(0 0,100% 0,60% 100%,0 80%)"></div>' +
+        '<div class="shard" style="width:60%;height:50%;bottom:-12%;right:-15%;background:' + couleurSecondaire + ';opacity:0.85;clip-path:polygon(40% 0,100% 20%,100% 100%,0 100%)"></div>' +
+        '<div class="cover-content">' + logoHTML + titreHTML + quoteHTML + auteurHTML + autoTagHTML + '</div>';
+    }
     preview.appendChild(cover);
 
     // --- Page sommaire ---
