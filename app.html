@@ -231,6 +231,35 @@
     cursor:pointer;
   }
 
+  /* ÉTAPE 4 : Génération */
+  .recap-box{
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    font-size:13px;
+    color:var(--grey);
+  }
+  .recap-box p{ margin-bottom:5px; }
+  .recap-box p:last-child{ margin-bottom:0; }
+  .recap-box b{ color:var(--white); }
+
+  .result-box{
+    width:100%;
+    min-height:320px;
+    margin-top:16px;
+    padding:14px 16px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--white);
+    font-size:13.5px;
+    line-height:1.6;
+    font-family:'Inter', sans-serif;
+    resize:vertical;
+  }
+
   .file-list{
     list-style:none;
     margin-top:10px;
@@ -552,13 +581,15 @@
     <h1>Génération et prévisualisation</h1>
     <p class="lead">L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.</p>
 
-    <div class="soon-box">
-      La génération du PDF (via l'IA Groq) sera activée à une prochaine étape du guide.
-    </div>
+    <div class="recap-box" id="recap-box"></div>
+
+    <button type="button" class="next-btn" id="generate-btn" onclick="genererContenu()">Générer mon contenu</button>
+    <p class="form-msg" id="msg-4"></p>
+
+    <textarea class="result-box hidden" id="result-box" readonly></textarea>
 
     <div class="btn-row">
       <button type="button" class="back-btn" onclick="goToStep(3)">Retour</button>
-      <button type="button" class="soon-btn" disabled>Bientôt disponible</button>
     </div>
   </div>
 
@@ -580,7 +611,49 @@
     document.querySelectorAll('.step-dot').forEach(function(dot, i){
       dot.classList.toggle('active', i < n);
     });
+    if (n === 4) {
+      remplirRecap();
+    }
     window.scrollTo(0, 0);
+  }
+
+  function remplirRecap(){
+    var recap = document.getElementById('recap-box');
+    recap.innerHTML =
+      '<p><b>Titre :</b> ' + (document.getElementById('titre').value || '—') + '</p>' +
+      '<p><b>Sujet :</b> ' + (document.getElementById('sujet').value || '—') + '</p>' +
+      '<p><b>Objectif :</b> ' + (document.getElementById('objectif').value || '—') + '</p>' +
+      '<p><b>Public cible :</b> ' + (document.getElementById('public').value || '—') + '</p>';
+  }
+
+  async function genererContenu(){
+    var btn = document.getElementById('generate-btn');
+    var msg = document.getElementById('msg-4');
+    var resultBox = document.getElementById('result-box');
+
+    msg.textContent = '';
+    msg.className = 'form-msg';
+    resultBox.classList.add('hidden');
+    btn.disabled = true;
+    btn.textContent = 'Génération en cours...';
+
+    try {
+      var resultat = await Parse.Cloud.run('analyserExpertise', {
+        titre: document.getElementById('titre').value,
+        sujet: document.getElementById('sujet').value,
+        objectif: document.getElementById('objectif').value,
+        publicCible: document.getElementById('public').value,
+        expertise: document.getElementById('connaissances').value
+      });
+      resultBox.value = resultat;
+      resultBox.classList.remove('hidden');
+    } catch (error) {
+      msg.textContent = 'Erreur : impossible de générer le contenu. Réessayez.';
+      msg.classList.add('error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Générer mon contenu';
+    }
   }
 
   function validateStep1(){
