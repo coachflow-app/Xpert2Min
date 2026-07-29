@@ -561,6 +561,25 @@
     overflow-y:auto;
   }
 
+  /* ÉCRAN IMAGE MARKETING */
+  .format-card{ font-size:12px; padding:14px 6px; }
+  .format-card.selected{ border-color:var(--red); color:var(--white); background:rgba(232,22,28,0.08); }
+
+  .marketing-image-box{
+    margin-top:18px;
+    display:flex;
+    justify-content:center;
+    background:#1a1a1c;
+    border-radius:10px;
+    padding:16px;
+  }
+  .marketing-image-box img{
+    max-width:100%;
+    max-height:420px;
+    border-radius:6px;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+  }
+
   .file-list{
     list-style:none;
     margin-top:10px;
@@ -908,10 +927,44 @@
       <span class="eye-icon">👁️</span> <span data-i18n="btn_previsualiser">Prévisualiser</span>
     </button>
 
+    <button type="button" class="next-btn hidden" id="goto-image-btn" onclick="allerEcranImage()" style="margin-top:10px" data-i18n="btn_vers_image">Continuer vers l'image marketing</button>
+
     <textarea class="result-box hidden" id="result-box" readonly></textarea>
 
     <div class="btn-row">
       <button type="button" class="back-btn" onclick="goToStep(3)" data-i18n="btn_retour">Retour</button>
+    </div>
+  </div>
+
+  <!-- ÉCRAN : IMAGE MARKETING (après l'étape 4, hors compteur) -->
+  <div class="step-screen" id="screen-image">
+    <div class="eyebrow" data-i18n="img_eyebrow">Image marketing</div>
+    <h1 data-i18n="img_title">Créez votre image marketing</h1>
+    <p class="lead" data-i18n="img_lead">Cette image est générée automatiquement à partir de votre expertise, pour promouvoir votre PDF.</p>
+
+    <div class="field">
+      <label data-i18n="lbl_format_img">Format de l'image</label>
+      <div class="style-grid" id="format-grid" style="grid-template-columns:1fr 1fr 1fr">
+        <button type="button" class="style-card format-card selected" data-value="carre" data-w="1024" data-h="1024" data-i18n="fmt_carre">Carré</button>
+        <button type="button" class="style-card format-card" data-value="horizontal" data-w="1344" data-h="768" data-i18n="fmt_horizontal">Rectangle horizontal</button>
+        <button type="button" class="style-card format-card" data-value="vertical" data-w="768" data-h="1344" data-i18n="fmt_vertical">Rectangle vertical</button>
+      </div>
+    </div>
+
+    <button type="button" class="next-btn" id="generate-img-btn" onclick="genererImageMarketing()" data-i18n="btn_generer_image">Générer mon image marketing</button>
+    <p class="form-msg" id="msg-img"></p>
+
+    <div class="marketing-image-box hidden" id="marketing-image-box">
+      <img id="marketing-image" src="" alt="Image marketing">
+    </div>
+
+    <div class="btn-row hidden" id="image-actions-row">
+      <button type="button" class="back-btn" onclick="genererImageMarketing()" data-i18n="btn_regenerer">Régénérer</button>
+      <button type="button" class="next-btn" id="download-img-btn" data-i18n="btn_telecharger">Télécharger</button>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="back-btn" onclick="goToStep(4)" data-i18n="btn_retour">Retour</button>
     </div>
   </div>
 
@@ -964,7 +1017,12 @@
       step_label_4: "Étape 4 / 4", s4_title: "Génération et prévisualisation",
       s4_lead: "L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.",
       btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF",
-      recap_titre: "Titre", recap_sujet: "Sujet", recap_objectif: "Objectif", recap_public: "Public cible"
+      recap_titre: "Titre", recap_sujet: "Sujet", recap_objectif: "Objectif", recap_public: "Public cible",
+      btn_vers_image: "Continuer vers l'image marketing",
+      img_eyebrow: "Image marketing", img_title: "Créez votre image marketing",
+      img_lead: "Cette image est générée automatiquement à partir de votre expertise, pour promouvoir votre PDF.",
+      lbl_format_img: "Format de l'image", fmt_carre: "Carré", fmt_horizontal: "Rectangle horizontal", fmt_vertical: "Rectangle vertical",
+      btn_generer_image: "Générer mon image marketing", btn_regenerer: "Régénérer", btn_telecharger: "Télécharger"
     },
     en: {
       nav_creer: "Create", nav_dashboard: "Dashboard",
@@ -999,7 +1057,12 @@
       step_label_4: "Step 4 / 4", s4_title: "Generation and preview",
       s4_lead: "The AI combines your knowledge, structure and design to create your final PDF.",
       btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview",
-      recap_titre: "Title", recap_sujet: "Subject", recap_objectif: "Goal", recap_public: "Target audience"
+      recap_titre: "Title", recap_sujet: "Subject", recap_objectif: "Goal", recap_public: "Target audience",
+      btn_vers_image: "Continue to marketing image",
+      img_eyebrow: "Marketing image", img_title: "Create your marketing image",
+      img_lead: "This image is automatically generated from your expertise, to promote your PDF.",
+      lbl_format_img: "Image format", fmt_carre: "Square", fmt_horizontal: "Horizontal rectangle", fmt_vertical: "Vertical rectangle",
+      btn_generer_image: "Generate my marketing image", btn_regenerer: "Regenerate", btn_telecharger: "Download"
     }
   };
 
@@ -1063,6 +1126,7 @@
     var resultBox = document.getElementById('result-box');
     var preview = document.getElementById('pdf-preview');
     var previewBtn = document.getElementById('preview-btn');
+    var gotoImageBtn = document.getElementById('goto-image-btn');
 
     msg.textContent = '';
     msg.className = 'form-msg';
@@ -1070,6 +1134,7 @@
     preview.classList.add('hidden');
     preview.innerHTML = '';
     previewBtn.classList.add('hidden');
+    gotoImageBtn.classList.add('hidden');
     btn.disabled = true;
     btn.textContent = 'Génération en cours...';
 
@@ -1090,6 +1155,7 @@
       } else {
         construirePrevisualisation(contenu);
         previewBtn.classList.remove('hidden');
+        gotoImageBtn.classList.remove('hidden');
       }
     } catch (error) {
       msg.textContent = 'Erreur : impossible de générer le contenu. Réessayez.';
@@ -1107,6 +1173,68 @@
 
   function fermerPrevisualisation(){
     document.getElementById('preview-overlay').classList.add('hidden');
+  }
+
+  // ----- Écran Image marketing -----
+  function allerEcranImage(){
+    document.querySelectorAll('.step-screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById('screen-image').classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  document.querySelectorAll('.format-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      document.querySelectorAll('.format-card').forEach(function(c){ c.classList.remove('selected'); });
+      card.classList.add('selected');
+    });
+  });
+
+  async function genererImageMarketing(){
+    var btn = document.getElementById('generate-img-btn');
+    var msg = document.getElementById('msg-img');
+    var box = document.getElementById('marketing-image-box');
+    var actionsRow = document.getElementById('image-actions-row');
+    var img = document.getElementById('marketing-image');
+
+    var formatSelectionne = document.querySelector('.format-card.selected');
+    var largeur = formatSelectionne.getAttribute('data-w');
+    var hauteur = formatSelectionne.getAttribute('data-h');
+
+    msg.textContent = '';
+    msg.className = 'form-msg';
+    box.classList.add('hidden');
+    actionsRow.classList.add('hidden');
+    btn.disabled = true;
+    btn.textContent = 'Génération en cours...';
+
+    try {
+      var resultat = await Parse.Cloud.run('genererImageMarketing', {
+        titre: document.getElementById('titre').value,
+        sujet: document.getElementById('sujet').value,
+        expertise: document.getElementById('connaissances').value,
+        largeur: largeur,
+        hauteur: hauteur
+      });
+
+      img.src = resultat.image;
+      box.classList.remove('hidden');
+      actionsRow.classList.remove('hidden');
+
+      document.getElementById('download-img-btn').onclick = function(){
+        var lien = document.createElement('a');
+        lien.href = resultat.image;
+        lien.download = 'xpert2min-image-marketing.jpg';
+        document.body.appendChild(lien);
+        lien.click();
+        document.body.removeChild(lien);
+      };
+    } catch (error) {
+      msg.textContent = 'Erreur : impossible de générer l\'image. Réessayez.';
+      msg.classList.add('error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = document.getElementById('lang-switch').textContent === 'FR' ? 'Generate my marketing image' : 'Générer mon image marketing';
+    }
   }
 
   // Découpe le texte brut de l'IA en morceaux, à partir des balises [SOMMAIRE], [INTRODUCTION], [CHAPITRE X: titre], [CONCLUSION]
@@ -1186,6 +1314,7 @@
         '</div>';
     }
     else if (styleChoisi === 'minimaliste') {
+      cover.style.color = '#161616';
       cover.innerHTML =
         '<div class="cover-content">' +
           logoHTML + titreHTML +
