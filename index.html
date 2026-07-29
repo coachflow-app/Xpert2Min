@@ -251,6 +251,23 @@
   }
   .toast b{ color:var(--red); }
 
+  .lang-switch-fixed{
+    position:fixed;
+    top:16px;
+    right:16px;
+    z-index:20;
+    background:rgba(255,255,255,0.06);
+    border:1px solid var(--line);
+    color:var(--white);
+    font-size:11.5px;
+    font-weight:700;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    font-family:'Inter', sans-serif;
+  }
+  .lang-switch-fixed:hover{ border-color:var(--red); }
+
   @media (max-width:860px){
     body{ flex-direction:column; }
     .brand{ padding:36px 24px; min-height:0; }
@@ -261,6 +278,9 @@
 </head>
 <body>
 
+  <!-- BOUTON DE LANGUE -->
+  <button type="button" class="lang-switch-fixed" id="lang-switch" onclick="toggleLangue()">EN</button>
+
   <!-- LEFT BRAND PANEL -->
   <div class="brand">
     <div class="x-mark">
@@ -270,11 +290,11 @@
       </svg>
     </div>
     <div class="brand-word">XPERT<span>2</span>MIN</div>
-    <p class="brand-tag"><b>Votre expertise. Votre produit.</b><br><em>En 2 minutes.</em></p>
+    <p class="brand-tag"><b data-i18n="brand_line1">Votre expertise. Votre produit.</b><br><em data-i18n="brand_line2">En 2 minutes.</em></p>
     <div class="brand-strip">
-      <span>IA de structuration</span>
-      <span>Design pro</span>
-      <span>PDF prêt à vendre</span>
+      <span data-i18n="brand_feat1">IA de structuration</span>
+      <span data-i18n="brand_feat2">Design pro</span>
+      <span data-i18n="brand_feat3">PDF prêt à vendre</span>
     </div>
   </div>
 
@@ -283,56 +303,104 @@
     <div class="card">
 
       <div class="tabs">
-        <button class="tab active" id="tab-login" onclick="showForm('login')">Se connecter</button>
-        <button class="tab" id="tab-signup" onclick="showForm('signup')">Créer un compte</button>
+        <button class="tab active" id="tab-login" onclick="showForm('login')" data-i18n="tab_login">Se connecter</button>
+        <button class="tab" id="tab-signup" onclick="showForm('signup')" data-i18n="tab_signup">Créer un compte</button>
       </div>
 
       <!-- LOGIN FORM -->
       <form id="form-login">
-        <h1 class="form-title">Content de vous revoir</h1>
-        <p class="form-sub">Connectez-vous pour accéder à vos créations.</p>
+        <h1 class="form-title" data-i18n="login_title">Content de vous revoir</h1>
+        <p class="form-sub" data-i18n="login_sub">Connectez-vous pour accéder à vos créations.</p>
 
         <div class="field">
-          <label for="login-email">E-mail</label>
-          <input type="email" id="login-email" placeholder="vous@exemple.com" required>
+          <label for="login-email" data-i18n="lbl_email">E-mail</label>
+          <input type="email" id="login-email" placeholder="vous@exemple.com" data-i18n-placeholder="ph_email" required>
         </div>
         <div class="field">
-          <label for="login-password">Mot de passe</label>
+          <label for="login-password" data-i18n="lbl_password">Mot de passe</label>
           <input type="password" id="login-password" placeholder="••••••••" required>
         </div>
 
-        <button type="submit" class="submit-btn">Se connecter</button>
+        <button type="submit" class="submit-btn" data-i18n="btn_login">Se connecter</button>
         <p class="form-msg" id="login-msg"></p>
-        <p class="switch-line">Pas encore de compte ? <button type="button" onclick="showForm('signup')">Créer un compte</button></p>
+        <p class="switch-line"><span data-i18n="no_account">Pas encore de compte ?</span> <button type="button" onclick="showForm('signup')" data-i18n="tab_signup">Créer un compte</button></p>
       </form>
 
       <!-- SIGNUP FORM -->
       <form id="form-signup" class="hidden">
-        <h1 class="form-title">Créez votre compte</h1>
-        <p class="form-sub">Votre expertise. Votre produit. En 2 minutes.</p>
+        <h1 class="form-title" data-i18n="signup_title">Créez votre compte</h1>
+        <p class="form-sub" data-i18n="signup_sub">Votre expertise. Votre produit. En 2 minutes.</p>
 
         <div class="field">
-          <label for="signup-email">E-mail</label>
-          <input type="email" id="signup-email" placeholder="vous@exemple.com" required>
+          <label for="signup-email" data-i18n="lbl_email">E-mail</label>
+          <input type="email" id="signup-email" placeholder="vous@exemple.com" data-i18n-placeholder="ph_email" required>
         </div>
         <div class="field">
-          <label for="signup-password">Mot de passe</label>
+          <label for="signup-password" data-i18n="lbl_password">Mot de passe</label>
           <input type="password" id="signup-password" placeholder="••••••••" required>
         </div>
 
-        <button type="submit" class="submit-btn">Créer mon compte</button>
+        <button type="submit" class="submit-btn" data-i18n="btn_signup">Créer mon compte</button>
         <p class="form-msg" id="signup-msg"></p>
-        <p class="switch-line">Déjà un compte ? <button type="button" onclick="showForm('login')">Se connecter</button></p>
+        <p class="switch-line"><span data-i18n="have_account">Déjà un compte ?</span> <button type="button" onclick="showForm('login')" data-i18n="tab_login">Se connecter</button></p>
       </form>
 
     </div>
   </div>
 
   <div class="toast" id="toast">
-    Bienvenue sur <b>Xpert2Min</b>. Vous avez reçu 2 générations de PDF offertes pour votre premier mois.
+    <span data-i18n="toast_text">Bienvenue sur Xpert2Min. Vous avez reçu 2 générations de PDF offertes pour votre premier mois.</span>
   </div>
 
 <script>
+  // ----- Système de langue de l'interface (FR / EN) -----
+  var traductions = {
+    fr: {
+      brand_line1: "Votre expertise. Votre produit.", brand_line2: "En 2 minutes.",
+      brand_feat1: "IA de structuration", brand_feat2: "Design pro", brand_feat3: "PDF prêt à vendre",
+      tab_login: "Se connecter", tab_signup: "Créer un compte",
+      login_title: "Content de vous revoir", login_sub: "Connectez-vous pour accéder à vos créations.",
+      lbl_email: "E-mail", ph_email: "vous@exemple.com", lbl_password: "Mot de passe",
+      btn_login: "Se connecter", no_account: "Pas encore de compte ?",
+      signup_title: "Créez votre compte", signup_sub: "Votre expertise. Votre produit. En 2 minutes.",
+      btn_signup: "Créer mon compte", have_account: "Déjà un compte ?",
+      toast_text: "Bienvenue sur Xpert2Min. Vous avez reçu 2 générations de PDF offertes pour votre premier mois."
+    },
+    en: {
+      brand_line1: "Your expertise. Your product.", brand_line2: "In 2 minutes.",
+      brand_feat1: "AI structuring", brand_feat2: "Pro design", brand_feat3: "Ready-to-sell PDF",
+      tab_login: "Log in", tab_signup: "Create account",
+      login_title: "Welcome back", login_sub: "Log in to access your creations.",
+      lbl_email: "Email", ph_email: "you@example.com", lbl_password: "Password",
+      btn_login: "Log in", no_account: "Don't have an account yet?",
+      signup_title: "Create your account", signup_sub: "Your expertise. Your product. In 2 minutes.",
+      btn_signup: "Create my account", have_account: "Already have an account?",
+      toast_text: "Welcome to Xpert2Min. You've received 2 free PDF generations for your first month."
+    }
+  };
+
+  function appliquerLangue(langue){
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var cle = el.getAttribute('data-i18n');
+      if (traductions[langue][cle] !== undefined) el.textContent = traductions[langue][cle];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+      var cle = el.getAttribute('data-i18n-placeholder');
+      if (traductions[langue][cle] !== undefined) el.placeholder = traductions[langue][cle];
+    });
+    document.getElementById('lang-switch').textContent = (langue === 'fr') ? 'EN' : 'FR';
+    document.documentElement.lang = langue;
+    localStorage.setItem('xpert2min_langue', langue);
+  }
+
+  function toggleLangue(){
+    var actuelle = localStorage.getItem('xpert2min_langue') || 'fr';
+    var nouvelle = actuelle === 'fr' ? 'en' : 'fr';
+    appliquerLangue(nouvelle);
+  }
+
+  appliquerLangue(localStorage.getItem('xpert2min_langue') || 'fr');
+
   // Connexion à Back4App (Parse)
   Parse.initialize("s1YvHg4CRjirbCydEjFLoBnkSxnNHBlXeBLSmJxq", "WgwearpWgCysVARQz6etPeujBL0ZspvkRCafYuZT");
   Parse.serverURL = "https://parseapi.back4app.com/";
