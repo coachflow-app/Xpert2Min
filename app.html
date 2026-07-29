@@ -243,6 +243,24 @@
     cursor:pointer;
   }
 
+  .sub-field{
+    margin:0 0 10px 26px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .sub-field input, .sub-field textarea{
+    padding:9px 12px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:7px;
+    color:var(--white);
+    font-size:13px;
+    font-family:'Inter', sans-serif;
+    outline:none;
+  }
+  .sub-field input:focus, .sub-field textarea:focus{ border-color:var(--red); }
+
   /* ÉTAPE 4 : Génération */
   .recap-box{
     background:var(--black);
@@ -847,10 +865,26 @@
 
     <div class="field">
       <label data-i18n="lbl_elements_supp">Éléments supplémentaires</label>
-      <label class="checkbox-line"><input type="checkbox" id="elt-copyright"><span data-i18n="chk_copyright">Copyright</span></label>
-      <label class="checkbox-line"><input type="checkbox" id="elt-page-auteur"><span data-i18n="chk_page_auteur">Page auteur</span></label>
-      <label class="checkbox-line"><input type="checkbox" id="elt-page-contact"><span data-i18n="chk_page_contact">Page contact</span></label>
-      <label class="checkbox-line"><input type="checkbox" id="elt-reseaux"><span data-i18n="chk_reseaux">Réseaux sociaux</span></label>
+
+      <label class="checkbox-line"><input type="checkbox" id="elt-copyright" onchange="toggleSubField('copyright-sub', this)"><span data-i18n="chk_copyright">Copyright</span></label>
+
+      <label class="checkbox-line"><input type="checkbox" id="elt-page-auteur" onchange="toggleSubField('auteur-sub', this)"><span data-i18n="chk_page_auteur">Page auteur</span></label>
+      <div class="sub-field hidden" id="auteur-sub">
+        <textarea id="bio-auteur" rows="3" placeholder="Courte biographie du créateur..." data-i18n-placeholder="ph_bio"></textarea>
+      </div>
+
+      <label class="checkbox-line"><input type="checkbox" id="elt-page-contact" onchange="toggleSubField('contact-sub', this)"><span data-i18n="chk_page_contact">Page contact</span></label>
+      <div class="sub-field hidden" id="contact-sub">
+        <input type="email" id="contact-email" placeholder="E-mail de contact" data-i18n-placeholder="ph_contact_email">
+        <input type="tel" id="contact-tel" placeholder="Téléphone (optionnel)" data-i18n-placeholder="ph_contact_tel">
+      </div>
+
+      <label class="checkbox-line"><input type="checkbox" id="elt-reseaux" onchange="toggleSubField('reseaux-sub', this)"><span data-i18n="chk_reseaux">Réseaux sociaux</span></label>
+      <div class="sub-field hidden" id="reseaux-sub">
+        <input type="text" id="reseau-instagram" placeholder="Instagram (optionnel)" data-i18n-placeholder="ph_instagram">
+        <input type="text" id="reseau-linkedin" placeholder="LinkedIn (optionnel)" data-i18n-placeholder="ph_linkedin">
+        <input type="text" id="reseau-site" placeholder="Site web (optionnel)" data-i18n-placeholder="ph_site">
+      </div>
     </div>
 
     <div class="btn-row">
@@ -925,6 +959,8 @@
       lbl_position_img: "Position des images", pos_centrees: "Centrées", pos_gauche: "Alignées à gauche", pos_droite: "Alignées à droite", pos_pleine: "Pleine largeur",
       chk_numero_page: "Numéro de page", chk_entete: "En-tête / pied de page",
       lbl_elements_supp: "Éléments supplémentaires", chk_copyright: "Copyright", chk_page_auteur: "Page auteur", chk_page_contact: "Page contact", chk_reseaux: "Réseaux sociaux",
+      ph_bio: "Courte biographie du créateur...", ph_contact_email: "E-mail de contact", ph_contact_tel: "Téléphone (optionnel)",
+      ph_instagram: "Instagram (optionnel)", ph_linkedin: "LinkedIn (optionnel)", ph_site: "Site web (optionnel)",
       step_label_4: "Étape 4 / 4", s4_title: "Génération et prévisualisation",
       s4_lead: "L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.",
       btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF",
@@ -958,6 +994,8 @@
       lbl_position_img: "Image position", pos_centrees: "Centered", pos_gauche: "Left-aligned", pos_droite: "Right-aligned", pos_pleine: "Full width",
       chk_numero_page: "Page number", chk_entete: "Header / footer",
       lbl_elements_supp: "Additional elements", chk_copyright: "Copyright", chk_page_auteur: "Author page", chk_page_contact: "Contact page", chk_reseaux: "Social media",
+      ph_bio: "Short creator bio...", ph_contact_email: "Contact email", ph_contact_tel: "Phone (optional)",
+      ph_instagram: "Instagram (optional)", ph_linkedin: "LinkedIn (optional)", ph_site: "Website (optional)",
       step_label_4: "Step 4 / 4", s4_title: "Generation and preview",
       s4_lead: "The AI combines your knowledge, structure and design to create your final PDF.",
       btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview",
@@ -1213,27 +1251,43 @@
       preview.appendChild(concl);
     }
 
-    // --- Pages optionnelles ---
-    if (afficherPageAuteur) {
-      var auteur = document.createElement('div');
-      auteur.className = 'pdf-page';
-      auteur.style.fontFamily = police;
-      auteur.innerHTML = '<div class="page-label">Auteur</div><h2 class="section-title" style="color:' + couleurPrincipale + '">' + escapeHTML(document.getElementById('createur').value) + '</h2>';
-      preview.appendChild(auteur);
-    }
-    if (afficherContact) {
-      var contact = document.createElement('div');
-      contact.className = 'pdf-page';
-      contact.style.fontFamily = police;
-      contact.innerHTML = '<div class="page-label">Contact</div><h2 class="section-title" style="color:' + couleurPrincipale + '">Contact</h2>';
-      preview.appendChild(contact);
-    }
-    if (afficherCopyright) {
-      var copy = document.createElement('div');
-      copy.className = 'pdf-page';
-      copy.style.fontFamily = police;
-      copy.innerHTML = '<div class="page-label">Copyright</div><div class="chapter-body">© ' + new Date().getFullYear() + ' — ' + escapeHTML(document.getElementById('createur').value) + '. Tous droits réservés.</div>';
-      preview.appendChild(copy);
+    // --- Page optionnelle combinée : auteur / contact / réseaux / copyright ---
+    var afficherReseaux = document.getElementById('elt-reseaux').checked;
+    if (afficherPageAuteur || afficherContact || afficherReseaux || afficherCopyright) {
+      var pageInfos = document.createElement('div');
+      pageInfos.className = 'pdf-page';
+      pageInfos.style.fontFamily = police;
+      var blocs = '<div class="page-label">À propos</div>';
+
+      if (afficherPageAuteur) {
+        var bio = document.getElementById('bio-auteur').value;
+        blocs += '<h2 class="section-title" style="color:' + couleurPrincipale + '">' + escapeHTML(document.getElementById('createur').value) + '</h2>';
+        if (bio) blocs += '<div class="chapter-body" style="margin-bottom:18px">' + escapeHTML(bio) + '</div>';
+      }
+      if (afficherContact) {
+        var email = document.getElementById('contact-email').value;
+        var tel = document.getElementById('contact-tel').value;
+        blocs += '<p style="font-size:13px;margin-bottom:6px"><b>Contact</b></p>';
+        if (email) blocs += '<p style="font-size:12.5px;margin-bottom:4px">' + escapeHTML(email) + '</p>';
+        if (tel) blocs += '<p style="font-size:12.5px;margin-bottom:16px">' + escapeHTML(tel) + '</p>';
+      }
+      if (afficherReseaux) {
+        var insta = document.getElementById('reseau-instagram').value;
+        var linkedin = document.getElementById('reseau-linkedin').value;
+        var site = document.getElementById('reseau-site').value;
+        if (insta || linkedin || site) {
+          blocs += '<p style="font-size:13px;margin-bottom:6px"><b>Réseaux</b></p>';
+          if (insta) blocs += '<p style="font-size:12.5px;margin-bottom:4px">Instagram : ' + escapeHTML(insta) + '</p>';
+          if (linkedin) blocs += '<p style="font-size:12.5px;margin-bottom:4px">LinkedIn : ' + escapeHTML(linkedin) + '</p>';
+          if (site) blocs += '<p style="font-size:12.5px;margin-bottom:16px">Site : ' + escapeHTML(site) + '</p>';
+        }
+      }
+      if (afficherCopyright) {
+        blocs += '<p style="font-size:11px;opacity:0.6;margin-top:20px">© ' + new Date().getFullYear() + ' — ' + escapeHTML(document.getElementById('createur').value) + '. Tous droits réservés.</p>';
+      }
+
+      pageInfos.innerHTML = blocs;
+      preview.appendChild(pageInfos);
     }
   }
 
@@ -1263,6 +1317,9 @@
   }
 
   // Sélection du style de PDF (étape 3)
+  function toggleSubField(id, checkbox){
+    document.getElementById(id).classList.toggle('hidden', !checkbox.checked);
+  }
   document.querySelectorAll('.style-card').forEach(function(card){
     card.addEventListener('click', function(){
       document.querySelectorAll('.style-card').forEach(function(c){ c.classList.remove('selected'); });
