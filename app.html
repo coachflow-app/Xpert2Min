@@ -292,27 +292,26 @@
     resize:vertical;
   }
 
-  /* PRÉVISUALISATION VISUELLE DU PDF */
+  /* PRÉVISUALISATION VISUELLE DU PDF — document continu, comme un vrai lecteur PDF */
   .pdf-preview{
     margin-top:16px;
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:22px;
-    background:#1a1a1c;
-    padding:20px 10px;
-    border-radius:12px;
+    background:#3a3a3d;
+    padding:14px 0;
   }
   .pdf-page{
     background:#fff;
     color:#1a1a1a;
-    border-radius:3px;
+    border-radius:0;
     padding:30px 24px 42px;
-    box-shadow:0 10px 34px rgba(0,0,0,.55);
+    box-shadow:none;
+    border-bottom:2px solid #26262a;
     position:relative;
     font-family:'Inter', sans-serif;
     width:100%;
-    max-width:380px;
+    max-width:420px;
     aspect-ratio:210 / 297;
     overflow-y:auto;
   }
@@ -331,6 +330,41 @@
     max-width:100px;
     max-height:100px;
     object-fit:contain;
+  }
+  .cover-logo-img{
+    max-width:150px;
+    max-height:120px;
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    display:block;
+    margin:0 auto 6px;
+  }
+  .logo-fallback{
+    width:58px; height:58px;
+    border:2px solid;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Archivo Black', sans-serif;
+    font-size:16px;
+    margin:0 auto 6px;
+  }
+  .cover-watermark{
+    position:absolute;
+    bottom:16px;
+    left:0;
+    right:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    opacity:0.4;
+    font-size:8.5px;
+    letter-spacing:0.09em;
+    font-weight:700;
+    z-index:2;
   }
   .pdf-page.cover .cover-title{
     font-family:'Archivo Black', sans-serif;
@@ -1361,6 +1395,13 @@
   }
 
   // ----- Motif de secours (jamais d'espace vide si aucune image) -----
+  // ----- Filigrane discret Xpert2Min (remplace l'ancien texte "généré automatiquement") -----
+  function xpertWatermarkHTML(){
+    return '<div class="cover-watermark">' +
+      '<svg viewBox="0 0 200 200" width="13" height="13"><polygon points="30,30 85,30 170,170 115,170" fill="currentColor"/><polygon points="170,30 115,30 30,170 85,170" fill="currentColor" opacity="0.55"/></svg>' +
+      '<span>XPERT2MIN</span></div>';
+  }
+
   function motifSecoursHTML(couleur){
     return '<svg class="fallback-motif" viewBox="0 0 100 100" preserveAspectRatio="none">' +
       '<circle cx="85" cy="15" r="40" fill="' + couleur + '"/>' +
@@ -1385,14 +1426,14 @@
     var afficherCopyright = document.getElementById('elt-copyright').checked;
     var afficherNumeroPage = document.getElementById('numero-pages').checked;
     var afficherEntetePied = document.getElementById('entete-pied').checked;
-    var logoImporte = coverFiles.length > 0 ? coverFiles[0] : null;
+    var logoImporte = coverImageDataUrl;
     var titreDoc = document.getElementById('titre').value;
 
     var styleCardSelectionnee = document.querySelector('.style-card.selected');
     var styleChoisi = styleCardSelectionnee ? styleCardSelectionnee.getAttribute('data-value') : 'professionnel';
 
     // Titre de couverture : taille ajustée automatiquement selon la longueur (jamais de débordement)
-    var tailleTitreCouverture = titreCouverture.length > 40 ? '19px' : (titreCouverture.length > 22 ? '23px' : '27px');
+    var tailleTitreCouverture = titreCouverture.length > 40 ? '20px' : (titreCouverture.length > 22 ? '25px' : '30px');
     var tailleCitation = citation && citation.length > 90 ? '11px' : '12.5px';
 
     var numeroPageActuel = 0;
@@ -1403,13 +1444,8 @@
     cover.className = 'pdf-page cover cover-' + styleChoisi;
     cover.style.fontFamily = police;
 
-    var logoHTML = '';
-    if (logoImporte) {
-      var url = URL.createObjectURL(logoImporte);
-      // Image optimisée : recadrage propre (object-fit cover), jamais déformée, teinte harmonisée avec la palette
-      logoHTML = '<img src="' + url + '" alt="Logo" class="creator-image" style="aspect-ratio:1/1; max-width:100px; max-height:100px; box-shadow:0 4px 14px rgba(0,0,0,.25); filter:saturate(1.05)">';
-    }
-    var autoTagHTML = logoImporte ? '' : '<div class="cover-auto-tag">Couverture générée automatiquement par Xpert2Min</div>';
+    // Logo : image entière (jamais recadrée/coupée), taille généreuse, fond transparent conservé
+    var logoHTML = logoImporte ? '<img src="' + logoImporte + '" alt="Logo" class="cover-logo-img">' : '';
     var quoteHTML = citation ? '<div class="cover-quote" style="font-size:' + tailleCitation + '">« ' + escapeHTML(citation) + ' »</div>' : '';
     var auteurHTML = '<div class="cover-auteur">' + escapeHTML(document.getElementById('createur').value) + '</div>';
     var titreHTML = '<div class="cover-title" style="font-size:' + tailleTitreCouverture + '">' + escapeHTML(titreCouverture) + '</div>';
@@ -1419,9 +1455,9 @@
       cover.innerHTML =
         '<div class="diag-block" style="background:' + couleurPrincipale + '"></div>' +
         '<div class="cover-content">' +
-          '<div class="logo-box">' + (logoImporte ? logoHTML : '<span style="font-size:18px;font-weight:800;color:' + couleurPrincipale + '">X2M</span>') + '</div>' +
-          titreHTML + quoteHTML + auteurHTML + autoTagHTML +
-        '</div>';
+          (logoImporte ? logoHTML : '<div class="logo-fallback" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">X2M</div>') +
+          titreHTML + quoteHTML + auteurHTML +
+        '</div>' + xpertWatermarkHTML(couleurPrincipale);
     }
     else if (styleChoisi === 'luxe') {
       cover.style.color = '#fff';
@@ -1429,8 +1465,8 @@
         '<div class="luxe-frame" style="border-color:' + couleurPrincipale + '55">' +
           logoHTML + titreHTML +
           '<div class="luxe-sep" style="background:' + couleurPrincipale + '"></div>' +
-          quoteHTML + auteurHTML + autoTagHTML +
-        '</div>';
+          quoteHTML + auteurHTML +
+        '</div>' + xpertWatermarkHTML(couleurPrincipale);
     }
     else if (styleChoisi === 'minimaliste') {
       cover.style.color = '#161616';
@@ -1438,22 +1474,22 @@
         '<div class="cover-content">' +
           logoHTML + titreHTML +
           '<div class="min-underline" style="background:' + couleurPrincipale + '"></div>' +
-          quoteHTML + auteurHTML + autoTagHTML +
-        '</div>';
+          quoteHTML + auteurHTML +
+        '</div>' + xpertWatermarkHTML(couleurPrincipale);
     }
     else if (styleChoisi === 'moderne') {
       cover.style.color = '#fff';
       cover.innerHTML =
         '<div class="blob" style="width:220px;height:220px;top:-60px;right:-60px;background:' + couleurPrincipale + '"></div>' +
         '<div class="blob" style="width:150px;height:150px;bottom:-40px;left:-30px;background:' + couleurSecondaire + ';opacity:0.7"></div>' +
-        '<div class="cover-content">' + logoHTML + titreHTML + quoteHTML + auteurHTML + autoTagHTML + '</div>';
+        '<div class="cover-content">' + logoHTML + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML(couleurPrincipale);
     }
     else { // créatif
       cover.style.color = '#fff';
       cover.innerHTML =
         '<div class="shard" style="width:70%;height:55%;top:-10%;left:-15%;background:' + couleurPrincipale + ';clip-path:polygon(0 0,100% 0,60% 100%,0 80%)"></div>' +
         '<div class="shard" style="width:60%;height:50%;bottom:-12%;right:-15%;background:' + couleurSecondaire + ';opacity:0.85;clip-path:polygon(40% 0,100% 20%,100% 100%,0 100%)"></div>' +
-        '<div class="cover-content">' + logoHTML + titreHTML + quoteHTML + auteurHTML + autoTagHTML + '</div>';
+        '<div class="cover-content">' + logoHTML + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML(couleurPrincipale);
     }
     preview.appendChild(cover);
 
@@ -1613,6 +1649,7 @@
 
   // Import du logo/image de couverture (étape 3)
   var coverFiles = [];
+  var coverImageDataUrl = null;
   function renderCoverFileList(){
     var list = document.getElementById('cover-file-list');
     list.innerHTML = '';
@@ -1626,6 +1663,7 @@
       removeBtn.textContent = '✕';
       removeBtn.onclick = function(){
         coverFiles.splice(index, 1);
+        if (coverFiles.length === 0) coverImageDataUrl = null;
         renderCoverFileList();
       };
       li.appendChild(nameSpan);
@@ -1634,7 +1672,13 @@
     });
   }
   document.getElementById('cover-file-input').addEventListener('change', function(e){
-    Array.from(e.target.files).forEach(function(file){ coverFiles.push(file); });
+    var fichier = e.target.files[0];
+    if (fichier) {
+      coverFiles = [fichier];
+      var lecteur = new FileReader();
+      lecteur.onload = function(evt){ coverImageDataUrl = evt.target.result; };
+      lecteur.readAsDataURL(fichier);
+    }
     renderCoverFileList();
     e.target.value = '';
   });
