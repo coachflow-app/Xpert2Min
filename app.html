@@ -331,24 +331,27 @@
     max-height:100px;
     object-fit:contain;
   }
-  .cover-logo-img{
-    max-width:170px;
-    max-height:110px;
-    min-width:70px;
-    width:auto;
-    height:auto;
-    object-fit:contain;
-    display:block;
-    margin:0 auto 8px;
+  .cover-logo-frame{
+    width:150px;
+    height:110px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 10px;
   }
-  .cover-logo-img.corner-position{
+  .cover-logo-frame img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  .cover-logo-frame.corner-position{
     position:absolute;
     top:20px;
     left:20px;
+    width:110px;
+    height:80px;
     margin:0;
     z-index:2;
-    max-width:110px;
-    max-height:80px;
   }
   .logo-fallback{
     width:58px; height:58px;
@@ -797,13 +800,16 @@
 
   /* Vue d'ensemble en vignettes (comme Canva / InDesign) */
   .pdf-thumb-grid{
-    display:grid;
-    grid-template-columns:repeat(2, 1fr);
-    gap:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
     padding:18px 16px 30px;
     background:#1a1a1c;
   }
   .pdf-thumb{
+    width:100%;
+    max-width:340px;
     aspect-ratio:210/297;
     background:#fff;
     border-radius:4px;
@@ -1610,8 +1616,8 @@
     cover.style.fontFamily = police;
 
     // Logo : image entière (jamais recadrée/coupée), taille généreuse, fond transparent conservé
-    var logoCentre = logoImporte ? '<img src="' + logoImporte + '" alt="Logo" class="cover-logo-img">' : '';
-    var logoCoin = logoImporte ? '<img src="' + logoImporte + '" alt="Logo" class="cover-logo-img corner-position">' : '';
+    var logoCentre = logoImporte ? '<div class="cover-logo-frame"><img src="' + logoImporte + '" alt="Logo"></div>' : '';
+    var logoCoin = logoImporte ? '<div class="cover-logo-frame corner-position"><img src="' + logoImporte + '" alt="Logo"></div>' : '';
     var quoteHTML = citation ? '<div class="cover-quote" style="font-size:' + tailleCitation + '">« ' + escapeHTML(citation) + ' »</div>' : '';
     var auteurHTML = '<div class="cover-auteur">' + escapeHTML(document.getElementById('createur').value) + '</div>';
     var titreHTML = '<div class="cover-title" style="font-size:' + tailleTitreCouverture + '">' + escapeHTML(titreCouverture) + '</div>';
