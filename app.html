@@ -313,7 +313,7 @@
     width:100%;
     max-width:420px;
     aspect-ratio:210 / 297;
-    overflow-y:auto;
+    overflow:hidden;
   }
   .pdf-page.cover{
     display:flex;
@@ -332,13 +332,23 @@
     object-fit:contain;
   }
   .cover-logo-img{
-    max-width:150px;
-    max-height:120px;
+    max-width:170px;
+    max-height:110px;
+    min-width:70px;
     width:auto;
     height:auto;
     object-fit:contain;
     display:block;
-    margin:0 auto 6px;
+    margin:0 auto 8px;
+  }
+  .cover-logo-img.corner-position{
+    position:absolute;
+    top:20px;
+    left:20px;
+    margin:0;
+    z-index:2;
+    max-width:110px;
+    max-height:80px;
   }
   .logo-fallback{
     width:58px; height:58px;
@@ -353,18 +363,56 @@
   }
   .cover-watermark{
     position:absolute;
-    bottom:16px;
+    bottom:14px;
     left:0;
     right:0;
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:6px;
-    opacity:0.4;
-    font-size:8.5px;
+    gap:5px;
+    opacity:0.22;
+    font-size:7.5px;
     letter-spacing:0.09em;
     font-weight:700;
     z-index:2;
+  }
+
+  /* Éléments graphiques premium supplémentaires par style */
+  .deco-line{
+    position:absolute;
+    top:44%;
+    left:0;
+    width:34px;
+    height:3px;
+    z-index:1;
+  }
+  .luxe-corner-dot{
+    position:absolute;
+    top:18px;
+    left:18px;
+    width:6px; height:6px;
+    border-radius:50%;
+  }
+  .deco-dots{
+    position:absolute;
+    bottom:22px;
+    right:22px;
+    width:60px;
+    height:14px;
+    background-image:radial-gradient(currentColor 1.5px, transparent 1.5px);
+    background-size:10px 10px;
+    opacity:0.5;
+    z-index:1;
+  }
+  .deco-ring{
+    position:absolute;
+    top:20px;
+    right:20px;
+    width:46px; height:46px;
+    border:1.5px solid;
+    border-radius:50%;
+    opacity:0.5;
+    z-index:1;
   }
   .pdf-page.cover .cover-title{
     font-family:'Archivo Black', sans-serif;
@@ -677,9 +725,10 @@
     align-items:center;
     justify-content:center;
     gap:8px;
-    width:100%;
-    margin:14px auto 0;
-    padding:11px 0;
+    width:auto;
+    min-width:180px;
+    margin:14px auto 4px;
+    padding:11px 24px;
     background:transparent;
     color:var(--white);
     border:1px solid var(--line);
@@ -701,6 +750,7 @@
     display:flex;
     flex-direction:column;
   }
+  .hidden{ display:none !important; }
   .preview-overlay.hidden{ display:none; }
   .preview-overlay-header{
     display:flex;
@@ -724,9 +774,60 @@
     padding:4px 8px;
   }
   .preview-close-btn:hover{ color:var(--red); }
+  .preview-header-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .preview-back-btn{
+    background:none;
+    border:none;
+    color:var(--grey);
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Inter', sans-serif;
+    padding:4px 0;
+  }
+  .preview-back-btn:hover{ color:var(--white); }
   .preview-overlay-body{
     flex:1;
     overflow-y:auto;
+  }
+
+  /* Vue d'ensemble en vignettes (comme Canva / InDesign) */
+  .pdf-thumb-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:14px;
+    padding:18px 16px 30px;
+    background:#1a1a1c;
+  }
+  .pdf-thumb{
+    aspect-ratio:210/297;
+    background:#fff;
+    border-radius:4px;
+    overflow:hidden;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,.4);
+    border:2px solid transparent;
+    transition:border-color .15s ease;
+    position:relative;
+  }
+  .pdf-thumb:hover{ border-color:var(--red); }
+  .pdf-thumb .thumb-scale-wrap{
+    width:800px;
+    height:1131px;
+    transform-origin:top left;
+  }
+  .pdf-thumb-label{
+    position:absolute;
+    bottom:0; left:0; right:0;
+    background:rgba(0,0,0,0.55);
+    color:#fff;
+    font-size:9px;
+    text-align:center;
+    padding:3px 0;
   }
 
   .file-list{
@@ -1088,11 +1189,15 @@
 <!-- FENÊTRE DE PRÉVISUALISATION PLEIN ÉCRAN -->
 <div class="preview-overlay hidden" id="preview-overlay">
   <div class="preview-overlay-header">
-    <span data-i18n="preview_titre">Prévisualisation du PDF</span>
+    <div class="preview-header-left">
+      <button type="button" class="preview-back-btn hidden" id="preview-back-btn" onclick="afficherVueEnsemble()" data-i18n="btn_vue_ensemble">← Vue d'ensemble</button>
+      <span data-i18n="preview_titre">Prévisualisation du PDF</span>
+    </div>
     <button type="button" class="preview-close-btn" onclick="fermerPrevisualisation()">✕</button>
   </div>
-  <div class="preview-overlay-body">
-    <div class="pdf-preview" id="pdf-preview"></div>
+  <div class="preview-overlay-body" id="preview-overlay-body">
+    <div class="pdf-thumb-grid" id="pdf-thumb-grid"></div>
+    <div class="pdf-preview hidden" id="pdf-preview"></div>
   </div>
 </div>
 
@@ -1134,7 +1239,7 @@
       ph_instagram: "Instagram (optionnel)", ph_linkedin: "LinkedIn (optionnel)", ph_site: "Site web (optionnel)",
       step_label_4: "Étape 4 / 4", s4_title: "Génération et prévisualisation",
       s4_lead: "L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.",
-      btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF",
+      btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF", btn_vue_ensemble: "← Vue d'ensemble",
       recap_titre: "Titre", recap_sujet: "Sujet", recap_objectif: "Objectif", recap_public: "Public cible"
     },
     en: {
@@ -1169,7 +1274,7 @@
       ph_instagram: "Instagram (optional)", ph_linkedin: "LinkedIn (optional)", ph_site: "Website (optional)",
       step_label_4: "Step 4 / 4", s4_title: "Generation and preview",
       s4_lead: "The AI combines your knowledge, structure and design to create your final PDF.",
-      btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview",
+      btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview", btn_vue_ensemble: "← Overview",
       recap_titre: "Title", recap_sujet: "Subject", recap_objectif: "Goal", recap_public: "Target audience"
     }
   };
@@ -1271,13 +1376,73 @@
     }
   }
 
+  var REF_LARGEUR = 420, REF_HAUTEUR = 594; // référence de taille de page utilisée pour les vignettes
+
   function ouvrirPrevisualisation(){
-    document.getElementById('pdf-preview').classList.remove('hidden');
     document.getElementById('preview-overlay').classList.remove('hidden');
+    afficherVueEnsemble();
   }
 
   function fermerPrevisualisation(){
     document.getElementById('preview-overlay').classList.add('hidden');
+  }
+
+  function afficherVueEnsemble(){
+    document.getElementById('pdf-thumb-grid').classList.remove('hidden');
+    document.getElementById('pdf-preview').classList.add('hidden');
+    document.getElementById('preview-back-btn').classList.add('hidden');
+    document.getElementById('preview-overlay-body').scrollTop = 0;
+    construireVignettes();
+  }
+
+  function afficherLectureDetaillee(index){
+    document.getElementById('pdf-thumb-grid').classList.add('hidden');
+    document.getElementById('pdf-preview').classList.remove('hidden');
+    document.getElementById('preview-back-btn').classList.remove('hidden');
+    var pages = document.querySelectorAll('#pdf-preview .pdf-page');
+    if (pages[index]) pages[index].scrollIntoView({ block: 'start' });
+  }
+
+  function construireVignettes(){
+    var grid = document.getElementById('pdf-thumb-grid');
+    grid.innerHTML = '';
+    var pages = document.querySelectorAll('#pdf-preview .pdf-page');
+    pages.forEach(function(page, index){
+      var thumb = document.createElement('div');
+      thumb.className = 'pdf-thumb';
+      thumb.onclick = function(){ afficherLectureDetaillee(index); };
+
+      var wrap = document.createElement('div');
+      wrap.className = 'thumb-scale-wrap';
+      wrap.style.width = REF_LARGEUR + 'px';
+      wrap.style.height = REF_HAUTEUR + 'px';
+
+      var clone = page.cloneNode(true);
+      clone.style.width = REF_LARGEUR + 'px';
+      clone.style.maxWidth = 'none';
+      clone.style.height = REF_HAUTEUR + 'px';
+      clone.style.aspectRatio = 'auto';
+      clone.style.borderBottom = 'none';
+      wrap.appendChild(clone);
+      thumb.appendChild(wrap);
+
+      var label = document.createElement('div');
+      label.className = 'pdf-thumb-label';
+      label.textContent = (index + 1);
+      thumb.appendChild(label);
+
+      grid.appendChild(thumb);
+    });
+
+    // Mise à l'échelle des vignettes une fois insérées dans la grille (dimensions réelles connues)
+    requestAnimationFrame(function(){
+      document.querySelectorAll('.pdf-thumb').forEach(function(thumb){
+        var wrap = thumb.querySelector('.thumb-scale-wrap');
+        var largeurDispo = thumb.getBoundingClientRect().width;
+        var echelle = largeurDispo / REF_LARGEUR;
+        wrap.style.transform = 'scale(' + echelle + ')';
+      });
+    });
   }
 
   // Découpe le texte brut de l'IA en morceaux, à partir des balises [SOMMAIRE], [INTRODUCTION], [CHAPITRE X: titre], [CONCLUSION]
@@ -1398,7 +1563,7 @@
   // ----- Filigrane discret Xpert2Min (remplace l'ancien texte "généré automatiquement") -----
   function xpertWatermarkHTML(){
     return '<div class="cover-watermark">' +
-      '<svg viewBox="0 0 200 200" width="13" height="13"><polygon points="30,30 85,30 170,170 115,170" fill="currentColor"/><polygon points="170,30 115,30 30,170 85,170" fill="currentColor" opacity="0.55"/></svg>' +
+      '<svg viewBox="0 0 200 200" width="10" height="10"><polygon points="30,30 85,30 170,170 115,170" fill="currentColor"/><polygon points="170,30 115,30 30,170 85,170" fill="currentColor" opacity="0.55"/></svg>' +
       '<span>XPERT2MIN</span></div>';
   }
 
@@ -1445,7 +1610,8 @@
     cover.style.fontFamily = police;
 
     // Logo : image entière (jamais recadrée/coupée), taille généreuse, fond transparent conservé
-    var logoHTML = logoImporte ? '<img src="' + logoImporte + '" alt="Logo" class="cover-logo-img">' : '';
+    var logoCentre = logoImporte ? '<img src="' + logoImporte + '" alt="Logo" class="cover-logo-img">' : '';
+    var logoCoin = logoImporte ? '<img src="' + logoImporte + '" alt="Logo" class="cover-logo-img corner-position">' : '';
     var quoteHTML = citation ? '<div class="cover-quote" style="font-size:' + tailleCitation + '">« ' + escapeHTML(citation) + ' »</div>' : '';
     var auteurHTML = '<div class="cover-auteur">' + escapeHTML(document.getElementById('createur').value) + '</div>';
     var titreHTML = '<div class="cover-title" style="font-size:' + tailleTitreCouverture + '">' + escapeHTML(titreCouverture) + '</div>';
@@ -1454,42 +1620,46 @@
       cover.style.color = '#161616';
       cover.innerHTML =
         '<div class="diag-block" style="background:' + couleurPrincipale + '"></div>' +
+        '<div class="deco-line" style="background:' + couleurSecondaire + '"></div>' +
         '<div class="cover-content">' +
-          (logoImporte ? logoHTML : '<div class="logo-fallback" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">X2M</div>') +
+          (logoImporte ? logoCentre : '<div class="logo-fallback" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">X2M</div>') +
           titreHTML + quoteHTML + auteurHTML +
-        '</div>' + xpertWatermarkHTML(couleurPrincipale);
+        '</div>' + xpertWatermarkHTML();
     }
     else if (styleChoisi === 'luxe') {
       cover.style.color = '#fff';
       cover.innerHTML =
         '<div class="luxe-frame" style="border-color:' + couleurPrincipale + '55">' +
-          logoHTML + titreHTML +
+          '<div class="luxe-corner-dot" style="background:' + couleurPrincipale + '"></div>' +
+          logoCentre + titreHTML +
           '<div class="luxe-sep" style="background:' + couleurPrincipale + '"></div>' +
           quoteHTML + auteurHTML +
-        '</div>' + xpertWatermarkHTML(couleurPrincipale);
+        '</div>' + xpertWatermarkHTML();
     }
     else if (styleChoisi === 'minimaliste') {
       cover.style.color = '#161616';
       cover.innerHTML =
         '<div class="cover-content">' +
-          logoHTML + titreHTML +
+          logoCentre + titreHTML +
           '<div class="min-underline" style="background:' + couleurPrincipale + '"></div>' +
           quoteHTML + auteurHTML +
-        '</div>' + xpertWatermarkHTML(couleurPrincipale);
+        '</div>' + xpertWatermarkHTML();
     }
     else if (styleChoisi === 'moderne') {
       cover.style.color = '#fff';
       cover.innerHTML =
         '<div class="blob" style="width:220px;height:220px;top:-60px;right:-60px;background:' + couleurPrincipale + '"></div>' +
         '<div class="blob" style="width:150px;height:150px;bottom:-40px;left:-30px;background:' + couleurSecondaire + ';opacity:0.7"></div>' +
-        '<div class="cover-content">' + logoHTML + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML(couleurPrincipale);
+        '<div class="deco-dots" style="color:' + couleurSecondaire + '"></div>' +
+        '<div class="cover-content">' + logoCoin + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
     }
     else { // créatif
       cover.style.color = '#fff';
       cover.innerHTML =
         '<div class="shard" style="width:70%;height:55%;top:-10%;left:-15%;background:' + couleurPrincipale + ';clip-path:polygon(0 0,100% 0,60% 100%,0 80%)"></div>' +
         '<div class="shard" style="width:60%;height:50%;bottom:-12%;right:-15%;background:' + couleurSecondaire + ';opacity:0.85;clip-path:polygon(40% 0,100% 20%,100% 100%,0 100%)"></div>' +
-        '<div class="cover-content">' + logoHTML + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML(couleurPrincipale);
+        '<div class="deco-ring" style="border-color:' + couleurSecondaire + '"></div>' +
+        '<div class="cover-content">' + logoCoin + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
     }
     preview.appendChild(cover);
 
@@ -1600,11 +1770,16 @@
   function ajusterDebordements(){
     document.querySelectorAll('.pdf-page').forEach(function(page){
       var tentative = 0;
-      while (page.scrollHeight > page.clientHeight + 4 && tentative < 6) {
-        var corps = page.querySelectorAll('.chapter-body, .callout, .sommaire-item');
+      while (page.scrollHeight > page.clientHeight + 3 && tentative < 14) {
+        var corps = page.querySelectorAll('.chapter-body, .callout, .sommaire-item, .cover-title, .cover-quote');
         corps.forEach(function(el){
           var tailleActuelle = parseFloat(window.getComputedStyle(el).fontSize);
-          el.style.fontSize = (tailleActuelle - 0.4) + 'px';
+          if (tailleActuelle > 8) el.style.fontSize = (tailleActuelle - 0.35) + 'px';
+        });
+        var interlignes = page.querySelectorAll('.chapter-body');
+        interlignes.forEach(function(el){
+          var lh = parseFloat(window.getComputedStyle(el).lineHeight);
+          if (lh > 15) el.style.lineHeight = (lh - 0.5) + 'px';
         });
         tentative++;
       }
