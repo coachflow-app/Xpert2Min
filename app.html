@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
+<script src="https://unpkg.com/grapesjs"></script>
 <style>
   :root{
     --black:#0A0A0B;
@@ -305,7 +307,7 @@
     background:#fff;
     color:#1a1a1a;
     border-radius:3px;
-    padding:28px 24px;
+    padding:30px 24px 42px;
     box-shadow:0 10px 34px rgba(0,0,0,.55);
     position:relative;
     font-family:'Inter', sans-serif;
@@ -462,6 +464,8 @@
     font-family:'Archivo Black', sans-serif;
     font-size:16px;
     margin-bottom:10px;
+    position:relative;
+    z-index:1;
   }
   .pdf-page .chapter-title.style-numbered::before{
     content:attr(data-num) ". ";
@@ -475,17 +479,121 @@
     font-size:13px;
     line-height:1.75;
     white-space:pre-line;
+    margin-bottom:10px;
+    position:relative;
+    z-index:1;
   }
-  .pdf-page.no-illustration-note{
+
+  /* Numéro de chapitre géant en filigrane (identité visuelle premium) */
+  .chapter-num-bg{
+    position:absolute;
+    top:6px;
+    right:14px;
+    font-family:'Archivo Black', sans-serif;
+    font-size:96px;
+    line-height:1;
+    opacity:0.06;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* Lettrine (première lettre agrandie, style livre premium) */
+  .drop-cap{
+    float:left;
+    font-family:'Archivo Black', sans-serif;
+    font-size:2.6em;
+    line-height:0.82;
+    padding:2px 6px 0 0;
+  }
+
+  /* Encadrés premium : astuce / conseil / exemple / important */
+  .callout{
+    position:relative;
+    z-index:1;
+    margin:12px 0 14px;
+    padding:11px 13px;
+    border-radius:7px;
+    border-left:3px solid;
+    background:rgba(0,0,0,0.035);
+    font-size:12px;
+    line-height:1.55;
+  }
+  .callout-label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-weight:800;
     font-size:10.5px;
-    opacity:0.5;
-    margin-top:14px;
-    font-style:italic;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:4px;
   }
+  .callout-icon{
+    width:14px; height:14px;
+    border-radius:3px;
+    display:inline-block;
+    flex-shrink:0;
+  }
+
+  /* En-tête / pied de page (identité cohérente sur toutes les pages de contenu) */
+  .page-header-x2m{
+    position:absolute;
+    top:12px;
+    left:24px;
+    right:24px;
+    display:flex;
+    justify-content:space-between;
+    font-size:8.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    opacity:0.4;
+    z-index:1;
+  }
+  .page-footer-x2m{
+    position:absolute;
+    bottom:12px;
+    left:24px;
+    right:24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:9px;
+    opacity:0.45;
+    z-index:1;
+  }
+  .page-footer-x2m .footer-dot{
+    width:5px; height:5px;
+    border-radius:50%;
+    display:inline-block;
+    margin-right:6px;
+  }
+
+  /* Motif de secours quand aucune image n'est fournie (jamais d'espace vide) */
+  .fallback-motif{
+    position:absolute;
+    inset:0;
+    opacity:0.05;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* Image importée optimisée : recadrage propre, jamais déformée */
+  .creator-image{
+    width:100%;
+    aspect-ratio:16/9;
+    object-fit:cover;
+    object-position:center;
+    border-radius:8px;
+    display:block;
+    margin:10px 0 14px;
+  }
+
   .pdf-page ol.summary-list{
     padding-left:20px;
     font-size:13.5px;
     line-height:2;
+    position:relative;
+    z-index:1;
   }
   .pdf-page ol.summary-list.style-plain{
     list-style:none;
@@ -495,12 +603,38 @@
     border-bottom:1px dashed #ddd;
     padding:6px 0;
   }
+  .sommaire-item{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    padding:8px 0;
+    font-size:13px;
+  }
+  .sommaire-badge{
+    width:22px; height:22px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10.5px;
+    font-weight:800;
+    color:#fff;
+    flex-shrink:0;
+  }
+  .sommaire-item.style-line{ border-bottom:1px dashed #ddd; }
+  .sommaire-item.style-chip{ border-radius:6px; padding:9px 10px; margin-bottom:6px; }
 
   .pdf-note{
     font-size:11.5px;
     color:var(--grey);
     text-align:center;
     margin-top:6px;
+  }
+
+  /* Optimisation impression / haute résolution (préparation Puppeteer) */
+  @media print{
+    .pdf-preview{ background:none; padding:0; }
+    .pdf-page{ box-shadow:none; page-break-after:always; }
   }
 
   /* Bouton Prévisualiser */
@@ -928,6 +1062,9 @@
   </div>
 </div>
 
+<!-- Moteur GrapesJS invisible : construit les pages en coulisses, jamais affiché -->
+<div id="gjs-hidden" style="position:fixed; top:-99999px; left:-99999px; width:800px; height:1131px; overflow:hidden;"></div>
+
 <script>
   // ----- Système de langue de l'interface (FR / EN) -----
   var traductions = {
@@ -1132,10 +1269,110 @@
   }
 
   // Construit la prévisualisation visuelle du PDF à partir du contenu découpé + des choix de design
+  // ----- Moteur GrapesJS invisible : passe chaque page à travers GrapesJS pour la construction finale -----
+  var gjsEditor = null;
+  function getGjsEditor(){
+    if (!gjsEditor && window.grapesjs) {
+      try {
+        gjsEditor = grapesjs.init({
+          container: '#gjs-hidden',
+          fromElement: false,
+          height: '1131px',
+          width: '800px',
+          storageManager: false,
+          panels: { defaults: [] },
+          layerManager: { appendTo: '#gjs-hidden' }
+        });
+      } catch(e) { gjsEditor = null; }
+    }
+    return gjsEditor;
+  }
+  function assemblerAvecGrapesJS(htmlInterne){
+    var editor = getGjsEditor();
+    if (!editor) return htmlInterne;
+    try {
+      editor.setComponents(htmlInterne);
+      return editor.getHtml();
+    } catch(e) {
+      return htmlInterne;
+    }
+  }
+
+  // ----- Icône unique et cohérente pour tout le document (un seul style, jamais mélangé) -----
+  function iconeAccent(couleur){
+    return '<span class="callout-icon" style="background:' + couleur + '"></span>';
+  }
+
+  var ICONES_CALLOUT = { ASTUCE: '★', CONSEIL: '◆', EXEMPLE: '▸', IMPORTANT: '■' };
+  var LABELS_CALLOUT = { ASTUCE: 'Astuce', CONSEIL: 'Conseil', EXEMPLE: 'Exemple', IMPORTANT: 'Important' };
+
+  // ----- Découpe le texte d'un chapitre en paragraphes + encadrés premium, avec lettrine sur le tout premier paragraphe -----
+  function construireCorpsChapitre(texte, couleurAccent, couleurAccent2){
+    var regex = /\[(ASTUCE|CONSEIL|EXEMPLE|IMPORTANT)\]([\s\S]*?)\[\/\1\]/g;
+    var html = '';
+    var lastIndex = 0;
+    var match;
+    var premierParagraphe = true;
+
+    function rendreParagraphes(bloc){
+      var out = '';
+      var paragraphes = bloc.split(/\n{1,}/).filter(function(p){ return p.trim(); });
+      paragraphes.forEach(function(p){
+        var texteEchappe = escapeHTML(p.trim());
+        if (premierParagraphe) {
+          var premiereLettre = texteEchappe.charAt(0);
+          var reste = texteEchappe.slice(1);
+          out += '<div class="chapter-body"><span class="drop-cap" style="color:' + couleurAccent + '">' + premiereLettre + '</span>' + reste + '</div>';
+          premierParagraphe = false;
+        } else {
+          out += '<div class="chapter-body">' + texteEchappe + '</div>';
+        }
+      });
+      return out;
+    }
+
+    while ((match = regex.exec(texte)) !== null) {
+      var avant = texte.slice(lastIndex, match.index);
+      if (avant.trim()) html += rendreParagraphes(avant);
+      var type = match[1];
+      var contenuCallout = match[2].trim();
+      var couleurCallout = (type === 'ASTUCE' || type === 'IMPORTANT') ? couleurAccent : couleurAccent2;
+      html += '<div class="callout" style="border-left-color:' + couleurCallout + '">' +
+        '<div class="callout-label" style="color:' + couleurCallout + '">' + iconeAccent(couleurCallout) + LABELS_CALLOUT[type] + '</div>' +
+        '<div>' + escapeHTML(contenuCallout) + '</div></div>';
+      lastIndex = regex.lastIndex;
+    }
+    var reste = texte.slice(lastIndex);
+    if (reste.trim()) html += rendreParagraphes(reste);
+
+    return html || '<div class="chapter-body">' + escapeHTML(texte) + '</div>';
+  }
+
+  // ----- En-tête / pied de page cohérents (identité visuelle sur toutes les pages de contenu) -----
+  function headerFooterHTML(titreDoc, numPage, couleur, afficherHeader, afficherFooter){
+    var html = '';
+    if (afficherHeader) {
+      html += '<div class="page-header-x2m"><span>' + escapeHTML(titreDoc) + '</span><span>XPERT2MIN</span></div>';
+    }
+    if (afficherFooter) {
+      html += '<div class="page-footer-x2m"><span><span class="footer-dot" style="background:' + couleur + '"></span>Xpert2Min</span><span>' + numPage + '</span></div>';
+    }
+    return html;
+  }
+
+  // ----- Motif de secours (jamais d'espace vide si aucune image) -----
+  function motifSecoursHTML(couleur){
+    return '<svg class="fallback-motif" viewBox="0 0 100 100" preserveAspectRatio="none">' +
+      '<circle cx="85" cy="15" r="40" fill="' + couleur + '"/>' +
+      '<circle cx="10" cy="95" r="25" fill="' + couleur + '"/>' +
+      '</svg>';
+  }
+
   function construirePrevisualisation(contenu){
     var preview = document.getElementById('pdf-preview');
     preview.innerHTML = '';
 
+    // Palette volontairement limitée à 3 couleurs maximum (identité visuelle cohérente)
     var couleurPrincipale = document.getElementById('couleur-principale').value;
     var couleurSecondaire = document.getElementById('couleur-secondaire').value;
     var couleurTexte = document.getElementById('couleur-texte').value;
@@ -1146,11 +1383,20 @@
     var afficherPageAuteur = document.getElementById('elt-page-auteur').checked;
     var afficherContact = document.getElementById('elt-page-contact').checked;
     var afficherCopyright = document.getElementById('elt-copyright').checked;
+    var afficherNumeroPage = document.getElementById('numero-pages').checked;
+    var afficherEntetePied = document.getElementById('entete-pied').checked;
     var logoImporte = coverFiles.length > 0 ? coverFiles[0] : null;
+    var titreDoc = document.getElementById('titre').value;
 
-    // --- Style choisi à l'étape 3 (par défaut "professionnel" si rien n'est sélectionné) ---
     var styleCardSelectionnee = document.querySelector('.style-card.selected');
     var styleChoisi = styleCardSelectionnee ? styleCardSelectionnee.getAttribute('data-value') : 'professionnel';
+
+    // Titre de couverture : taille ajustée automatiquement selon la longueur (jamais de débordement)
+    var tailleTitreCouverture = titreCouverture.length > 40 ? '19px' : (titreCouverture.length > 22 ? '23px' : '27px');
+    var tailleCitation = citation && citation.length > 90 ? '11px' : '12.5px';
+
+    var numeroPageActuel = 0;
+    function prochainNumero(){ numeroPageActuel++; return numeroPageActuel; }
 
     // --- Page de couverture ---
     var cover = document.createElement('div');
@@ -1160,12 +1406,13 @@
     var logoHTML = '';
     if (logoImporte) {
       var url = URL.createObjectURL(logoImporte);
-      logoHTML = '<img src="' + url + '" alt="Logo">';
+      // Image optimisée : recadrage propre (object-fit cover), jamais déformée, teinte harmonisée avec la palette
+      logoHTML = '<img src="' + url + '" alt="Logo" class="creator-image" style="aspect-ratio:1/1; max-width:100px; max-height:100px; box-shadow:0 4px 14px rgba(0,0,0,.25); filter:saturate(1.05)">';
     }
     var autoTagHTML = logoImporte ? '' : '<div class="cover-auto-tag">Couverture générée automatiquement par Xpert2Min</div>';
-    var quoteHTML = citation ? '<div class="cover-quote">« ' + escapeHTML(citation) + ' »</div>' : '';
+    var quoteHTML = citation ? '<div class="cover-quote" style="font-size:' + tailleCitation + '">« ' + escapeHTML(citation) + ' »</div>' : '';
     var auteurHTML = '<div class="cover-auteur">' + escapeHTML(document.getElementById('createur').value) + '</div>';
-    var titreHTML = '<div class="cover-title">' + escapeHTML(titreCouverture) + '</div>';
+    var titreHTML = '<div class="cover-title" style="font-size:' + tailleTitreCouverture + '">' + escapeHTML(titreCouverture) + '</div>';
 
     if (styleChoisi === 'professionnel') {
       cover.style.color = '#161616';
@@ -1210,12 +1457,22 @@
     }
     preview.appendChild(cover);
 
-    // --- Page sommaire ---
+    // --- Page sommaire (style adapté automatiquement au style choisi) ---
     var sommaire = document.createElement('div');
     sommaire.className = 'pdf-page';
     sommaire.style.fontFamily = police;
-    var listItems = contenu.chapitres.map(function(ch){ return '<li>' + escapeHTML(ch.titre) + '</li>'; }).join('');
-    sommaire.innerHTML = '<div class="page-label">Sommaire</div><h2 class="section-title" style="color:' + couleurPrincipale + '">Sommaire</h2><ol class="summary-list">' + listItems + '</ol>';
+    var listItems = contenu.chapitres.map(function(ch, i){
+      if (styleChoisi === 'minimaliste') {
+        return '<div class="sommaire-item style-line">' + escapeHTML(ch.titre) + '</div>';
+      } else if (styleChoisi === 'creatif') {
+        return '<div class="sommaire-item style-chip" style="background:' + (i % 2 === 0 ? couleurPrincipale + '18' : couleurSecondaire + '18') + '"><span class="sommaire-badge" style="background:' + couleurPrincipale + '">' + (i + 1) + '</span>' + escapeHTML(ch.titre) + '</div>';
+      } else {
+        return '<div class="sommaire-item"><span class="sommaire-badge" style="background:' + couleurPrincipale + '">' + (i + 1) + '</span>' + escapeHTML(ch.titre) + '</div>';
+      }
+    }).join('');
+    var numSommaire = prochainNumero();
+    sommaire.innerHTML = '<h2 class="section-title" style="color:' + couleurPrincipale + '">Sommaire</h2><div>' + listItems + '</div>' +
+      headerFooterHTML(titreDoc, numSommaire, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
     preview.appendChild(sommaire);
 
     // --- Page introduction ---
@@ -1223,7 +1480,10 @@
       var intro = document.createElement('div');
       intro.className = 'pdf-page';
       intro.style.fontFamily = police;
-      intro.innerHTML = '<div class="page-label">Introduction</div><h2 class="section-title" style="color:' + couleurPrincipale + '">Introduction</h2><div class="chapter-body">' + escapeHTML(contenu.introduction) + '</div>';
+      var numIntro = prochainNumero();
+      intro.innerHTML = '<h2 class="section-title" style="color:' + couleurPrincipale + '">Introduction</h2>' +
+        construireCorpsChapitre(contenu.introduction, couleurPrincipale, couleurSecondaire) +
+        headerFooterHTML(titreDoc, numIntro, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
       preview.appendChild(intro);
     }
 
@@ -1235,11 +1495,13 @@
       var titreClass = 'chapter-title';
       if (styleChapitres === 'Numérotés') titreClass += ' style-numbered';
       if (styleChapitres === 'Titres pleine largeur') titreClass += ' style-fullwidth';
+      var numPage = prochainNumero();
       page.innerHTML =
-        '<div class="page-label">Chapitre ' + (index + 1) + '</div>' +
+        '<div class="chapter-num-bg" style="color:' + couleurPrincipale + '">' + String(index + 1).padStart(2, '0') + '</div>' +
         '<div class="' + titreClass + '" data-num="' + (index + 1) + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">' + escapeHTML(ch.titre) + '</div>' +
-        '<div class="chapter-body">' + escapeHTML(ch.texte) + '</div>' +
-        (logoImporte ? '' : '<div class="no-illustration-note">Mise en page sans illustration (aucune image importée)</div>');
+        construireCorpsChapitre(ch.texte, couleurPrincipale, couleurSecondaire) +
+        (logoImporte ? '' : motifSecoursHTML(couleurSecondaire)) +
+        headerFooterHTML(titreDoc, numPage, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
       preview.appendChild(page);
     });
 
@@ -1248,7 +1510,10 @@
       var concl = document.createElement('div');
       concl.className = 'pdf-page';
       concl.style.fontFamily = police;
-      concl.innerHTML = '<div class="page-label">Conclusion</div><h2 class="section-title" style="color:' + couleurPrincipale + '">Conclusion</h2><div class="chapter-body">' + escapeHTML(contenu.conclusion) + '</div>';
+      var numConcl = prochainNumero();
+      concl.innerHTML = '<h2 class="section-title" style="color:' + couleurPrincipale + '">Conclusion</h2>' +
+        construireCorpsChapitre(contenu.conclusion, couleurPrincipale, couleurSecondaire) +
+        headerFooterHTML(titreDoc, numConcl, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
       preview.appendChild(concl);
     }
 
@@ -1258,7 +1523,7 @@
       var pageInfos = document.createElement('div');
       pageInfos.className = 'pdf-page';
       pageInfos.style.fontFamily = police;
-      var blocs = '<div class="page-label">À propos</div>';
+      var blocs = '';
 
       if (afficherPageAuteur) {
         var bio = document.getElementById('bio-auteur').value;
@@ -1268,7 +1533,7 @@
       if (afficherContact) {
         var email = document.getElementById('contact-email').value;
         var tel = document.getElementById('contact-tel').value;
-        blocs += '<p style="font-size:13px;margin-bottom:6px"><b>Contact</b></p>';
+        blocs += '<p style="font-size:13px;margin-bottom:6px;color:' + couleurPrincipale + '"><b>Contact</b></p>';
         if (email) blocs += '<p style="font-size:12.5px;margin-bottom:4px">' + escapeHTML(email) + '</p>';
         if (tel) blocs += '<p style="font-size:12.5px;margin-bottom:16px">' + escapeHTML(tel) + '</p>';
       }
@@ -1277,7 +1542,7 @@
         var linkedin = document.getElementById('reseau-linkedin').value;
         var site = document.getElementById('reseau-site').value;
         if (insta || linkedin || site) {
-          blocs += '<p style="font-size:13px;margin-bottom:6px"><b>Réseaux</b></p>';
+          blocs += '<p style="font-size:13px;margin-bottom:6px;color:' + couleurPrincipale + '"><b>Réseaux</b></p>';
           if (insta) blocs += '<p style="font-size:12.5px;margin-bottom:4px">Instagram : ' + escapeHTML(insta) + '</p>';
           if (linkedin) blocs += '<p style="font-size:12.5px;margin-bottom:4px">LinkedIn : ' + escapeHTML(linkedin) + '</p>';
           if (site) blocs += '<p style="font-size:12.5px;margin-bottom:16px">Site : ' + escapeHTML(site) + '</p>';
@@ -1286,10 +1551,28 @@
       if (afficherCopyright) {
         blocs += '<p style="font-size:11px;opacity:0.6;margin-top:20px">© ' + new Date().getFullYear() + ' — ' + escapeHTML(document.getElementById('createur').value) + '. Tous droits réservés.</p>';
       }
-
-      pageInfos.innerHTML = blocs;
+      var numInfos = prochainNumero();
+      pageInfos.innerHTML = blocs + headerFooterHTML(titreDoc, numInfos, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
       preview.appendChild(pageInfos);
     }
+
+    // --- Vérification finale avant "export" : aucune page ne doit déborder (ajustement auto de la taille du texte) ---
+    ajusterDebordements();
+  }
+
+  // Passe sur toutes les pages générées : si le contenu dépasse le format A4, réduit progressivement le texte pour que rien ne soit coupé
+  function ajusterDebordements(){
+    document.querySelectorAll('.pdf-page').forEach(function(page){
+      var tentative = 0;
+      while (page.scrollHeight > page.clientHeight + 4 && tentative < 6) {
+        var corps = page.querySelectorAll('.chapter-body, .callout, .sommaire-item');
+        corps.forEach(function(el){
+          var tailleActuelle = parseFloat(window.getComputedStyle(el).fontSize);
+          el.style.fontSize = (tailleActuelle - 0.4) + 'px';
+        });
+        tentative++;
+      }
+    });
   }
 
   function escapeHTML(str){
