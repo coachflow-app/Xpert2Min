@@ -757,63 +757,9 @@
     padding:4px 8px;
   }
   .preview-close-btn:hover{ color:var(--red); }
-  .preview-header-left{
-    display:flex;
-    align-items:center;
-    gap:12px;
-  }
-  .preview-back-btn{
-    background:none;
-    border:none;
-    color:var(--grey);
-    font-size:12.5px;
-    font-weight:600;
-    cursor:pointer;
-    font-family:'Inter', sans-serif;
-    padding:4px 0;
-  }
-  .preview-back-btn:hover{ color:var(--white); }
   .preview-overlay-body{
     flex:1;
     overflow-y:auto;
-  }
-
-  /* Vue d'ensemble en vignettes (comme Canva / InDesign) */
-  .pdf-thumb-grid{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:12px;
-    padding:18px 16px 30px;
-    background:#1a1a1c;
-  }
-  .pdf-thumb{
-    width:100%;
-    max-width:340px;
-    aspect-ratio:210/297;
-    background:#fff;
-    border-radius:4px;
-    overflow:hidden;
-    cursor:pointer;
-    box-shadow:0 4px 14px rgba(0,0,0,.4);
-    border:2px solid transparent;
-    transition:border-color .15s ease;
-    position:relative;
-  }
-  .pdf-thumb:hover{ border-color:var(--red); }
-  .pdf-thumb .thumb-scale-wrap{
-    width:800px;
-    height:1131px;
-    transform-origin:top left;
-  }
-  .pdf-thumb-label{
-    position:absolute;
-    bottom:0; left:0; right:0;
-    background:rgba(0,0,0,0.55);
-    color:#fff;
-    font-size:9px;
-    text-align:center;
-    padding:3px 0;
   }
 
   .file-list{
@@ -1166,15 +1112,11 @@
 <!-- FENÊTRE DE PRÉVISUALISATION PLEIN ÉCRAN -->
 <div class="preview-overlay hidden" id="preview-overlay">
   <div class="preview-overlay-header">
-    <div class="preview-header-left">
-      <button type="button" class="preview-back-btn hidden" id="preview-back-btn" onclick="afficherVueEnsemble()" data-i18n="btn_vue_ensemble">← Vue d'ensemble</button>
-      <span data-i18n="preview_titre">Prévisualisation du PDF</span>
-    </div>
+    <span data-i18n="preview_titre">Prévisualisation du PDF</span>
     <button type="button" class="preview-close-btn" onclick="fermerPrevisualisation()">✕</button>
   </div>
   <div class="preview-overlay-body" id="preview-overlay-body">
-    <div class="pdf-thumb-grid" id="pdf-thumb-grid"></div>
-    <div class="pdf-preview hidden" id="pdf-preview"></div>
+    <div class="pdf-preview" id="pdf-preview"></div>
   </div>
 </div>
 
@@ -1215,7 +1157,7 @@
       ph_instagram: "Instagram (optionnel)", ph_linkedin: "LinkedIn (optionnel)", ph_site: "Site web (optionnel)",
       step_label_4: "Étape 4 / 4", s4_title: "Génération et prévisualisation",
       s4_lead: "L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.",
-      btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF", btn_vue_ensemble: "← Vue d'ensemble",
+      btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF",
       recap_titre: "Titre", recap_sujet: "Sujet", recap_objectif: "Objectif", recap_public: "Public cible"
     },
     en: {
@@ -1249,7 +1191,7 @@
       ph_instagram: "Instagram (optional)", ph_linkedin: "LinkedIn (optional)", ph_site: "Website (optional)",
       step_label_4: "Step 4 / 4", s4_title: "Generation and preview",
       s4_lead: "The AI combines your knowledge, structure and design to create your final PDF.",
-      btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview", btn_vue_ensemble: "← Overview",
+      btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview",
       recap_titre: "Title", recap_sujet: "Subject", recap_objectif: "Goal", recap_public: "Target audience"
     }
   };
@@ -1351,73 +1293,13 @@
     }
   }
 
-  var REF_LARGEUR = 420, REF_HAUTEUR = 594; // référence de taille de page utilisée pour les vignettes
-
   function ouvrirPrevisualisation(){
     document.getElementById('preview-overlay').classList.remove('hidden');
-    afficherVueEnsemble();
+    document.getElementById('preview-overlay-body').scrollTop = 0;
   }
 
   function fermerPrevisualisation(){
     document.getElementById('preview-overlay').classList.add('hidden');
-  }
-
-  function afficherVueEnsemble(){
-    document.getElementById('pdf-thumb-grid').classList.remove('hidden');
-    document.getElementById('pdf-preview').classList.add('hidden');
-    document.getElementById('preview-back-btn').classList.add('hidden');
-    document.getElementById('preview-overlay-body').scrollTop = 0;
-    construireVignettes();
-  }
-
-  function afficherLectureDetaillee(index){
-    document.getElementById('pdf-thumb-grid').classList.add('hidden');
-    document.getElementById('pdf-preview').classList.remove('hidden');
-    document.getElementById('preview-back-btn').classList.remove('hidden');
-    var pages = document.querySelectorAll('#pdf-preview .pdf-page');
-    if (pages[index]) pages[index].scrollIntoView({ block: 'start' });
-  }
-
-  function construireVignettes(){
-    var grid = document.getElementById('pdf-thumb-grid');
-    grid.innerHTML = '';
-    var pages = document.querySelectorAll('#pdf-preview .pdf-page');
-    pages.forEach(function(page, index){
-      var thumb = document.createElement('div');
-      thumb.className = 'pdf-thumb';
-      thumb.onclick = function(){ afficherLectureDetaillee(index); };
-
-      var wrap = document.createElement('div');
-      wrap.className = 'thumb-scale-wrap';
-      wrap.style.width = REF_LARGEUR + 'px';
-      wrap.style.height = REF_HAUTEUR + 'px';
-
-      var clone = page.cloneNode(true);
-      clone.style.width = REF_LARGEUR + 'px';
-      clone.style.maxWidth = 'none';
-      clone.style.height = REF_HAUTEUR + 'px';
-      clone.style.aspectRatio = 'auto';
-      clone.style.borderBottom = 'none';
-      wrap.appendChild(clone);
-      thumb.appendChild(wrap);
-
-      var label = document.createElement('div');
-      label.className = 'pdf-thumb-label';
-      label.textContent = (index + 1);
-      thumb.appendChild(label);
-
-      grid.appendChild(thumb);
-    });
-
-    // Mise à l'échelle des vignettes une fois insérées dans la grille (dimensions réelles connues)
-    requestAnimationFrame(function(){
-      document.querySelectorAll('.pdf-thumb').forEach(function(thumb){
-        var wrap = thumb.querySelector('.thumb-scale-wrap');
-        var largeurDispo = thumb.getBoundingClientRect().width;
-        var echelle = largeurDispo / REF_LARGEUR;
-        wrap.style.transform = 'scale(' + echelle + ')';
-      });
-    });
   }
 
   // Découpe le texte brut de l'IA en morceaux, à partir des balises [SOMMAIRE], [INTRODUCTION], [CHAPITRE X: titre], [CONCLUSION]
