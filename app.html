@@ -1466,9 +1466,6 @@
     cover.className = 'pdf-page cover cover-' + styleChoisi;
     cover.style.fontFamily = police;
 
-    // Emblème de marque permanent (aucun logo importé n'est possible)
-    var emblemeCentre = '<div class="cover-emblem" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">X2M</div>';
-    var emblemeCoin = '<div class="cover-emblem corner-position" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">X2M</div>';
     var quoteHTML = citation ? '<div class="cover-quote" style="font-size:' + tailleCitation + '">« ' + escapeHTML(citation) + ' »</div>' : '';
     var auteurHTML = '<div class="cover-auteur">' + escapeHTML(document.getElementById('createur').value) + '</div>';
     var titreHTML = '<div class="cover-title" style="font-size:' + tailleTitreCouverture + '">' + escapeHTML(titreCouverture) + '</div>';
@@ -1479,7 +1476,7 @@
         '<div class="diag-block" style="background:' + couleurPrincipale + '"></div>' +
         '<div class="deco-line" style="background:' + couleurSecondaire + '"></div>' +
         '<div class="cover-content">' +
-          emblemeCentre + titreHTML + quoteHTML + auteurHTML +
+          titreHTML + quoteHTML + auteurHTML +
         '</div>' + xpertWatermarkHTML();
     }
     else if (styleChoisi === 'luxe') {
@@ -1487,7 +1484,7 @@
       cover.innerHTML =
         '<div class="luxe-frame" style="border-color:' + couleurPrincipale + '55">' +
           '<div class="luxe-corner-dot" style="background:' + couleurPrincipale + '"></div>' +
-          emblemeCentre + titreHTML +
+          titreHTML +
           '<div class="luxe-sep" style="background:' + couleurPrincipale + '"></div>' +
           quoteHTML + auteurHTML +
         '</div>' + xpertWatermarkHTML();
@@ -1496,7 +1493,7 @@
       cover.style.color = '#161616';
       cover.innerHTML =
         '<div class="cover-content">' +
-          emblemeCentre + titreHTML +
+          titreHTML +
           '<div class="min-underline" style="background:' + couleurPrincipale + '"></div>' +
           quoteHTML + auteurHTML +
         '</div>' + xpertWatermarkHTML();
@@ -1507,7 +1504,7 @@
         '<div class="blob" style="width:220px;height:220px;top:-60px;right:-60px;background:' + couleurPrincipale + '"></div>' +
         '<div class="blob" style="width:150px;height:150px;bottom:-40px;left:-30px;background:' + couleurSecondaire + ';opacity:0.7"></div>' +
         '<div class="deco-dots" style="color:' + couleurSecondaire + '"></div>' +
-        '<div class="cover-content">' + emblemeCoin + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
+        '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
     }
     else { // créatif
       cover.style.color = '#fff';
@@ -1515,7 +1512,7 @@
         '<div class="shard" style="width:70%;height:55%;top:-10%;left:-15%;background:' + couleurPrincipale + ';clip-path:polygon(0 0,100% 0,60% 100%,0 80%)"></div>' +
         '<div class="shard" style="width:60%;height:50%;bottom:-12%;right:-15%;background:' + couleurSecondaire + ';opacity:0.85;clip-path:polygon(40% 0,100% 20%,100% 100%,0 100%)"></div>' +
         '<div class="deco-ring" style="border-color:' + couleurSecondaire + '"></div>' +
-        '<div class="cover-content">' + emblemeCoin + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
+        '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
     }
     preview.appendChild(cover);
 
