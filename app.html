@@ -326,34 +326,7 @@
     overflow:hidden;
     padding:0;
   }
-  .pdf-page.cover img{
-    max-width:100px;
-    max-height:100px;
-    object-fit:contain;
-  }
-  .cover-logo-frame{
-    width:150px;
-    height:110px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin:0 auto 10px;
-  }
-  .cover-logo-frame img{
-    width:100%;
-    height:100%;
-    object-fit:contain;
-  }
-  .cover-logo-frame.corner-position{
-    position:absolute;
-    top:20px;
-    left:20px;
-    width:110px;
-    height:80px;
-    margin:0;
-    z-index:2;
-  }
-  .logo-fallback{
+  .cover-emblem{
     width:58px; height:58px;
     border:2px solid;
     border-radius:10px;
@@ -363,6 +336,13 @@
     font-family:'Archivo Black', sans-serif;
     font-size:16px;
     margin:0 auto 6px;
+  }
+  .cover-emblem.corner-position{
+    position:absolute;
+    top:20px;
+    left:20px;
+    margin:0;
+    z-index:2;
   }
   .cover-watermark{
     position:absolute;
@@ -1090,15 +1070,6 @@
     </div>
 
     <div class="field">
-      <label data-i18n="lbl_logo">Image / logo (optionnel)</label>
-      <div class="import-zone" onclick="document.getElementById('cover-file-input').click()" data-i18n="import_logo">
-        Importez une image ou un logo
-      </div>
-      <input type="file" id="cover-file-input" accept="image/*" style="display:none">
-      <ul class="file-list" id="cover-file-list"></ul>
-    </div>
-
-    <div class="field">
       <label for="style-couverture" data-i18n="lbl_style_couv">Style de couverture</label>
       <select id="style-couverture">
         <option data-i18n="couv_image">Image pleine page</option>
@@ -1234,7 +1205,6 @@
       lbl_couleurs: "Couleurs", col_principale: "Couleur principale", col_secondaire: "Couleur secondaire", col_texte: "Couleur du texte",
       lbl_police: "Style de police", lbl_taille: "Taille du texte", taille_petit: "Petit", taille_moyen: "Moyen", taille_grand: "Grand",
       lbl_titre_couv: "Titre (couverture)", ph_titre_couv: "Repris automatiquement de l'étape 1",
-      lbl_logo: "Image / logo (optionnel)", import_logo: "Importez une image ou un logo",
       lbl_style_couv: "Style de couverture", couv_image: "Image pleine page", couv_bandeau: "Bandeau coloré", couv_cadre: "Cadre centré", couv_epure: "Épuré (texte seul)",
       lbl_citation: "Citation éventuelle (optionnel)", ph_citation: "Une citation à afficher sur la couverture",
       lbl_style_chap: "Style des chapitres", chap_numerotes: "Numérotés", chap_icones: "Avec icônes", chap_pleine: "Titres pleine largeur", chap_min: "Minimaliste",
@@ -1269,7 +1239,6 @@
       lbl_couleurs: "Colors", col_principale: "Primary color", col_secondaire: "Secondary color", col_texte: "Text color",
       lbl_police: "Font style", lbl_taille: "Text size", taille_petit: "Small", taille_moyen: "Medium", taille_grand: "Large",
       lbl_titre_couv: "Title (cover)", ph_titre_couv: "Auto-filled from step 1",
-      lbl_logo: "Image / logo (optional)", import_logo: "Import an image or logo",
       lbl_style_couv: "Cover style", couv_image: "Full-page image", couv_bandeau: "Colored banner", couv_cadre: "Centered frame", couv_epure: "Clean (text only)",
       lbl_citation: "Optional quote", ph_citation: "A quote to display on the cover",
       lbl_style_chap: "Chapter style", chap_numerotes: "Numbered", chap_icones: "With icons", chap_pleine: "Full-width titles", chap_min: "Minimalist",
@@ -1597,7 +1566,6 @@
     var afficherCopyright = document.getElementById('elt-copyright').checked;
     var afficherNumeroPage = document.getElementById('numero-pages').checked;
     var afficherEntetePied = document.getElementById('entete-pied').checked;
-    var logoImporte = coverImageDataUrl;
     var titreDoc = document.getElementById('titre').value;
 
     var styleCardSelectionnee = document.querySelector('.style-card.selected');
@@ -1615,9 +1583,9 @@
     cover.className = 'pdf-page cover cover-' + styleChoisi;
     cover.style.fontFamily = police;
 
-    // Logo : image entière (jamais recadrée/coupée), taille généreuse, fond transparent conservé
-    var logoCentre = logoImporte ? '<div class="cover-logo-frame"><img src="' + logoImporte + '" alt="Logo"></div>' : '';
-    var logoCoin = logoImporte ? '<div class="cover-logo-frame corner-position"><img src="' + logoImporte + '" alt="Logo"></div>' : '';
+    // Emblème de marque permanent (aucun logo importé n'est possible)
+    var emblemeCentre = '<div class="cover-emblem" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">X2M</div>';
+    var emblemeCoin = '<div class="cover-emblem corner-position" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">X2M</div>';
     var quoteHTML = citation ? '<div class="cover-quote" style="font-size:' + tailleCitation + '">« ' + escapeHTML(citation) + ' »</div>' : '';
     var auteurHTML = '<div class="cover-auteur">' + escapeHTML(document.getElementById('createur').value) + '</div>';
     var titreHTML = '<div class="cover-title" style="font-size:' + tailleTitreCouverture + '">' + escapeHTML(titreCouverture) + '</div>';
@@ -1628,8 +1596,7 @@
         '<div class="diag-block" style="background:' + couleurPrincipale + '"></div>' +
         '<div class="deco-line" style="background:' + couleurSecondaire + '"></div>' +
         '<div class="cover-content">' +
-          (logoImporte ? logoCentre : '<div class="logo-fallback" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">X2M</div>') +
-          titreHTML + quoteHTML + auteurHTML +
+          emblemeCentre + titreHTML + quoteHTML + auteurHTML +
         '</div>' + xpertWatermarkHTML();
     }
     else if (styleChoisi === 'luxe') {
@@ -1637,7 +1604,7 @@
       cover.innerHTML =
         '<div class="luxe-frame" style="border-color:' + couleurPrincipale + '55">' +
           '<div class="luxe-corner-dot" style="background:' + couleurPrincipale + '"></div>' +
-          logoCentre + titreHTML +
+          emblemeCentre + titreHTML +
           '<div class="luxe-sep" style="background:' + couleurPrincipale + '"></div>' +
           quoteHTML + auteurHTML +
         '</div>' + xpertWatermarkHTML();
@@ -1646,7 +1613,7 @@
       cover.style.color = '#161616';
       cover.innerHTML =
         '<div class="cover-content">' +
-          logoCentre + titreHTML +
+          emblemeCentre + titreHTML +
           '<div class="min-underline" style="background:' + couleurPrincipale + '"></div>' +
           quoteHTML + auteurHTML +
         '</div>' + xpertWatermarkHTML();
@@ -1657,7 +1624,7 @@
         '<div class="blob" style="width:220px;height:220px;top:-60px;right:-60px;background:' + couleurPrincipale + '"></div>' +
         '<div class="blob" style="width:150px;height:150px;bottom:-40px;left:-30px;background:' + couleurSecondaire + ';opacity:0.7"></div>' +
         '<div class="deco-dots" style="color:' + couleurSecondaire + '"></div>' +
-        '<div class="cover-content">' + logoCoin + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
+        '<div class="cover-content">' + emblemeCoin + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
     }
     else { // créatif
       cover.style.color = '#fff';
@@ -1665,7 +1632,7 @@
         '<div class="shard" style="width:70%;height:55%;top:-10%;left:-15%;background:' + couleurPrincipale + ';clip-path:polygon(0 0,100% 0,60% 100%,0 80%)"></div>' +
         '<div class="shard" style="width:60%;height:50%;bottom:-12%;right:-15%;background:' + couleurSecondaire + ';opacity:0.85;clip-path:polygon(40% 0,100% 20%,100% 100%,0 100%)"></div>' +
         '<div class="deco-ring" style="border-color:' + couleurSecondaire + '"></div>' +
-        '<div class="cover-content">' + logoCoin + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
+        '<div class="cover-content">' + emblemeCoin + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
     }
     preview.appendChild(cover);
 
@@ -1712,7 +1679,7 @@
         '<div class="chapter-num-bg" style="color:' + couleurPrincipale + '">' + String(index + 1).padStart(2, '0') + '</div>' +
         '<div class="' + titreClass + '" data-num="' + (index + 1) + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">' + escapeHTML(ch.titre) + '</div>' +
         construireCorpsChapitre(ch.texte, couleurPrincipale, couleurSecondaire) +
-        (logoImporte ? '' : motifSecoursHTML(couleurSecondaire)) +
+        motifSecoursHTML(couleurSecondaire) +
         headerFooterHTML(titreDoc, numPage, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
       preview.appendChild(page);
     });
@@ -1826,42 +1793,6 @@
       document.querySelectorAll('.style-card').forEach(function(c){ c.classList.remove('selected'); });
       card.classList.add('selected');
     });
-  });
-
-  // Import du logo/image de couverture (étape 3)
-  var coverFiles = [];
-  var coverImageDataUrl = null;
-  function renderCoverFileList(){
-    var list = document.getElementById('cover-file-list');
-    list.innerHTML = '';
-    coverFiles.forEach(function(file, index){
-      var li = document.createElement('li');
-      var nameSpan = document.createElement('span');
-      nameSpan.className = 'name';
-      nameSpan.textContent = file.name;
-      var removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.textContent = '✕';
-      removeBtn.onclick = function(){
-        coverFiles.splice(index, 1);
-        if (coverFiles.length === 0) coverImageDataUrl = null;
-        renderCoverFileList();
-      };
-      li.appendChild(nameSpan);
-      li.appendChild(removeBtn);
-      list.appendChild(li);
-    });
-  }
-  document.getElementById('cover-file-input').addEventListener('change', function(e){
-    var fichier = e.target.files[0];
-    if (fichier) {
-      coverFiles = [fichier];
-      var lecteur = new FileReader();
-      lecteur.onload = function(evt){ coverImageDataUrl = evt.target.result; };
-      lecteur.readAsDataURL(fichier);
-    }
-    renderCoverFileList();
-    e.target.value = '';
   });
 
   // Gestion de l'affichage des fichiers importés
