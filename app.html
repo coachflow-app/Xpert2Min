@@ -1470,9 +1470,10 @@
     var auteurHTML = '<div class="cover-auteur">' + escapeHTML(document.getElementById('createur').value) + '</div>';
     var titreHTML = '<div class="cover-title" style="font-size:' + tailleTitreCouverture + '">' + escapeHTML(titreCouverture) + '</div>';
 
+    var coverInnerHTML = '';
     if (styleChoisi === 'professionnel') {
       cover.style.color = '#161616';
-      cover.innerHTML =
+      coverInnerHTML =
         '<div class="diag-block" style="background:' + couleurPrincipale + '"></div>' +
         '<div class="deco-line" style="background:' + couleurSecondaire + '"></div>' +
         '<div class="cover-content">' +
@@ -1481,7 +1482,7 @@
     }
     else if (styleChoisi === 'luxe') {
       cover.style.color = '#fff';
-      cover.innerHTML =
+      coverInnerHTML =
         '<div class="luxe-frame" style="border-color:' + couleurPrincipale + '55">' +
           '<div class="luxe-corner-dot" style="background:' + couleurPrincipale + '"></div>' +
           titreHTML +
@@ -1491,7 +1492,7 @@
     }
     else if (styleChoisi === 'minimaliste') {
       cover.style.color = '#161616';
-      cover.innerHTML =
+      coverInnerHTML =
         '<div class="cover-content">' +
           titreHTML +
           '<div class="min-underline" style="background:' + couleurPrincipale + '"></div>' +
@@ -1500,7 +1501,7 @@
     }
     else if (styleChoisi === 'moderne') {
       cover.style.color = '#fff';
-      cover.innerHTML =
+      coverInnerHTML =
         '<div class="blob" style="width:220px;height:220px;top:-60px;right:-60px;background:' + couleurPrincipale + '"></div>' +
         '<div class="blob" style="width:150px;height:150px;bottom:-40px;left:-30px;background:' + couleurSecondaire + ';opacity:0.7"></div>' +
         '<div class="deco-dots" style="color:' + couleurSecondaire + '"></div>' +
@@ -1508,12 +1509,14 @@
     }
     else { // créatif
       cover.style.color = '#fff';
-      cover.innerHTML =
+      coverInnerHTML =
         '<div class="shard" style="width:70%;height:55%;top:-10%;left:-15%;background:' + couleurPrincipale + ';clip-path:polygon(0 0,100% 0,60% 100%,0 80%)"></div>' +
         '<div class="shard" style="width:60%;height:50%;bottom:-12%;right:-15%;background:' + couleurSecondaire + ';opacity:0.85;clip-path:polygon(40% 0,100% 20%,100% 100%,0 100%)"></div>' +
         '<div class="deco-ring" style="border-color:' + couleurSecondaire + '"></div>' +
         '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
     }
+    // Construction finale de la page via GrapesJS (moteur de design)
+    cover.innerHTML = assemblerAvecGrapesJS(coverInnerHTML);
     preview.appendChild(cover);
 
     // --- Page sommaire (style adapté automatiquement au style choisi) ---
@@ -1530,8 +1533,8 @@
       }
     }).join('');
     var numSommaire = prochainNumero();
-    sommaire.innerHTML = '<h2 class="section-title" style="color:' + couleurPrincipale + '">Sommaire</h2><div>' + listItems + '</div>' +
-      headerFooterHTML(titreDoc, numSommaire, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
+    sommaire.innerHTML = assemblerAvecGrapesJS('<h2 class="section-title" style="color:' + couleurPrincipale + '">Sommaire</h2><div>' + listItems + '</div>' +
+      headerFooterHTML(titreDoc, numSommaire, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
     preview.appendChild(sommaire);
 
     // --- Page introduction ---
@@ -1540,9 +1543,9 @@
       intro.className = 'pdf-page';
       intro.style.fontFamily = police;
       var numIntro = prochainNumero();
-      intro.innerHTML = '<h2 class="section-title" style="color:' + couleurPrincipale + '">Introduction</h2>' +
+      intro.innerHTML = assemblerAvecGrapesJS('<h2 class="section-title" style="color:' + couleurPrincipale + '">Introduction</h2>' +
         construireCorpsChapitre(contenu.introduction, couleurPrincipale, couleurSecondaire) +
-        headerFooterHTML(titreDoc, numIntro, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
+        headerFooterHTML(titreDoc, numIntro, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
       preview.appendChild(intro);
     }
 
@@ -1555,12 +1558,12 @@
       if (styleChapitres === 'Numérotés') titreClass += ' style-numbered';
       if (styleChapitres === 'Titres pleine largeur') titreClass += ' style-fullwidth';
       var numPage = prochainNumero();
-      page.innerHTML =
+      page.innerHTML = assemblerAvecGrapesJS(
         '<div class="chapter-num-bg" style="color:' + couleurPrincipale + '">' + String(index + 1).padStart(2, '0') + '</div>' +
         '<div class="' + titreClass + '" data-num="' + (index + 1) + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">' + escapeHTML(ch.titre) + '</div>' +
         construireCorpsChapitre(ch.texte, couleurPrincipale, couleurSecondaire) +
         motifSecoursHTML(couleurSecondaire) +
-        headerFooterHTML(titreDoc, numPage, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
+        headerFooterHTML(titreDoc, numPage, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
       preview.appendChild(page);
     });
 
@@ -1570,9 +1573,9 @@
       concl.className = 'pdf-page';
       concl.style.fontFamily = police;
       var numConcl = prochainNumero();
-      concl.innerHTML = '<h2 class="section-title" style="color:' + couleurPrincipale + '">Conclusion</h2>' +
+      concl.innerHTML = assemblerAvecGrapesJS('<h2 class="section-title" style="color:' + couleurPrincipale + '">Conclusion</h2>' +
         construireCorpsChapitre(contenu.conclusion, couleurPrincipale, couleurSecondaire) +
-        headerFooterHTML(titreDoc, numConcl, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
+        headerFooterHTML(titreDoc, numConcl, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
       preview.appendChild(concl);
     }
 
@@ -1611,7 +1614,7 @@
         blocs += '<p style="font-size:11px;opacity:0.6;margin-top:20px">© ' + new Date().getFullYear() + ' — ' + escapeHTML(document.getElementById('createur').value) + '. Tous droits réservés.</p>';
       }
       var numInfos = prochainNumero();
-      pageInfos.innerHTML = blocs + headerFooterHTML(titreDoc, numInfos, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
+      pageInfos.innerHTML = assemblerAvecGrapesJS(blocs + headerFooterHTML(titreDoc, numInfos, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
       preview.appendChild(pageInfos);
     }
 
