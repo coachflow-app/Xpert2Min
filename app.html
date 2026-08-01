@@ -1365,6 +1365,19 @@
   }
 
   // ----- Téléchargement du vrai fichier PDF (généré côté serveur via Puppeteer) -----
+  // Construit un document HTML autonome (avec ses propres styles) à partir de ce qui est déjà affiché en prévisualisation
+  function construireHTMLPourPDF(){
+    var styleCSS = document.querySelector('style').innerHTML;
+    var pagesHTML = document.getElementById('pdf-preview').innerHTML;
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">' +
+      '<style>' + styleCSS +
+      'body{background:#fff;margin:0;}' +
+      '.pdf-preview{background:none !important;padding:0 !important;}' +
+      '.pdf-page{max-width:none !important;width:210mm !important;aspect-ratio:auto !important;height:296mm !important;overflow:hidden !important;page-break-after:always;}' +
+      '</style></head><body><div class="pdf-preview">' + pagesHTML + '</div></body></html>';
+  }
+
   async function telechargerPDF(){
     var btn = document.getElementById('download-pdf-btn');
     var msg = document.getElementById('msg-pdf');
@@ -1374,22 +1387,10 @@
     btn.textContent = 'Génération du PDF en cours...';
 
     try {
-      var styleCardSelectionnee = document.querySelector('.style-card.selected');
+      var htmlComplet = construireHTMLPourPDF();
       var resultat = await Parse.Cloud.run('genererPDF', {
         titre: document.getElementById('titre').value,
-        contenuGenere: dernierResultatIA,
-        design: {
-          style: styleCardSelectionnee ? styleCardSelectionnee.getAttribute('data-value') : 'professionnel',
-          couleurPrincipale: document.getElementById('couleur-principale').value,
-          couleurSecondaire: document.getElementById('couleur-secondaire').value,
-          police: document.getElementById('police').value,
-          titreCouverture: document.getElementById('titre-couverture').value,
-          citation: document.getElementById('citation').value,
-          styleChapitres: document.getElementById('style-chapitres').value,
-          createur: document.getElementById('createur').value,
-          numeroPages: document.getElementById('numero-pages').checked,
-          entetePied: document.getElementById('entete-pied').checked
-        }
+        html: htmlComplet
       });
 
       // resultat.url = lien du fichier PDF hébergé sur Back4App
