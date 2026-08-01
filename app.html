@@ -855,6 +855,7 @@
     text-align:center;
     color:var(--red);
   }
+  .form-msg.success{ color:#4CAF50; }
 </style>
 </head>
 <body>
@@ -1100,6 +1101,11 @@
       <span class="eye-icon">👁️</span> <span data-i18n="btn_previsualiser">Prévisualiser</span>
     </button>
 
+    <button type="button" class="preview-btn hidden" id="save-btn" onclick="enregistrerProjet()">
+      <span class="eye-icon">💾</span> <span data-i18n="btn_enregistrer">Enregistrer le projet</span>
+    </button>
+    <p class="form-msg" id="msg-save"></p>
+
     <textarea class="result-box hidden" id="result-box" readonly></textarea>
 
     <div class="btn-row">
@@ -1157,7 +1163,7 @@
       ph_instagram: "Instagram (optionnel)", ph_linkedin: "LinkedIn (optionnel)", ph_site: "Site web (optionnel)",
       step_label_4: "Étape 4 / 4", s4_title: "Génération et prévisualisation",
       s4_lead: "L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.",
-      btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF",
+      btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF", btn_enregistrer: "Enregistrer le projet",
       recap_titre: "Titre", recap_sujet: "Sujet", recap_objectif: "Objectif", recap_public: "Public cible"
     },
     en: {
@@ -1191,7 +1197,7 @@
       ph_instagram: "Instagram (optional)", ph_linkedin: "LinkedIn (optional)", ph_site: "Website (optional)",
       step_label_4: "Step 4 / 4", s4_title: "Generation and preview",
       s4_lead: "The AI combines your knowledge, structure and design to create your final PDF.",
-      btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview",
+      btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview", btn_enregistrer: "Save project",
       recap_titre: "Title", recap_sujet: "Subject", recap_objectif: "Goal", recap_public: "Target audience"
     }
   };
@@ -1250,12 +1256,15 @@
       '<p><b>' + t.recap_public + ' :</b> ' + (document.getElementById('public').value || '—') + '</p>';
   }
 
+  var dernierResultatIA = null; // texte brut renvoyé par l'IA, pour la sauvegarde
+
   async function genererContenu(){
     var btn = document.getElementById('generate-btn');
     var msg = document.getElementById('msg-4');
     var resultBox = document.getElementById('result-box');
     var preview = document.getElementById('pdf-preview');
     var previewBtn = document.getElementById('preview-btn');
+    var saveBtn = document.getElementById('save-btn');
 
     msg.textContent = '';
     msg.className = 'form-msg';
@@ -1263,6 +1272,7 @@
     preview.classList.add('hidden');
     preview.innerHTML = '';
     previewBtn.classList.add('hidden');
+    saveBtn.classList.add('hidden');
     btn.disabled = true;
     btn.textContent = 'Génération en cours...';
 
@@ -1275,6 +1285,7 @@
         expertise: document.getElementById('connaissances').value
       });
 
+      dernierResultatIA = resultat;
       var contenu = decouperReponseIA(resultat);
 
       if (!contenu) {
@@ -1284,6 +1295,7 @@
         construirePrevisualisation(contenu);
         preview.classList.remove('hidden');
         previewBtn.classList.remove('hidden');
+        saveBtn.classList.remove('hidden');
       }
     } catch (error) {
       msg.textContent = 'Erreur : impossible de générer le contenu. Réessayez.';
@@ -1291,6 +1303,63 @@
     } finally {
       btn.disabled = false;
       btn.textContent = 'Générer mon contenu';
+    }
+  }
+
+  // ----- Enregistrement du projet dans Back4App -----
+  async function enregistrerProjet(){
+    var btn = document.getElementById('save-btn');
+    var msg = document.getElementById('msg-save');
+    msg.textContent = '';
+    msg.className = 'form-msg';
+    btn.disabled = true;
+    btn.querySelector('span:last-child').textContent = 'Enregistrement...';
+
+    try {
+      var Project = Parse.Object.extend('Project');
+      var projet = new Project();
+
+      projet.set('utilisateur', Parse.User.current());
+      projet.set('titre', document.getElementById('titre').value);
+      projet.set('sujet', document.getElementById('sujet').value);
+      projet.set('objectif', document.getElementById('objectif').value);
+      projet.set('publicCible', document.getElementById('public').value);
+      projet.set('createur', document.getElementById('createur').value);
+      projet.set('langueDocument', document.querySelector('input[name="langue"]:checked').value);
+      projet.set('expertise', document.getElementById('connaissances').value);
+
+      var styleCardSelectionnee = document.querySelector('.style-card.selected');
+      projet.set('design', {
+        style: styleCardSelectionnee ? styleCardSelectionnee.getAttribute('data-value') : 'professionnel',
+        couleurPrincipale: document.getElementById('couleur-principale').value,
+        couleurSecondaire: document.getElementById('couleur-secondaire').value,
+        couleurTexte: document.getElementById('couleur-texte').value,
+        police: document.getElementById('police').value,
+        tailleTexte: document.getElementById('taille-texte').value,
+        titreCouverture: document.getElementById('titre-couverture').value,
+        styleCouverture: document.getElementById('style-couverture').value,
+        citation: document.getElementById('citation').value,
+        styleChapitres: document.getElementById('style-chapitres').value,
+        positionImages: document.getElementById('position-images').value,
+        numeroPages: document.getElementById('numero-pages').checked,
+        entetePied: document.getElementById('entete-pied').checked,
+        copyright: document.getElementById('elt-copyright').checked,
+        pageAuteur: document.getElementById('elt-page-auteur').checked,
+        pageContact: document.getElementById('elt-page-contact').checked,
+        reseaux: document.getElementById('elt-reseaux').checked
+      });
+
+      projet.set('contenuGenere', dernierResultatIA);
+
+      await projet.save();
+      msg.textContent = 'Projet enregistré ✓';
+      msg.classList.add('success');
+    } catch (error) {
+      msg.textContent = 'Erreur : impossible d\'enregistrer le projet.';
+      msg.classList.add('error');
+    } finally {
+      btn.disabled = false;
+      btn.querySelector('span:last-child').textContent = document.getElementById('lang-switch').textContent === 'FR' ? 'Save project' : 'Enregistrer le projet';
     }
   }
 
@@ -1516,7 +1585,7 @@
         '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
     }
     // Construction finale de la page via GrapesJS (moteur de design)
-    cover.innerHTML = assemblerAvecGrapesJS(coverInnerHTML);
+    cover.innerHTML = coverInnerHTML;
     preview.appendChild(cover);
 
     // --- Page sommaire (style adapté automatiquement au style choisi) ---
@@ -1533,7 +1602,7 @@
       }
     }).join('');
     var numSommaire = prochainNumero();
-    sommaire.innerHTML = assemblerAvecGrapesJS('<h2 class="section-title" style="color:' + couleurPrincipale + '">Sommaire</h2><div>' + listItems + '</div>' +
+    sommaire.innerHTML = ('<h2 class="section-title" style="color:' + couleurPrincipale + '">Sommaire</h2><div>' + listItems + '</div>' +
       headerFooterHTML(titreDoc, numSommaire, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
     preview.appendChild(sommaire);
 
@@ -1543,7 +1612,7 @@
       intro.className = 'pdf-page';
       intro.style.fontFamily = police;
       var numIntro = prochainNumero();
-      intro.innerHTML = assemblerAvecGrapesJS('<h2 class="section-title" style="color:' + couleurPrincipale + '">Introduction</h2>' +
+      intro.innerHTML = ('<h2 class="section-title" style="color:' + couleurPrincipale + '">Introduction</h2>' +
         construireCorpsChapitre(contenu.introduction, couleurPrincipale, couleurSecondaire) +
         headerFooterHTML(titreDoc, numIntro, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
       preview.appendChild(intro);
@@ -1558,7 +1627,7 @@
       if (styleChapitres === 'Numérotés') titreClass += ' style-numbered';
       if (styleChapitres === 'Titres pleine largeur') titreClass += ' style-fullwidth';
       var numPage = prochainNumero();
-      page.innerHTML = assemblerAvecGrapesJS(
+      page.innerHTML = (
         '<div class="chapter-num-bg" style="color:' + couleurPrincipale + '">' + String(index + 1).padStart(2, '0') + '</div>' +
         '<div class="' + titreClass + '" data-num="' + (index + 1) + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">' + escapeHTML(ch.titre) + '</div>' +
         construireCorpsChapitre(ch.texte, couleurPrincipale, couleurSecondaire) +
@@ -1573,7 +1642,7 @@
       concl.className = 'pdf-page';
       concl.style.fontFamily = police;
       var numConcl = prochainNumero();
-      concl.innerHTML = assemblerAvecGrapesJS('<h2 class="section-title" style="color:' + couleurPrincipale + '">Conclusion</h2>' +
+      concl.innerHTML = ('<h2 class="section-title" style="color:' + couleurPrincipale + '">Conclusion</h2>' +
         construireCorpsChapitre(contenu.conclusion, couleurPrincipale, couleurSecondaire) +
         headerFooterHTML(titreDoc, numConcl, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
       preview.appendChild(concl);
@@ -1614,7 +1683,7 @@
         blocs += '<p style="font-size:11px;opacity:0.6;margin-top:20px">© ' + new Date().getFullYear() + ' — ' + escapeHTML(document.getElementById('createur').value) + '. Tous droits réservés.</p>';
       }
       var numInfos = prochainNumero();
-      pageInfos.innerHTML = assemblerAvecGrapesJS(blocs + headerFooterHTML(titreDoc, numInfos, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
+      pageInfos.innerHTML = (blocs + headerFooterHTML(titreDoc, numInfos, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
       preview.appendChild(pageInfos);
     }
 
