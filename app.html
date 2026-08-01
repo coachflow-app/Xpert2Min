@@ -1402,7 +1402,7 @@
       lien.click();
       document.body.removeChild(lien);
     } catch (error) {
-      msg.textContent = 'Erreur : impossible de générer le PDF. Réessayez.';
+      msg.textContent = 'Erreur : ' + (error.message || 'impossible de générer le PDF.');
       msg.classList.add('error');
     } finally {
       btn.disabled = false;
