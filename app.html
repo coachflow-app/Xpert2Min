@@ -1356,7 +1356,7 @@
       msg.textContent = 'Projet enregistré ✓';
       msg.classList.add('success');
     } catch (error) {
-      msg.textContent = 'Erreur : impossible d\'enregistrer le projet.';
+      msg.textContent = 'Erreur : ' + (error.message || 'impossible d\'enregistrer le projet.');
       msg.classList.add('error');
     } finally {
       btn.disabled = false;
