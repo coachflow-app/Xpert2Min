@@ -226,21 +226,6 @@
     background:none;
     cursor:pointer;
   }
-  .palette-row{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:8px;
-  }
-  .palette-swatch{
-    width:34px;
-    height:34px;
-    border-radius:50%;
-    border:2px solid var(--line);
-    cursor:pointer;
-    padding:0;
-  }
-  .palette-swatch:hover, .palette-swatch.selected{ border-color:var(--white); }
 
   .checkbox-line{
     display:flex;
@@ -525,91 +510,7 @@
   .cover-creatif .cover-content{ position:relative; z-index:2; }
   .cover-creatif .cover-title{ font-size:24px; }
 
-  /* --- Composition CORPORATE : bandeau supérieur net + barre latérale --- */
-  .cover-corporate{
-    background:#fff;
-    color:#161616;
-    position:relative;
-    padding:0;
-  }
-  .cover-corporate .corp-top{
-    position:absolute;
-    top:0; left:0; right:0;
-    height:14%;
-  }
-  .cover-corporate .corp-side{
-    position:absolute;
-    top:14%; bottom:0; left:0;
-    width:8px;
-  }
-  .cover-corporate .cover-content{ position:relative; z-index:1; padding:0 34px; }
-  .cover-corporate .cover-title{ text-align:left; font-size:25px; }
-  .cover-corporate .cover-quote, .cover-corporate .cover-auteur{ text-align:left; }
 
-  /* --- Composition VINTAGE : double cadre + ornement --- */
-  .cover-vintage{
-    background:#f5efe4;
-    color:#2b2013;
-    padding:22px;
-  }
-  .cover-vintage .vint-frame{
-    border:2px solid currentColor;
-    padding:8px;
-    width:100%; height:100%;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .cover-vintage .vint-inner{
-    border:1px solid currentColor;
-    width:100%; height:100%;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
-    padding:20px;
-  }
-  .cover-vintage .cover-title{ font-family:'Archivo Black', sans-serif; font-size:23px; letter-spacing:0.03em; }
-  .cover-vintage .vint-orn{ font-size:18px; letter-spacing:0.3em; opacity:0.7; }
-
-  /* --- Composition PASTEL : formes douces arrondies --- */
-  .cover-pastel{
-    background:#fdfaf7;
-    color:#3a3a3a;
-    position:relative;
-    padding:36px 28px;
-  }
-  .cover-pastel .past-blob{
-    position:absolute;
-    border-radius:50%;
-    opacity:0.35;
-  }
-  .cover-pastel .cover-content{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:12px; }
-  .cover-pastel .cover-title{ font-size:23px; }
-
-  /* --- Composition URBAIN : blocs bruts asymétriques --- */
-  .cover-urbain{
-    background:#161616;
-    color:#fff;
-    position:relative;
-    padding:30px 22px;
-  }
-  .cover-urbain .urb-block{
-    position:absolute;
-  }
-  .cover-urbain .cover-content{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:10px; }
-  .cover-urbain .cover-title{ font-size:26px; text-transform:uppercase; }
-
-  /* --- Composition ÉDITORIAL : style magazine, filet vertical --- */
-  .cover-editorial{
-    background:#fff;
-    color:#161616;
-    position:relative;
-    padding:34px 30px;
-  }
-  .cover-editorial .edit-rule{
-    position:absolute;
-    top:30px; bottom:30px; left:30px;
-    width:2px;
-  }
-  .cover-editorial .cover-content{ padding-left:22px; text-align:left; display:flex; flex-direction:column; gap:10px; }
-  .cover-editorial .cover-title{ font-size:27px; text-align:left; }
-  .cover-editorial .edit-kicker{ font-size:10.5px; text-transform:uppercase; letter-spacing:0.12em; font-weight:700; }
 
   .pdf-page .page-label{
     position:absolute;
@@ -809,20 +710,53 @@
     align-items:center;
     justify-content:center;
     gap:8px;
-    width:auto;
-    min-width:180px;
-    margin:14px auto 4px;
-    padding:11px 24px;
+    flex:1;
+    padding:11px 14px;
     background:transparent;
     color:var(--white);
     border:1px solid var(--line);
     border-radius:8px;
-    font-size:14px;
+    font-size:13.5px;
     font-weight:600;
     font-family:'Inter', sans-serif;
     cursor:pointer;
   }
   .preview-btn:hover{ border-color:var(--red); }
+  #actions-row{ margin-top:14px; }
+
+  .autosave-msg{
+    text-align:center;
+    font-size:12px;
+    color:#4CAF50;
+    margin-top:6px;
+  }
+
+  .vente-box{
+    margin-top:16px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .vente-section{
+    background:var(--black);
+    border:1px solid var(--line);
+    border-left:3px solid var(--red);
+    border-radius:8px;
+    padding:14px 16px;
+  }
+  .vente-section .vente-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--red);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .vente-section .vente-texte{
+    font-size:13.5px;
+    line-height:1.6;
+    color:var(--white);
+  }
   .preview-btn .eye-icon{ font-size:15px; }
 
   /* Overlay plein écran de prévisualisation */
@@ -1071,11 +1005,6 @@
         <button type="button" class="style-card" data-value="minimaliste" data-i18n="style_min">Minimaliste</button>
         <button type="button" class="style-card" data-value="moderne" data-i18n="style_mod">Moderne</button>
         <button type="button" class="style-card" data-value="creatif" data-i18n="style_crea">Créatif</button>
-        <button type="button" class="style-card" data-value="corporate" data-i18n="style_corp">Corporate</button>
-        <button type="button" class="style-card" data-value="vintage" data-i18n="style_vint">Vintage</button>
-        <button type="button" class="style-card" data-value="pastel" data-i18n="style_past">Pastel</button>
-        <button type="button" class="style-card" data-value="urbain" data-i18n="style_urb">Urbain</button>
-        <button type="button" class="style-card" data-value="editorial" data-i18n="style_edit">Éditorial</button>
       </div>
     </div>
 
@@ -1090,18 +1019,6 @@
           <input type="color" id="couleur-secondaire" value="#0A0A0B">
           <span data-i18n="col_secondaire">Couleur secondaire</span>
         </div>
-      </div>
-
-      <label data-i18n="lbl_palettes" style="margin-top:14px;display:block">Palettes prêtes à l'emploi</label>
-      <div class="palette-row" id="palette-row">
-        <button type="button" class="palette-swatch" data-p="#E8161C" data-s="#0A0A0B" style="background:linear-gradient(135deg,#E8161C 50%,#0A0A0B 50%)"></button>
-        <button type="button" class="palette-swatch" data-p="#1E3A8A" data-s="#D4AF37" style="background:linear-gradient(135deg,#1E3A8A 50%,#D4AF37 50%)"></button>
-        <button type="button" class="palette-swatch" data-p="#0F766E" data-s="#F5EFE6" style="background:linear-gradient(135deg,#0F766E 50%,#F5EFE6 50%)"></button>
-        <button type="button" class="palette-swatch" data-p="#7C3AED" data-s="#111111" style="background:linear-gradient(135deg,#7C3AED 50%,#111111 50%)"></button>
-        <button type="button" class="palette-swatch" data-p="#EA580C" data-s="#1C1917" style="background:linear-gradient(135deg,#EA580C 50%,#1C1917 50%)"></button>
-        <button type="button" class="palette-swatch" data-p="#059669" data-s="#052E1F" style="background:linear-gradient(135deg,#059669 50%,#052E1F 50%)"></button>
-        <button type="button" class="palette-swatch" data-p="#DB2777" data-s="#1F1123" style="background:linear-gradient(135deg,#DB2777 50%,#1F1123 50%)"></button>
-        <button type="button" class="palette-swatch" data-p="#0284C7" data-s="#0A1220" style="background:linear-gradient(135deg,#0284C7 50%,#0A1220 50%)"></button>
       </div>
     </div>
 
@@ -1210,23 +1127,45 @@
 
     <button type="button" class="next-btn" id="generate-btn" onclick="genererContenu()" data-i18n="btn_generer">Générer mon contenu</button>
     <p class="form-msg" id="msg-4"></p>
+    <p class="autosave-msg hidden" id="autosave-msg" data-i18n="msg_autosave">Enregistré automatiquement ✓</p>
 
-    <button type="button" class="preview-btn hidden" id="preview-btn" onclick="ouvrirPrevisualisation()">
-      <span class="eye-icon">👁️</span> <span data-i18n="btn_previsualiser">Prévisualiser</span>
-    </button>
-
-    <button type="button" class="preview-btn hidden" id="save-btn" onclick="enregistrerProjet()">
-      <span class="eye-icon">💾</span> <span data-i18n="btn_enregistrer">Enregistrer le projet</span>
-    </button>
-    <p class="form-msg" id="msg-save"></p>
-
-    <button type="button" class="next-btn hidden" id="download-pdf-btn" onclick="telechargerPDF()" data-i18n="btn_telecharger_pdf">Télécharger mon PDF</button>
+    <div class="btn-row hidden" id="actions-row">
+      <button type="button" class="preview-btn" id="preview-btn" onclick="ouvrirPrevisualisation()">
+        <span class="eye-icon">👁️</span> <span data-i18n="btn_previsualiser">Prévisualiser</span>
+      </button>
+      <button type="button" class="preview-btn" id="download-pdf-btn" onclick="telechargerPDF()">
+        <span class="eye-icon">⬇️</span> <span data-i18n="btn_telecharger_pdf">Télécharger le PDF</span>
+      </button>
+    </div>
     <p class="form-msg" id="msg-pdf"></p>
+
+    <button type="button" class="next-btn hidden" id="goto-vente-btn" onclick="allerPageDeVente()" style="margin-top:14px" data-i18n="btn_page_vente">Créer ma page de vente avec l'IA</button>
 
     <textarea class="result-box hidden" id="result-box" readonly></textarea>
 
     <div class="btn-row">
       <button type="button" class="back-btn" onclick="goToStep(3)" data-i18n="btn_retour">Retour</button>
+    </div>
+  </div>
+
+  <!-- ÉCRAN : PAGE DE VENTE (après l'étape 4, hors compteur) -->
+  <div class="step-screen" id="screen-vente">
+    <div class="eyebrow" data-i18n="vente_eyebrow">Page de vente</div>
+    <h1 data-i18n="vente_title">Votre page de vente</h1>
+    <p class="lead" data-i18n="vente_lead">Générée par l'IA à partir de votre expertise, selon une structure de vente éprouvée.</p>
+
+    <button type="button" class="next-btn" id="generate-vente-btn" onclick="genererPageDeVente()" data-i18n="btn_generer_vente">Générer ma page de vente</button>
+    <p class="form-msg" id="msg-vente"></p>
+
+    <div class="vente-box hidden" id="vente-box"></div>
+
+    <div class="btn-row hidden" id="vente-actions-row">
+      <button type="button" class="back-btn" onclick="genererPageDeVente()" data-i18n="btn_regenerer">Régénérer</button>
+      <button type="button" class="next-btn" id="copy-vente-btn" onclick="copierPageDeVente()" data-i18n="btn_copier">Copier</button>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="back-btn" onclick="goToStep(4)" data-i18n="btn_retour">Retour</button>
     </div>
   </div>
 
@@ -1267,8 +1206,7 @@
       step_label_3: "Étape 3 / 4", s3_title: "Personnalisez le design",
       s3_lead: "Choisissez le style, les couleurs et la mise en page de votre PDF.",
       lbl_style_pdf: "Style du PDF", style_pro: "Professionnel", style_luxe: "Luxe", style_min: "Minimaliste", style_mod: "Moderne", style_crea: "Créatif",
-      style_corp: "Corporate", style_vint: "Vintage", style_past: "Pastel", style_urb: "Urbain", style_edit: "Éditorial",
-      lbl_couleurs: "Couleurs", col_principale: "Couleur principale", col_secondaire: "Couleur secondaire", lbl_palettes: "Palettes prêtes à l'emploi",
+      lbl_couleurs: "Couleurs", col_principale: "Couleur principale", col_secondaire: "Couleur secondaire",
       lbl_police: "Style de police", lbl_taille: "Taille du texte", taille_petit: "Petit", taille_moyen: "Moyen", taille_grand: "Grand",
       lbl_titre_couv: "Titre (couverture)", ph_titre_couv: "Repris automatiquement de l'étape 1",
       lbl_style_couv: "Style de couverture", couv_image: "Image pleine page", couv_bandeau: "Bandeau coloré", couv_cadre: "Cadre centré", couv_epure: "Épuré (texte seul)",
@@ -1281,7 +1219,10 @@
       ph_instagram: "Instagram (optionnel)", ph_linkedin: "LinkedIn (optionnel)", ph_site: "Site web (optionnel)",
       step_label_4: "Étape 4 / 4", s4_title: "Génération et prévisualisation",
       s4_lead: "L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.",
-      btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF", btn_enregistrer: "Enregistrer le projet", btn_telecharger_pdf: "Télécharger mon PDF",
+      btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF", btn_telecharger_pdf: "Télécharger le PDF",
+      msg_autosave: "Enregistré automatiquement ✓", btn_page_vente: "Créer ma page de vente avec l'IA",
+      vente_eyebrow: "Page de vente", vente_title: "Votre page de vente", vente_lead: "Générée par l'IA à partir de votre expertise, selon une structure de vente éprouvée.",
+      btn_generer_vente: "Générer ma page de vente", btn_regenerer: "Régénérer", btn_copier: "Copier",
       recap_titre: "Titre", recap_sujet: "Sujet", recap_objectif: "Objectif", recap_public: "Public cible"
     },
     en: {
@@ -1302,8 +1243,7 @@
       step_label_3: "Step 3 / 4", s3_title: "Customize the design",
       s3_lead: "Choose the style, colors and layout of your PDF.",
       lbl_style_pdf: "PDF style", style_pro: "Professional", style_luxe: "Luxury", style_min: "Minimalist", style_mod: "Modern", style_crea: "Creative",
-      style_corp: "Corporate", style_vint: "Vintage", style_past: "Pastel", style_urb: "Urban", style_edit: "Editorial",
-      lbl_couleurs: "Colors", col_principale: "Primary color", col_secondaire: "Secondary color", lbl_palettes: "Ready-made palettes",
+      lbl_couleurs: "Colors", col_principale: "Primary color", col_secondaire: "Secondary color",
       lbl_police: "Font style", lbl_taille: "Text size", taille_petit: "Small", taille_moyen: "Medium", taille_grand: "Large",
       lbl_titre_couv: "Title (cover)", ph_titre_couv: "Auto-filled from step 1",
       lbl_style_couv: "Cover style", couv_image: "Full-page image", couv_bandeau: "Colored banner", couv_cadre: "Centered frame", couv_epure: "Clean (text only)",
@@ -1316,7 +1256,10 @@
       ph_instagram: "Instagram (optional)", ph_linkedin: "LinkedIn (optional)", ph_site: "Website (optional)",
       step_label_4: "Step 4 / 4", s4_title: "Generation and preview",
       s4_lead: "The AI combines your knowledge, structure and design to create your final PDF.",
-      btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview", btn_enregistrer: "Save project", btn_telecharger_pdf: "Download my PDF",
+      btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview", btn_telecharger_pdf: "Download the PDF",
+      msg_autosave: "Auto-saved ✓", btn_page_vente: "Create my sales page with AI",
+      vente_eyebrow: "Sales page", vente_title: "Your sales page", vente_lead: "Generated by AI from your expertise, using a proven sales structure.",
+      btn_generer_vente: "Generate my sales page", btn_regenerer: "Regenerate", btn_copier: "Copy",
       recap_titre: "Title", recap_sujet: "Subject", recap_objectif: "Goal", recap_public: "Target audience"
     }
   };
@@ -1382,18 +1325,18 @@
     var msg = document.getElementById('msg-4');
     var resultBox = document.getElementById('result-box');
     var preview = document.getElementById('pdf-preview');
-    var previewBtn = document.getElementById('preview-btn');
-    var saveBtn = document.getElementById('save-btn');
-    var downloadBtn = document.getElementById('download-pdf-btn');
+    var actionsRow = document.getElementById('actions-row');
+    var autosaveMsg = document.getElementById('autosave-msg');
+    var gotoVenteBtn = document.getElementById('goto-vente-btn');
 
     msg.textContent = '';
     msg.className = 'form-msg';
     resultBox.classList.add('hidden');
     preview.classList.add('hidden');
     preview.innerHTML = '';
-    previewBtn.classList.add('hidden');
-    saveBtn.classList.add('hidden');
-    downloadBtn.classList.add('hidden');
+    actionsRow.classList.add('hidden');
+    autosaveMsg.classList.add('hidden');
+    gotoVenteBtn.classList.add('hidden');
     btn.disabled = true;
     btn.textContent = 'Génération en cours...';
 
@@ -1415,9 +1358,11 @@
       } else {
         construirePrevisualisation(contenu);
         preview.classList.remove('hidden');
-        previewBtn.classList.remove('hidden');
-        saveBtn.classList.remove('hidden');
-        downloadBtn.classList.remove('hidden');
+        actionsRow.classList.remove('hidden');
+        gotoVenteBtn.classList.remove('hidden');
+
+        // Sauvegarde automatique et silencieuse (plus de bouton dédié)
+        enregistrerProjetSilencieux();
       }
     } catch (error) {
       msg.textContent = 'Erreur : impossible de générer le contenu. Réessayez.';
@@ -1429,14 +1374,7 @@
   }
 
   // ----- Enregistrement du projet dans Back4App -----
-  async function enregistrerProjet(){
-    var btn = document.getElementById('save-btn');
-    var msg = document.getElementById('msg-save');
-    msg.textContent = '';
-    msg.className = 'form-msg';
-    btn.disabled = true;
-    btn.querySelector('span:last-child').textContent = 'Enregistrement...';
-
+  async function enregistrerProjetSilencieux(){
     try {
       var Project = Parse.Object.extend('Project');
       var projet = new Project();
@@ -1473,14 +1411,11 @@
       projet.set('contenuGenere', dernierResultatIA);
 
       await projet.save();
-      msg.textContent = 'Projet enregistré ✓';
-      msg.classList.add('success');
+      document.getElementById('autosave-msg').classList.remove('hidden');
     } catch (error) {
-      msg.textContent = 'Erreur : ' + (error.message || 'impossible d\'enregistrer le projet.');
-      msg.classList.add('error');
-    } finally {
-      btn.disabled = false;
-      btn.querySelector('span:last-child').textContent = document.getElementById('lang-switch').textContent === 'FR' ? 'Save project' : 'Enregistrer le projet';
+      // Échec silencieux : on ne bloque pas l'utilisateur si la sauvegarde échoue,
+      // il peut toujours prévisualiser et télécharger son PDF normalement.
+      console.error('Erreur de sauvegarde automatique :', error.message);
     }
   }
 
@@ -1512,6 +1447,90 @@
       '<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">' +
       '<style>' + styleCSS + cssExportPDF +
       '</style></head><body><div class="pdf-preview">' + pagesHTML + '</div></body></html>';
+  }
+
+  // ----- Écran Page de vente -----
+  var dernierePageDeVente = null;
+
+  function allerPageDeVente(){
+    document.querySelectorAll('.step-screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById('screen-vente').classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  async function genererPageDeVente(){
+    var btn = document.getElementById('generate-vente-btn');
+    var btnRegen = document.querySelector('#vente-actions-row .back-btn');
+    var msg = document.getElementById('msg-vente');
+    var box = document.getElementById('vente-box');
+    var actionsRow = document.getElementById('vente-actions-row');
+
+    msg.textContent = '';
+    msg.className = 'form-msg';
+    btn.disabled = true;
+    var texteOrigineBtn = btn.textContent;
+    btn.textContent = 'Génération en cours...';
+    if (btnRegen) btnRegen.disabled = true;
+
+    try {
+      var resultat = await Parse.Cloud.run('genererPageDeVente', {
+        titre: document.getElementById('titre').value,
+        sujet: document.getElementById('sujet').value,
+        objectif: document.getElementById('objectif').value,
+        publicCible: document.getElementById('public').value,
+        expertise: document.getElementById('connaissances').value,
+        contenuGenere: dernierResultatIA
+      });
+
+      dernierePageDeVente = resultat;
+      var sections = decouperPageDeVente(resultat);
+      afficherPageDeVente(sections);
+      box.classList.remove('hidden');
+      actionsRow.classList.remove('hidden');
+    } catch (error) {
+      msg.textContent = 'Erreur : ' + (error.message || 'impossible de générer la page de vente.');
+      msg.classList.add('error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = texteOrigineBtn;
+      if (btnRegen) btnRegen.disabled = false;
+    }
+  }
+
+  // Découpe la réponse de l'IA selon les 7 balises : [PROMESSE][PROBLEME][PREUVE][PLAN][PRODUIT][PRIX][CTA]
+  function decouperPageDeVente(texte){
+    var etiquettes = ['PROMESSE', 'PROBLEME', 'PREUVE', 'PLAN', 'PRODUIT', 'PRIX', 'CTA'];
+    var sections = {};
+    var regex = /\[(PROMESSE|PROBLEME|PREUVE|PLAN|PRODUIT|PRIX|CTA)\]([\s\S]*?)(?=\[(?:PROMESSE|PROBLEME|PREUVE|PLAN|PRODUIT|PRIX|CTA)\]|$)/g;
+    var match;
+    while ((match = regex.exec(texte)) !== null) {
+      sections[match[1]] = match[2].trim();
+    }
+    return sections;
+  }
+
+  var LABELS_VENTE = {
+    PROMESSE: 'Promesse', PROBLEME: 'Problème', PREUVE: 'Preuve',
+    PLAN: 'Plan', PRODUIT: 'Produit', PRIX: 'Prix', CTA: 'Appel à l\'action'
+  };
+
+  function afficherPageDeVente(sections){
+    var box = document.getElementById('vente-box');
+    var ordre = ['PROMESSE', 'PROBLEME', 'PREUVE', 'PLAN', 'PRODUIT', 'PRIX', 'CTA'];
+    box.innerHTML = ordre.map(function(cle){
+      var contenu = sections[cle] || '—';
+      return '<div class="vente-section"><div class="vente-label">' + LABELS_VENTE[cle] + '</div><div class="vente-texte">' + escapeHTML(contenu) + '</div></div>';
+    }).join('');
+  }
+
+  function copierPageDeVente(){
+    var btn = document.getElementById('copy-vente-btn');
+    if (!dernierePageDeVente) return;
+    navigator.clipboard.writeText(dernierePageDeVente).then(function(){
+      var texteOrigine = btn.textContent;
+      btn.textContent = document.getElementById('lang-switch').textContent === 'FR' ? 'Copied ✓' : 'Copié ✓';
+      setTimeout(function(){ btn.textContent = texteOrigine; }, 2000);
+    });
   }
 
   async function telechargerPDF(){
@@ -1757,50 +1776,13 @@
         '<div class="deco-dots" style="color:' + couleurSecondaire + '"></div>' +
         '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
     }
-    else if (styleChoisi === 'creatif') {
+    else { // créatif
       cover.style.color = '#fff';
       coverInnerHTML =
         '<div class="shard" style="width:70%;height:55%;top:-10%;left:-15%;background:' + couleurPrincipale + ';clip-path:polygon(0 0,100% 0,60% 100%,0 80%)"></div>' +
         '<div class="shard" style="width:60%;height:50%;bottom:-12%;right:-15%;background:' + couleurSecondaire + ';opacity:0.85;clip-path:polygon(40% 0,100% 20%,100% 100%,0 100%)"></div>' +
         '<div class="deco-ring" style="border-color:' + couleurSecondaire + '"></div>' +
         '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
-    }
-    else if (styleChoisi === 'corporate') {
-      cover.style.color = '#161616';
-      coverInnerHTML =
-        '<div class="corp-top" style="background:' + couleurPrincipale + '"></div>' +
-        '<div class="corp-side" style="background:' + couleurSecondaire + '"></div>' +
-        '<div class="cover-content" style="position:absolute;top:50%;left:0;transform:translateY(-30%)">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
-    }
-    else if (styleChoisi === 'vintage') {
-      coverInnerHTML =
-        '<div class="vint-frame" style="color:' + couleurPrincipale + '">' +
-          '<div class="vint-inner">' +
-            '<div class="vint-orn" style="color:' + couleurSecondaire + '">✦ ✦ ✦</div>' +
-            titreHTML + quoteHTML + auteurHTML +
-          '</div>' +
-        '</div>' + xpertWatermarkHTML();
-    }
-    else if (styleChoisi === 'pastel') {
-      coverInnerHTML =
-        '<div class="past-blob" style="width:200px;height:200px;top:-50px;left:-50px;background:' + couleurPrincipale + '"></div>' +
-        '<div class="past-blob" style="width:140px;height:140px;bottom:-30px;right:-30px;background:' + couleurSecondaire + '"></div>' +
-        '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
-    }
-    else if (styleChoisi === 'urbain') {
-      coverInnerHTML =
-        '<div class="urb-block" style="width:100%;height:10px;top:24px;left:0;background:' + couleurPrincipale + '"></div>' +
-        '<div class="urb-block" style="width:60%;height:10px;bottom:60px;right:0;background:' + couleurSecondaire + '"></div>' +
-        '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
-    }
-    else { // editorial
-      cover.style.color = '#161616';
-      coverInnerHTML =
-        '<div class="edit-rule" style="background:' + couleurPrincipale + '"></div>' +
-        '<div class="cover-content">' +
-          '<div class="edit-kicker" style="color:' + couleurPrincipale + '">Xpert2Min</div>' +
-          titreHTML + quoteHTML + auteurHTML +
-        '</div>' + xpertWatermarkHTML();
     }
     // Construction finale de la page via GrapesJS (moteur de design)
     cover.innerHTML = coverInnerHTML;
@@ -1962,16 +1944,6 @@
     card.addEventListener('click', function(){
       document.querySelectorAll('.style-card').forEach(function(c){ c.classList.remove('selected'); });
       card.classList.add('selected');
-    });
-  });
-
-  // Sélection d'une palette de couleurs prédéfinie
-  document.querySelectorAll('.palette-swatch').forEach(function(swatch){
-    swatch.addEventListener('click', function(){
-      document.getElementById('couleur-principale').value = swatch.getAttribute('data-p');
-      document.getElementById('couleur-secondaire').value = swatch.getAttribute('data-s');
-      document.querySelectorAll('.palette-swatch').forEach(function(s){ s.classList.remove('selected'); });
-      swatch.classList.add('selected');
     });
   });
 
