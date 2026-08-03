@@ -181,16 +181,16 @@
   /* ÉTAPE 3 : Design */
   .style-grid{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:1fr 1fr 1fr;
     gap:8px;
   }
   .style-card{
-    padding:12px 10px;
+    padding:11px 6px;
     background:var(--black);
     border:1px solid var(--line);
     border-radius:8px;
     color:var(--grey);
-    font-size:13.5px;
+    font-size:12px;
     font-weight:600;
     font-family:'Inter', sans-serif;
     cursor:pointer;
@@ -226,6 +226,21 @@
     background:none;
     cursor:pointer;
   }
+  .palette-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:8px;
+  }
+  .palette-swatch{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    border:2px solid var(--line);
+    cursor:pointer;
+    padding:0;
+  }
+  .palette-swatch:hover, .palette-swatch.selected{ border-color:var(--white); }
 
   .checkbox-line{
     display:flex;
@@ -509,6 +524,92 @@
   }
   .cover-creatif .cover-content{ position:relative; z-index:2; }
   .cover-creatif .cover-title{ font-size:24px; }
+
+  /* --- Composition CORPORATE : bandeau supérieur net + barre latérale --- */
+  .cover-corporate{
+    background:#fff;
+    color:#161616;
+    position:relative;
+    padding:0;
+  }
+  .cover-corporate .corp-top{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:14%;
+  }
+  .cover-corporate .corp-side{
+    position:absolute;
+    top:14%; bottom:0; left:0;
+    width:8px;
+  }
+  .cover-corporate .cover-content{ position:relative; z-index:1; padding:0 34px; }
+  .cover-corporate .cover-title{ text-align:left; font-size:25px; }
+  .cover-corporate .cover-quote, .cover-corporate .cover-auteur{ text-align:left; }
+
+  /* --- Composition VINTAGE : double cadre + ornement --- */
+  .cover-vintage{
+    background:#f5efe4;
+    color:#2b2013;
+    padding:22px;
+  }
+  .cover-vintage .vint-frame{
+    border:2px solid currentColor;
+    padding:8px;
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .cover-vintage .vint-inner{
+    border:1px solid currentColor;
+    width:100%; height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    padding:20px;
+  }
+  .cover-vintage .cover-title{ font-family:'Archivo Black', sans-serif; font-size:23px; letter-spacing:0.03em; }
+  .cover-vintage .vint-orn{ font-size:18px; letter-spacing:0.3em; opacity:0.7; }
+
+  /* --- Composition PASTEL : formes douces arrondies --- */
+  .cover-pastel{
+    background:#fdfaf7;
+    color:#3a3a3a;
+    position:relative;
+    padding:36px 28px;
+  }
+  .cover-pastel .past-blob{
+    position:absolute;
+    border-radius:50%;
+    opacity:0.35;
+  }
+  .cover-pastel .cover-content{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .cover-pastel .cover-title{ font-size:23px; }
+
+  /* --- Composition URBAIN : blocs bruts asymétriques --- */
+  .cover-urbain{
+    background:#161616;
+    color:#fff;
+    position:relative;
+    padding:30px 22px;
+  }
+  .cover-urbain .urb-block{
+    position:absolute;
+  }
+  .cover-urbain .cover-content{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:10px; }
+  .cover-urbain .cover-title{ font-size:26px; text-transform:uppercase; }
+
+  /* --- Composition ÉDITORIAL : style magazine, filet vertical --- */
+  .cover-editorial{
+    background:#fff;
+    color:#161616;
+    position:relative;
+    padding:34px 30px;
+  }
+  .cover-editorial .edit-rule{
+    position:absolute;
+    top:30px; bottom:30px; left:30px;
+    width:2px;
+  }
+  .cover-editorial .cover-content{ padding-left:22px; text-align:left; display:flex; flex-direction:column; gap:10px; }
+  .cover-editorial .cover-title{ font-size:27px; text-align:left; }
+  .cover-editorial .edit-kicker{ font-size:10.5px; text-transform:uppercase; letter-spacing:0.12em; font-weight:700; }
 
   .pdf-page .page-label{
     position:absolute;
@@ -970,6 +1071,11 @@
         <button type="button" class="style-card" data-value="minimaliste" data-i18n="style_min">Minimaliste</button>
         <button type="button" class="style-card" data-value="moderne" data-i18n="style_mod">Moderne</button>
         <button type="button" class="style-card" data-value="creatif" data-i18n="style_crea">Créatif</button>
+        <button type="button" class="style-card" data-value="corporate" data-i18n="style_corp">Corporate</button>
+        <button type="button" class="style-card" data-value="vintage" data-i18n="style_vint">Vintage</button>
+        <button type="button" class="style-card" data-value="pastel" data-i18n="style_past">Pastel</button>
+        <button type="button" class="style-card" data-value="urbain" data-i18n="style_urb">Urbain</button>
+        <button type="button" class="style-card" data-value="editorial" data-i18n="style_edit">Éditorial</button>
       </div>
     </div>
 
@@ -984,6 +1090,18 @@
           <input type="color" id="couleur-secondaire" value="#0A0A0B">
           <span data-i18n="col_secondaire">Couleur secondaire</span>
         </div>
+      </div>
+
+      <label data-i18n="lbl_palettes" style="margin-top:14px;display:block">Palettes prêtes à l'emploi</label>
+      <div class="palette-row" id="palette-row">
+        <button type="button" class="palette-swatch" data-p="#E8161C" data-s="#0A0A0B" style="background:linear-gradient(135deg,#E8161C 50%,#0A0A0B 50%)"></button>
+        <button type="button" class="palette-swatch" data-p="#1E3A8A" data-s="#D4AF37" style="background:linear-gradient(135deg,#1E3A8A 50%,#D4AF37 50%)"></button>
+        <button type="button" class="palette-swatch" data-p="#0F766E" data-s="#F5EFE6" style="background:linear-gradient(135deg,#0F766E 50%,#F5EFE6 50%)"></button>
+        <button type="button" class="palette-swatch" data-p="#7C3AED" data-s="#111111" style="background:linear-gradient(135deg,#7C3AED 50%,#111111 50%)"></button>
+        <button type="button" class="palette-swatch" data-p="#EA580C" data-s="#1C1917" style="background:linear-gradient(135deg,#EA580C 50%,#1C1917 50%)"></button>
+        <button type="button" class="palette-swatch" data-p="#059669" data-s="#052E1F" style="background:linear-gradient(135deg,#059669 50%,#052E1F 50%)"></button>
+        <button type="button" class="palette-swatch" data-p="#DB2777" data-s="#1F1123" style="background:linear-gradient(135deg,#DB2777 50%,#1F1123 50%)"></button>
+        <button type="button" class="palette-swatch" data-p="#0284C7" data-s="#0A1220" style="background:linear-gradient(135deg,#0284C7 50%,#0A1220 50%)"></button>
       </div>
     </div>
 
@@ -1149,7 +1267,8 @@
       step_label_3: "Étape 3 / 4", s3_title: "Personnalisez le design",
       s3_lead: "Choisissez le style, les couleurs et la mise en page de votre PDF.",
       lbl_style_pdf: "Style du PDF", style_pro: "Professionnel", style_luxe: "Luxe", style_min: "Minimaliste", style_mod: "Moderne", style_crea: "Créatif",
-      lbl_couleurs: "Couleurs", col_principale: "Couleur principale", col_secondaire: "Couleur secondaire",
+      style_corp: "Corporate", style_vint: "Vintage", style_past: "Pastel", style_urb: "Urbain", style_edit: "Éditorial",
+      lbl_couleurs: "Couleurs", col_principale: "Couleur principale", col_secondaire: "Couleur secondaire", lbl_palettes: "Palettes prêtes à l'emploi",
       lbl_police: "Style de police", lbl_taille: "Taille du texte", taille_petit: "Petit", taille_moyen: "Moyen", taille_grand: "Grand",
       lbl_titre_couv: "Titre (couverture)", ph_titre_couv: "Repris automatiquement de l'étape 1",
       lbl_style_couv: "Style de couverture", couv_image: "Image pleine page", couv_bandeau: "Bandeau coloré", couv_cadre: "Cadre centré", couv_epure: "Épuré (texte seul)",
@@ -1183,7 +1302,8 @@
       step_label_3: "Step 3 / 4", s3_title: "Customize the design",
       s3_lead: "Choose the style, colors and layout of your PDF.",
       lbl_style_pdf: "PDF style", style_pro: "Professional", style_luxe: "Luxury", style_min: "Minimalist", style_mod: "Modern", style_crea: "Creative",
-      lbl_couleurs: "Colors", col_principale: "Primary color", col_secondaire: "Secondary color",
+      style_corp: "Corporate", style_vint: "Vintage", style_past: "Pastel", style_urb: "Urban", style_edit: "Editorial",
+      lbl_couleurs: "Colors", col_principale: "Primary color", col_secondaire: "Secondary color", lbl_palettes: "Ready-made palettes",
       lbl_police: "Font style", lbl_taille: "Text size", taille_petit: "Small", taille_moyen: "Medium", taille_grand: "Large",
       lbl_titre_couv: "Title (cover)", ph_titre_couv: "Auto-filled from step 1",
       lbl_style_couv: "Cover style", couv_image: "Full-page image", couv_bandeau: "Colored banner", couv_cadre: "Centered frame", couv_epure: "Clean (text only)",
@@ -1369,12 +1489,28 @@
   function construireHTMLPourPDF(){
     var styleCSS = document.querySelector('style').innerHTML;
     var pagesHTML = document.getElementById('pdf-preview').innerHTML;
-    return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
-      '<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">' +
-      '<style>' + styleCSS +
+    var cssExportPDF =
       'body{background:#fff;margin:0;}' +
       '.pdf-preview{background:none !important;padding:0 !important;}' +
-      '.pdf-page{max-width:none !important;width:210mm !important;aspect-ratio:auto !important;height:296mm !important;overflow:hidden !important;page-break-after:always;}' +
+      '.pdf-page{max-width:none !important;width:210mm !important;height:296mm !important;aspect-ratio:auto !important;overflow:hidden !important;page-break-after:always;padding:22mm 18mm 26mm !important;box-sizing:border-box;}' +
+      '.pdf-page.cover{padding:0 !important;}' +
+      '.cover-title{font-size:2.6em !important;line-height:1.15 !important;}' +
+      '.cover-quote{font-size:1em !important;}' +
+      '.cover-auteur{font-size:0.85em !important;}' +
+      '.section-title{font-size:1.7em !important;margin-bottom:14mm !important;}' +
+      '.chapter-title{font-size:1.5em !important;margin-bottom:8mm !important;}' +
+      '.chapter-body{font-size:1.05em !important;line-height:1.7 !important;margin-bottom:5mm !important;}' +
+      '.callout{font-size:0.95em !important;padding:5mm 6mm !important;margin:6mm 0 7mm !important;}' +
+      '.callout-label{font-size:0.85em !important;}' +
+      '.sommaire-item{font-size:1.05em !important;padding:3mm 0 !important;}' +
+      '.drop-cap{font-size:2.8em !important;}' +
+      '.chapter-num-bg{font-size:9em !important;}' +
+      '.page-header-x2m{font-size:0.7em !important;top:10mm !important;left:18mm !important;right:18mm !important;}' +
+      '.page-footer-x2m{font-size:0.75em !important;bottom:10mm !important;left:18mm !important;right:18mm !important;}' +
+      '.cover-watermark{bottom:10mm !important;}';
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">' +
+      '<style>' + styleCSS + cssExportPDF +
       '</style></head><body><div class="pdf-preview">' + pagesHTML + '</div></body></html>';
   }
 
@@ -1622,13 +1758,50 @@
         '<div class="deco-dots" style="color:' + couleurSecondaire + '"></div>' +
         '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
     }
-    else { // créatif
+    else if (styleChoisi === 'creatif') {
       cover.style.color = '#fff';
       coverInnerHTML =
         '<div class="shard" style="width:70%;height:55%;top:-10%;left:-15%;background:' + couleurPrincipale + ';clip-path:polygon(0 0,100% 0,60% 100%,0 80%)"></div>' +
         '<div class="shard" style="width:60%;height:50%;bottom:-12%;right:-15%;background:' + couleurSecondaire + ';opacity:0.85;clip-path:polygon(40% 0,100% 20%,100% 100%,0 100%)"></div>' +
         '<div class="deco-ring" style="border-color:' + couleurSecondaire + '"></div>' +
         '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
+    }
+    else if (styleChoisi === 'corporate') {
+      cover.style.color = '#161616';
+      coverInnerHTML =
+        '<div class="corp-top" style="background:' + couleurPrincipale + '"></div>' +
+        '<div class="corp-side" style="background:' + couleurSecondaire + '"></div>' +
+        '<div class="cover-content" style="position:absolute;top:50%;left:0;transform:translateY(-30%)">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
+    }
+    else if (styleChoisi === 'vintage') {
+      coverInnerHTML =
+        '<div class="vint-frame" style="color:' + couleurPrincipale + '">' +
+          '<div class="vint-inner">' +
+            '<div class="vint-orn" style="color:' + couleurSecondaire + '">✦ ✦ ✦</div>' +
+            titreHTML + quoteHTML + auteurHTML +
+          '</div>' +
+        '</div>' + xpertWatermarkHTML();
+    }
+    else if (styleChoisi === 'pastel') {
+      coverInnerHTML =
+        '<div class="past-blob" style="width:200px;height:200px;top:-50px;left:-50px;background:' + couleurPrincipale + '"></div>' +
+        '<div class="past-blob" style="width:140px;height:140px;bottom:-30px;right:-30px;background:' + couleurSecondaire + '"></div>' +
+        '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
+    }
+    else if (styleChoisi === 'urbain') {
+      coverInnerHTML =
+        '<div class="urb-block" style="width:100%;height:10px;top:24px;left:0;background:' + couleurPrincipale + '"></div>' +
+        '<div class="urb-block" style="width:60%;height:10px;bottom:60px;right:0;background:' + couleurSecondaire + '"></div>' +
+        '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
+    }
+    else { // editorial
+      cover.style.color = '#161616';
+      coverInnerHTML =
+        '<div class="edit-rule" style="background:' + couleurPrincipale + '"></div>' +
+        '<div class="cover-content">' +
+          '<div class="edit-kicker" style="color:' + couleurPrincipale + '">Xpert2Min</div>' +
+          titreHTML + quoteHTML + auteurHTML +
+        '</div>' + xpertWatermarkHTML();
     }
     // Construction finale de la page via GrapesJS (moteur de design)
     cover.innerHTML = coverInnerHTML;
@@ -1790,6 +1963,16 @@
     card.addEventListener('click', function(){
       document.querySelectorAll('.style-card').forEach(function(c){ c.classList.remove('selected'); });
       card.classList.add('selected');
+    });
+  });
+
+  // Sélection d'une palette de couleurs prédéfinie
+  document.querySelectorAll('.palette-swatch').forEach(function(swatch){
+    swatch.addEventListener('click', function(){
+      document.getElementById('couleur-principale').value = swatch.getAttribute('data-p');
+      document.getElementById('couleur-secondaire').value = swatch.getAttribute('data-s');
+      document.querySelectorAll('.palette-swatch').forEach(function(s){ s.classList.remove('selected'); });
+      swatch.classList.add('selected');
     });
   });
 
