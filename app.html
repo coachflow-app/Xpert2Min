@@ -146,6 +146,11 @@
   }
   .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--red); }
   .field textarea{ min-height:130px; resize:vertical; }
+  .two-col-row{
+    display:flex;
+    gap:10px;
+  }
+  .two-col-row > div{ flex:1; }
 
   .lang-choice{ display:flex; gap:10px; }
   .lang-choice label{
@@ -1005,8 +1010,8 @@
   <!-- ÉTAPE 1 : Informations générales -->
   <div class="step-screen active" id="screen-1">
     <div class="eyebrow" data-i18n="step_label_1">Étape 1 / 4</div>
-    <h1 data-i18n="s1_title">Parlez-nous de votre expertise</h1>
-    <p class="lead" data-i18n="s1_lead">Ces informations permettent à l'IA de transformer votre expertise en un PDF professionnel prêt à vendre.</p>
+    <h1 data-i18n="s1_title">Transformez votre expertise en produit</h1>
+    <p class="lead" data-i18n="s1_lead">Renseignez ces informations. L'IA transformera votre expertise en un PDF professionnel prêt à être vendu en 2 minutes.</p>
 
     <div class="field">
       <label for="titre" data-i18n="lbl_titre">Titre du PDF</label>
@@ -1029,13 +1034,16 @@
     </div>
 
     <div class="field">
-      <label for="prenom" data-i18n="lbl_prenom">Prénom du créateur</label>
-      <input type="text" id="prenom" placeholder="Votre prénom" data-i18n-placeholder="ph_prenom" required>
-    </div>
-
-    <div class="field">
-      <label for="createur" data-i18n="lbl_createur">Nom du créateur</label>
-      <input type="text" id="createur" placeholder="Votre nom" data-i18n-placeholder="ph_createur" required>
+      <div class="two-col-row">
+        <div>
+          <label for="prenom" data-i18n="lbl_prenom">Prénom du créateur</label>
+          <input type="text" id="prenom" placeholder="Votre prénom" data-i18n-placeholder="ph_prenom" required>
+        </div>
+        <div>
+          <label for="createur" data-i18n="lbl_createur">Nom de l'auteur</label>
+          <input type="text" id="createur" placeholder="Votre nom" data-i18n-placeholder="ph_createur" required>
+        </div>
+      </div>
     </div>
 
     <div class="field">
@@ -1054,11 +1062,11 @@
   <div class="step-screen" id="screen-2">
     <div class="eyebrow" data-i18n="step_label_2">Étape 2 / 4</div>
     <h1 data-i18n="s2_title">Ajoutez vos connaissances</h1>
-    <p class="lead" data-i18n="s2_lead">Écrivez ce que vous savez, ou importez des documents. L'IA s'appuiera dessus pour construire le contenu.</p>
+    <p class="lead" data-i18n="s2_lead">C'est ici que votre expertise prend vie. Décrivez vos connaissances, vos méthodes, vos conseils. Plus les informations sont détaillées, plus l'IA pourra créer un PDF professionnel fidèle à votre expertise.</p>
 
     <div class="field">
-      <label for="connaissances" data-i18n="lbl_expertise">Votre expertise (texte)</label>
-      <textarea id="connaissances" placeholder="Écrivez ou collez ici votre expertise, vos idées ou votre contenu brut..." data-i18n-placeholder="ph_expertise"></textarea>
+      <label for="connaissances" data-i18n="lbl_expertise">Vos connaissances</label>
+      <textarea id="connaissances" placeholder="Écrivez ou collez ici tout ce que vous savez sur votre sujet : méthodes, étapes, conseils, exemples, erreurs à éviter, astuces, expériences personnelles ou tout autre contenu que vous souhaitez retrouver dans votre PDF." data-i18n-placeholder="ph_expertise"></textarea>
     </div>
 
     <div class="field">
@@ -1131,16 +1139,6 @@
     <div class="field">
       <label for="titre-couverture" data-i18n="lbl_titre_couv">Titre (couverture)</label>
       <input type="text" id="titre-couverture" placeholder="Repris automatiquement de l'étape 1" data-i18n-placeholder="ph_titre_couv">
-    </div>
-
-    <div class="field">
-      <label for="style-couverture" data-i18n="lbl_style_couv">Style de couverture</label>
-      <select id="style-couverture">
-        <option data-i18n="couv_image">Image pleine page</option>
-        <option data-i18n="couv_bandeau">Bandeau coloré</option>
-        <option data-i18n="couv_cadre">Cadre centré</option>
-        <option data-i18n="couv_epure">Épuré (texte seul)</option>
-      </select>
     </div>
 
     <div class="field">
@@ -1250,18 +1248,18 @@
   var traductions = {
     fr: {
       nav_creer: "Créer", nav_dashboard: "Tableau de bord",
-      step_label_1: "Étape 1 / 4", s1_title: "Parlez-nous de votre expertise",
-      s1_lead: "Ces informations permettent à l'IA de transformer votre expertise en un PDF professionnel prêt à vendre.",
+      step_label_1: "Étape 1 / 4", s1_title: "Transformez votre expertise en produit",
+      s1_lead: "Renseignez ces informations. L'IA transformera votre expertise en un PDF professionnel prêt à être vendu en 2 minutes.",
       lbl_titre: "Titre du PDF", ph_titre: "Ex. : Les fondamentaux du copywriting",
       lbl_sujet: "Sujet", ph_sujet: "Ex. : Rédaction persuasive pour entrepreneurs",
       lbl_ton: "Ton", ph_ton: "Ex. : Persuasif, motivant, direct...",
       lbl_public: "Public cible", ph_public: "Ex. : Entrepreneurs et freelances débutants",
-      lbl_prenom: "Prénom du créateur", ph_prenom: "Votre prénom", lbl_createur: "Nom du créateur", ph_createur: "Votre nom",
+      lbl_prenom: "Prénom du créateur", ph_prenom: "Votre prénom", lbl_createur: "Nom de l'auteur", ph_createur: "Votre nom",
       lbl_langue_doc: "Langue du document", opt_francais: "Français", opt_anglais: "Anglais",
       btn_continuer: "Continuer", btn_retour: "Retour",
       step_label_2: "Étape 2 / 4", s2_title: "Ajoutez vos connaissances",
-      s2_lead: "Écrivez ce que vous savez, ou importez des documents. L'IA s'appuiera dessus pour construire le contenu.",
-      lbl_expertise: "Votre expertise (texte)", ph_expertise: "Écrivez ou collez ici votre expertise, vos idées ou votre contenu brut...",
+      s2_lead: "C'est ici que votre expertise prend vie. Décrivez vos connaissances, vos méthodes, vos conseils. Plus les informations sont détaillées, plus l'IA pourra créer un PDF professionnel fidèle à votre expertise.",
+      lbl_expertise: "Vos connaissances", ph_expertise: "Écrivez ou collez ici tout ce que vous savez sur votre sujet : méthodes, étapes, conseils, exemples, erreurs à éviter, astuces, expériences personnelles ou tout autre contenu que vous souhaitez retrouver dans votre PDF.",
       lbl_documents: "Documents de votre expertise (optionnel)", import_docs: "Importez vos documents (Word, PDF, TXT...)",
       step_label_3: "Étape 3 / 4", s3_title: "Personnalisez le design",
       s3_lead: "Choisissez le style, les couleurs et la mise en page de votre PDF.",
@@ -1269,7 +1267,7 @@
       lbl_couleurs: "Couleurs", col_principale: "Couleur principale", col_secondaire: "Couleur secondaire",
       lbl_police: "Style de police", lbl_taille: "Taille du texte", taille_petit: "Petit", taille_moyen: "Moyen", taille_grand: "Grand",
       lbl_titre_couv: "Titre (couverture)", ph_titre_couv: "Repris automatiquement de l'étape 1",
-      lbl_style_couv: "Style de couverture", couv_image: "Image pleine page", couv_bandeau: "Bandeau coloré", couv_cadre: "Cadre centré", couv_epure: "Épuré (texte seul)",
+      
       lbl_citation: "Citation éventuelle (optionnel)", ph_citation: "Une citation à afficher sur la couverture",
       lbl_style_chap: "Style des chapitres", chap_numerotes: "Numérotés", chap_icones: "Avec icônes", chap_pleine: "Titres pleine largeur", chap_min: "Minimaliste",
       
@@ -1290,18 +1288,18 @@
     },
     en: {
       nav_creer: "Create", nav_dashboard: "Dashboard",
-      step_label_1: "Step 1 / 4", s1_title: "Tell us about your expertise",
-      s1_lead: "This information helps the AI turn your expertise into a professional, sales-ready PDF.",
+      step_label_1: "Step 1 / 4", s1_title: "Turn your expertise into a product",
+      s1_lead: "Fill in this information. The AI will turn your expertise into a professional, sales-ready PDF in 2 minutes.",
       lbl_titre: "PDF title", ph_titre: "E.g.: Copywriting fundamentals",
       lbl_sujet: "Subject", ph_sujet: "E.g.: Persuasive writing for entrepreneurs",
       lbl_ton: "Tone", ph_ton: "E.g.: Persuasive, motivating, direct...",
       lbl_public: "Target audience", ph_public: "E.g.: Beginner entrepreneurs and freelancers",
-      lbl_prenom: "Creator first name", ph_prenom: "Your first name", lbl_createur: "Creator name", ph_createur: "Your name",
+      lbl_prenom: "Creator first name", ph_prenom: "Your first name", lbl_createur: "Author name", ph_createur: "Your name",
       lbl_langue_doc: "Document language", opt_francais: "French", opt_anglais: "English",
       btn_continuer: "Continue", btn_retour: "Back",
       step_label_2: "Step 2 / 4", s2_title: "Add your knowledge",
-      s2_lead: "Write what you know, or import documents. The AI will use this to build the content.",
-      lbl_expertise: "Your expertise (text)", ph_expertise: "Write or paste your expertise, ideas or raw content here...",
+      s2_lead: "This is where your expertise comes to life. Describe your knowledge, methods and advice. The more detailed the information, the better the AI can create a PDF true to your expertise.",
+      lbl_expertise: "Your knowledge", ph_expertise: "Write or paste here everything you know about your topic: methods, steps, advice, examples, mistakes to avoid, tips, personal experiences, or any other content you'd like to see in your PDF.",
       lbl_documents: "Expertise documents (optional)", import_docs: "Import your documents (Word, PDF, TXT...)",
       step_label_3: "Step 3 / 4", s3_title: "Customize the design",
       s3_lead: "Choose the style, colors and layout of your PDF.",
@@ -1309,7 +1307,7 @@
       lbl_couleurs: "Colors", col_principale: "Primary color", col_secondaire: "Secondary color",
       lbl_police: "Font style", lbl_taille: "Text size", taille_petit: "Small", taille_moyen: "Medium", taille_grand: "Large",
       lbl_titre_couv: "Title (cover)", ph_titre_couv: "Auto-filled from step 1",
-      lbl_style_couv: "Cover style", couv_image: "Full-page image", couv_bandeau: "Colored banner", couv_cadre: "Centered frame", couv_epure: "Clean (text only)",
+      
       lbl_citation: "Optional quote", ph_citation: "A quote to display on the cover",
       lbl_style_chap: "Chapter style", chap_numerotes: "Numbered", chap_icones: "With icons", chap_pleine: "Full-width titles", chap_min: "Minimalist",
       
@@ -1474,7 +1472,6 @@
         police: document.getElementById('police').value,
         tailleTexte: document.getElementById('taille-texte').value,
         titreCouverture: document.getElementById('titre-couverture').value,
-        styleCouverture: document.getElementById('style-couverture').value,
         citation: document.getElementById('citation').value,
         styleChapitres: document.getElementById('style-chapitres').value,
         numeroPages: document.getElementById('numero-pages').checked,
@@ -1712,7 +1709,6 @@
     var titreCouverture = document.getElementById('titre-couverture').value || document.getElementById('titre').value;
     var citation = document.getElementById('citation').value;
     var styleChapitres = document.getElementById('style-chapitres').value;
-    var styleCouvertureChoisi = document.getElementById('style-couverture').value;
     var tailleTexteChoisie = document.getElementById('taille-texte').value;
     var afficherPageAuteur = document.getElementById('elt-page-auteur').checked;
     var afficherContact = document.getElementById('elt-page-contact').checked;
@@ -1733,14 +1729,7 @@
 
     // --- Page de couverture ---
     var cover = document.createElement('div');
-    var CLASSES_STYLE_COUVERTURE = {
-      'Image pleine page': '',
-      'Bandeau coloré': 'couv-bandeau',
-      'Cadre centré': 'couv-cadre',
-      'Épuré (texte seul)': 'couv-epuree'
-    };
-    var classeCouvSupp = CLASSES_STYLE_COUVERTURE[styleCouvertureChoisi] || '';
-    cover.className = ('pdf-page cover cover-' + styleChoisi + ' ' + classeCouvSupp).trim();
+    cover.className = 'pdf-page cover cover-' + styleChoisi;
     cover.style.fontFamily = police;
 
     var quoteHTML = citation ? '<div class="cover-quote" style="font-size:' + tailleCitation + '">« ' + escapeHTML(citation) + ' »</div>' : '';
