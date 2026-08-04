@@ -264,18 +264,43 @@
   .sub-field input:focus, .sub-field textarea:focus{ border-color:var(--red); }
 
   /* ÉTAPE 4 : Génération */
-  .recap-box{
-    background:var(--black);
+  .recap-card{
+    background:linear-gradient(160deg, var(--black), #17171a);
     border:1px solid var(--line);
-    border-radius:10px;
-    padding:14px 16px;
-    margin-bottom:16px;
-    font-size:13px;
-    color:var(--grey);
+    border-radius:14px;
+    padding:20px 20px;
+    margin-bottom:22px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
   }
-  .recap-box p{ margin-bottom:5px; }
-  .recap-box p:last-child{ margin-bottom:0; }
-  .recap-box b{ color:var(--white); }
+  .recap-row{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .recap-row:not(:last-child){
+    padding-bottom:14px;
+    border-bottom:1px solid var(--line);
+  }
+  .recap-icon{
+    font-size:17px;
+    flex-shrink:0;
+    width:26px;
+    text-align:center;
+  }
+  .recap-row-label{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--grey);
+    margin-bottom:3px;
+  }
+  .recap-row-value{
+    font-size:13.5px;
+    color:var(--white);
+    line-height:1.5;
+  }
 
   .result-box{
     width:100%;
@@ -746,15 +771,69 @@
     cursor:pointer;
   }
   .preview-btn:hover{ border-color:var(--red); }
-  #actions-row{ margin-top:14px; }
+  #actions-row{ margin-top:22px; }
 
-  .autosave-msg{
-    text-align:center;
-    font-size:12px;
-    color:#4CAF50;
-    margin-top:6px;
+  .action-cards-row{
+    display:flex;
+    gap:12px;
+  }
+  .action-card{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+    padding:16px 15px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:12px;
+    cursor:pointer;
+    text-align:left;
+    font-family:'Inter', sans-serif;
+    transition:border-color .18s ease, transform .12s ease, background .18s ease;
+  }
+  .action-card:hover{
+    border-color:var(--red);
+    background:rgba(232,22,28,0.06);
+    transform:translateY(-2px);
+  }
+  .action-card:active{ transform:translateY(0) scale(0.98); }
+  .action-card-icon{ font-size:19px; }
+  .action-card-title{
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--white);
+  }
+  .action-card-desc{
+    font-size:11px;
+    color:var(--grey);
+    line-height:1.4;
+  }
+  .action-card.downloading{ opacity:0.7; animation:pulse-download 0.9s ease-in-out infinite; }
+  @keyframes pulse-download{
+    0%, 100%{ transform:scale(1); }
+    50%{ transform:scale(0.97); }
   }
 
+  .autosave-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    margin:10px auto 0;
+    padding:7px 14px;
+    background:rgba(76,175,80,0.1);
+    border:1px solid rgba(76,175,80,0.3);
+    border-radius:20px;
+    font-size:11.5px;
+    color:#4CAF50;
+    width:fit-content;
+  }
+
+  .step4-footer{
+    margin-top:26px;
+    display:flex;
+    justify-content:flex-start;
+  }
 
   .preview-btn .eye-icon{ font-size:15px; }
 
@@ -766,7 +845,10 @@
     z-index:100;
     display:flex;
     flex-direction:column;
+    opacity:1;
+    transition:opacity .22s ease;
   }
+  .preview-overlay.is-opening{ opacity:0; }
   .hidden{ display:none !important; }
   .preview-overlay.hidden{ display:none; }
   .preview-overlay-header{
@@ -1115,31 +1197,36 @@
   <!-- ÉTAPE 4 : Génération -->
   <div class="step-screen" id="screen-4">
     <div class="eyebrow" data-i18n="step_label_4">Étape 4 / 4</div>
-    <h1 data-i18n="s4_title">Génération et prévisualisation</h1>
-    <p class="lead" data-i18n="s4_lead">L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.</p>
+    <h1 id="s4-title-default" data-i18n="s4_title">Génération et prévisualisation</h1>
+    <h1 id="s4-title-done" class="hidden" data-i18n="s4_title_done">✅ Votre expertise est devenue un produit professionnel !</h1>
+    <p class="lead" id="s4-lead-default" data-i18n="s4_lead">L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.</p>
+    <p class="lead hidden" id="s4-lead-done" data-i18n="s4_lead_done">Votre expertise a été transformée en un ebook professionnel, prêt à être prévisualisé ou téléchargé en seulement 2 minutes.</p>
 
-    <div class="recap-box" id="recap-box"></div>
+    <div class="recap-card" id="recap-box"></div>
 
     <button type="button" class="next-btn" id="generate-btn" onclick="genererContenu()" data-i18n="btn_generer">Générer mon contenu</button>
     <p class="form-msg" id="msg-4"></p>
-    <p class="autosave-msg hidden" id="autosave-msg" data-i18n="msg_autosave">Enregistré automatiquement ✓</p>
+    <div class="autosave-badge hidden" id="autosave-msg"><span>✅</span> <span data-i18n="msg_autosave">Sauvegardé automatiquement</span></div>
 
-    <div class="btn-row hidden" id="actions-row">
-      <button type="button" class="preview-btn" id="preview-btn" onclick="ouvrirPrevisualisation()">
-        <span class="eye-icon">👁️</span> <span data-i18n="btn_previsualiser">Prévisualiser</span>
+    <div class="action-cards-row hidden" id="actions-row">
+      <button type="button" class="action-card" id="preview-btn" onclick="ouvrirPrevisualisation()">
+        <span class="action-card-icon">👁️</span>
+        <span class="action-card-title" data-i18n="btn_previsualiser">Prévisualiser</span>
+        <span class="action-card-desc" data-i18n="desc_previsualiser">Découvrez le rendu final de votre produit avant son téléchargement.</span>
       </button>
-      <button type="button" class="preview-btn" id="download-pdf-btn" onclick="telechargerPDF()">
-        <span class="eye-icon">⬇️</span> <span data-i18n="btn_telecharger_pdf">Télécharger le PDF</span>
+      <button type="button" class="action-card" id="download-pdf-btn" onclick="telechargerPDF()">
+        <span class="action-card-icon">📥</span>
+        <span class="action-card-title" data-i18n="btn_telecharger_pdf">Télécharger le PDF</span>
+        <span class="action-card-desc" data-i18n="desc_telecharger">Téléchargez votre ebook professionnel, prêt à être partagé ou vendu.</span>
       </button>
     </div>
     <p class="form-msg" id="msg-pdf"></p>
 
     <textarea class="result-box hidden" id="result-box" readonly></textarea>
 
-    <div class="btn-row">
+    <div class="step4-footer">
       <button type="button" class="back-btn" onclick="goToStep(3)" data-i18n="btn_retour">Retour</button>
     </div>
-  </div>
   </div>
 
 </main>
@@ -1192,6 +1279,11 @@
       ph_instagram: "Instagram (optionnel)", ph_linkedin: "LinkedIn (optionnel)", ph_site: "Site web (optionnel)",
       step_label_4: "Étape 4 / 4", s4_title: "Génération et prévisualisation",
       s4_lead: "L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.",
+      s4_title_done: "✅ Votre expertise est devenue un produit professionnel !",
+      s4_lead_done: "Votre expertise a été transformée en un ebook professionnel, prêt à être prévisualisé ou téléchargé en seulement 2 minutes.",
+      desc_previsualiser: "Découvrez le rendu final de votre produit avant son téléchargement.",
+      desc_telecharger: "Téléchargez votre ebook professionnel, prêt à être partagé ou vendu.",
+      btn_regenerer_ebook: "Régénérer mon ebook",
       btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF", btn_telecharger_pdf: "Télécharger le PDF",
       msg_autosave: "Enregistré automatiquement ✓",
       recap_titre: "Titre", recap_sujet: "Sujet", recap_ton: "Ton", recap_public: "Public cible"
@@ -1227,6 +1319,11 @@
       ph_instagram: "Instagram (optional)", ph_linkedin: "LinkedIn (optional)", ph_site: "Website (optional)",
       step_label_4: "Step 4 / 4", s4_title: "Generation and preview",
       s4_lead: "The AI combines your knowledge, structure and design to create your final PDF.",
+      s4_title_done: "✅ Your expertise has become a professional product!",
+      s4_lead_done: "Your expertise has been turned into a professional ebook, ready to preview or download in just 2 minutes.",
+      desc_previsualiser: "Discover the final look of your product before downloading it.",
+      desc_telecharger: "Download your professional ebook, ready to share or sell.",
+      btn_regenerer_ebook: "Regenerate my ebook",
       btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview", btn_telecharger_pdf: "Download the PDF",
       msg_autosave: "Auto-saved ✓",
       recap_titre: "Title", recap_sujet: "Subject", recap_ton: "Tone", recap_public: "Target audience"
@@ -1280,11 +1377,14 @@
     var recap = document.getElementById('recap-box');
     var langue = localStorage.getItem('xpert2min_langue') || 'fr';
     var t = traductions[langue];
+    function ligne(icone, label, valeur){
+      return '<div class="recap-row"><div class="recap-icon">' + icone + '</div><div><div class="recap-row-label">' + label + '</div><div class="recap-row-value">' + escapeHTML(valeur || '—') + '</div></div></div>';
+    }
     recap.innerHTML =
-      '<p><b>' + t.recap_titre + ' :</b> ' + (document.getElementById('titre').value || '—') + '</p>' +
-      '<p><b>' + t.recap_sujet + ' :</b> ' + (document.getElementById('sujet').value || '—') + '</p>' +
-      '<p><b>' + t.recap_ton + ' :</b> ' + (document.getElementById('ton').value || '—') + '</p>' +
-      '<p><b>' + t.recap_public + ' :</b> ' + (document.getElementById('public').value || '—') + '</p>';
+      ligne('📘', t.recap_titre, document.getElementById('titre').value) +
+      ligne('🏷️', t.recap_sujet, document.getElementById('sujet').value) +
+      ligne('🎯', t.recap_ton, document.getElementById('ton').value) +
+      ligne('👥', t.recap_public, document.getElementById('public').value);
   }
 
   var dernierResultatIA = null; // texte brut renvoyé par l'IA, pour la sauvegarde
@@ -1305,7 +1405,8 @@
     actionsRow.classList.add('hidden');
     autosaveMsg.classList.add('hidden');
     btn.disabled = true;
-    btn.textContent = 'Génération en cours...';
+    var texteChargement = document.getElementById('lang-switch').textContent === 'FR' ? 'Generating...' : 'Génération en cours...';
+    btn.textContent = texteChargement;
 
     try {
       var resultat = await Parse.Cloud.run('analyserExpertise', {
@@ -1327,6 +1428,14 @@
         preview.classList.remove('hidden');
         actionsRow.classList.remove('hidden');
 
+        // Bascule vers l'en-tête "terminé" + bouton devient secondaire (Régénérer)
+        document.getElementById('s4-title-default').classList.add('hidden');
+        document.getElementById('s4-title-done').classList.remove('hidden');
+        document.getElementById('s4-lead-default').classList.add('hidden');
+        document.getElementById('s4-lead-done').classList.remove('hidden');
+        btn.classList.add('back-btn');
+        btn.classList.remove('next-btn');
+
         // Sauvegarde automatique et silencieuse (plus de bouton dédié)
         enregistrerProjetSilencieux();
       }
@@ -1335,7 +1444,9 @@
       msg.classList.add('error');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Générer mon contenu';
+      var dejaGenere = !document.getElementById('s4-title-done').classList.contains('hidden');
+      var langueActuelle = document.getElementById('lang-switch').textContent === 'FR' ? 'en' : 'fr';
+      btn.textContent = dejaGenere ? traductions[langueActuelle].btn_regenerer_ebook : traductions[langueActuelle].btn_generer;
     }
   }
 
@@ -1417,11 +1528,14 @@
 
   async function telechargerPDF(){
     var btn = document.getElementById('download-pdf-btn');
+    var titreSpan = btn.querySelector('.action-card-title');
+    var texteOrigine = titreSpan.textContent;
     var msg = document.getElementById('msg-pdf');
     msg.textContent = '';
     msg.className = 'form-msg';
     btn.disabled = true;
-    btn.textContent = 'Génération du PDF en cours...';
+    btn.classList.add('downloading');
+    titreSpan.textContent = document.getElementById('lang-switch').textContent === 'FR' ? 'Generating PDF...' : 'Génération du PDF en cours...';
 
     try {
       var htmlComplet = construireHTMLPourPDF();
@@ -1442,13 +1556,16 @@
       msg.classList.add('error');
     } finally {
       btn.disabled = false;
-      btn.textContent = document.getElementById('lang-switch').textContent === 'FR' ? 'Download my PDF' : 'Télécharger mon PDF';
+      btn.classList.remove('downloading');
+      titreSpan.textContent = texteOrigine;
     }
   }
 
   function ouvrirPrevisualisation(){
+    document.getElementById('preview-overlay').classList.add('is-opening');
     document.getElementById('preview-overlay').classList.remove('hidden');
     document.getElementById('preview-overlay-body').scrollTop = 0;
+    setTimeout(function(){ document.getElementById('preview-overlay').classList.remove('is-opening'); }, 10);
   }
 
   function fermerPrevisualisation(){
