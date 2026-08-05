@@ -117,18 +117,25 @@
     line-height:1.15;
     margin-bottom:4px;
   }
+  .step-progress{
+    font-size:11px;
+    color:var(--grey);
+    font-weight:600;
+    margin-bottom:8px;
+  }
   .lead{
     color:var(--grey);
     font-size:13.5px;
-    margin-bottom:20px;
-    line-height:1.4;
+    margin-bottom:28px;
+    line-height:1.5;
   }
 
-  .field{ margin-bottom:12px; }
+  .field{ margin-bottom:16px; }
   .field label{
     display:block;
     font-size:11.5px;
-    color:var(--grey);
+    color:#a7a7ad;
+    font-weight:600;
     margin-bottom:4px;
     text-transform:uppercase;
     letter-spacing:0.04em;
@@ -136,7 +143,7 @@
   .field input, .field select, .field textarea{
     width:100%;
     padding:10px 13px;
-    background:var(--black);
+    background:#1c1c20;
     border:1px solid var(--line);
     border-radius:8px;
     color:var(--white);
@@ -145,7 +152,11 @@
     outline:none;
   }
   .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--red); }
-  .field textarea{ min-height:130px; resize:vertical; }
+  .field input::placeholder, .field textarea::placeholder{ color:#5c5c62; line-height:1.5; }
+  .field textarea{ min-height:130px; resize:vertical; line-height:1.6; }
+  .textarea-large{ min-height:260px !important; }
+  .next-btn-large{ padding:15px 0 !important; font-size:16px !important; }
+  .back-btn-discreet{ opacity:0.7; }
   .two-col-row{
     display:flex;
     gap:10px;
@@ -170,18 +181,18 @@
   }
   .lang-choice input{ width:auto; accent-color:var(--red); }
   .lang-choice input:checked + span{ color:var(--white); }
-
-  .import-zone{
-    border:1.5px dashed var(--line);
-    border-radius:10px;
-    padding:24px;
-    text-align:center;
+  .field-note{
+    font-size:11.5px;
     color:var(--grey);
-    font-size:13px;
-    cursor:pointer;
-    margin-top:10px;
+    margin-top:8px;
+    line-height:1.4;
   }
-  .import-zone:hover{ border-color:var(--red); }
+  .btn-arrow{
+    display:inline-block;
+    transition:transform .15s ease;
+  }
+  .next-btn:hover .btn-arrow{ transform:translateX(3px); }
+
 
   /* ÉTAPE 3 : Design */
   .style-grid{
@@ -814,7 +825,8 @@
     color:var(--grey);
     line-height:1.4;
   }
-  .action-card.downloading{ opacity:0.7; animation:pulse-download 0.9s ease-in-out infinite; }
+  .downloading{ opacity:0.7; animation:pulse-download 0.9s ease-in-out infinite; }
+  .pdf-download-note{ text-align:center; margin-top:8px; }
   @keyframes pulse-download{
     0%, 100%{ transform:scale(1); }
     50%{ transform:scale(0.97); }
@@ -883,38 +895,6 @@
     overflow-y:auto;
   }
 
-  .file-list{
-    list-style:none;
-    margin-top:10px;
-  }
-  .file-list li{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    padding:9px 12px;
-    background:var(--black);
-    border:1px solid var(--line);
-    border-radius:8px;
-    font-size:13px;
-    margin-top:8px;
-  }
-  .file-list li .name{
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    color:var(--white);
-  }
-  .file-list li button{
-    background:none;
-    border:none;
-    color:var(--grey);
-    font-size:15px;
-    cursor:pointer;
-    line-height:1;
-    padding:2px 4px;
-  }
-  .file-list li button:hover{ color:var(--red); }
 
   .next-btn{
     width:100%;
@@ -1010,6 +990,7 @@
   <!-- ÉTAPE 1 : Informations générales -->
   <div class="step-screen active" id="screen-1">
     <div class="eyebrow" data-i18n="step_label_1">Étape 1 / 4</div>
+    <p class="step-progress" data-i18n="progres_25">25 % terminé</p>
     <h1 data-i18n="s1_title">Transformez votre expertise en produit</h1>
     <p class="lead" data-i18n="s1_lead">Renseignez ces informations. L'IA transformera votre expertise en un PDF professionnel prêt à être vendu en 2 minutes.</p>
 
@@ -1025,7 +1006,16 @@
 
     <div class="field">
       <label for="ton" data-i18n="lbl_ton">Ton</label>
-      <input type="text" id="ton" placeholder="Ex. : Persuasif, motivant, direct..." data-i18n-placeholder="ph_ton" required>
+      <select id="ton" required>
+        <option value="" data-i18n="ton_choisir" disabled selected>Choisissez un ton</option>
+        <option data-i18n="ton_pro">Professionnel</option>
+        <option data-i18n="ton_persuasif">Persuasif</option>
+        <option data-i18n="ton_inspirant">Inspirant</option>
+        <option data-i18n="ton_pedagogique">Pédagogique</option>
+        <option data-i18n="ton_conversationnel">Conversationnel</option>
+        <option data-i18n="ton_motivant">Motivant</option>
+        <option data-i18n="ton_direct">Direct</option>
+      </select>
     </div>
 
     <div class="field">
@@ -1052,35 +1042,28 @@
         <label><input type="radio" name="langue" value="fr" checked><span data-i18n="opt_francais">Français</span></label>
         <label><input type="radio" name="langue" value="en"><span data-i18n="opt_anglais">Anglais</span></label>
       </div>
+      <p class="field-note" data-i18n="note_langue_pdf">Le PDF sera généré entièrement dans la langue sélectionnée.</p>
     </div>
 
-    <button type="button" class="next-btn" onclick="validateStep1()" data-i18n="btn_continuer">Continuer</button>
+    <button type="button" class="next-btn" onclick="validateStep1()"><span data-i18n="btn_continuer">Continuer</span> <span class="btn-arrow">→</span></button>
     <p class="form-msg" id="msg-1"></p>
   </div>
 
   <!-- ÉTAPE 2 : Connaissances -->
   <div class="step-screen" id="screen-2">
     <div class="eyebrow" data-i18n="step_label_2">Étape 2 / 4</div>
+    <p class="step-progress" data-i18n="progres_50">50 % terminé</p>
     <h1 data-i18n="s2_title">Ajoutez vos connaissances</h1>
     <p class="lead" data-i18n="s2_lead">C'est ici que votre expertise prend vie. Décrivez vos connaissances, vos méthodes, vos conseils. Plus les informations sont détaillées, plus l'IA pourra créer un PDF professionnel fidèle à votre expertise.</p>
 
     <div class="field">
       <label for="connaissances" data-i18n="lbl_expertise">Vos connaissances</label>
-      <textarea id="connaissances" placeholder="Écrivez ou collez ici tout ce que vous savez sur votre sujet : méthodes, étapes, conseils, exemples, erreurs à éviter, astuces, expériences personnelles ou tout autre contenu que vous souhaitez retrouver dans votre PDF." data-i18n-placeholder="ph_expertise"></textarea>
-    </div>
-
-    <div class="field">
-      <label data-i18n="lbl_documents">Documents de votre expertise (optionnel)</label>
-      <div class="import-zone" onclick="document.getElementById('file-input').click()" data-i18n="import_docs">
-        Importez vos documents (Word, PDF, TXT...)
-      </div>
-      <input type="file" id="file-input" multiple style="display:none">
-      <ul class="file-list" id="file-list"></ul>
+      <textarea id="connaissances" class="textarea-large" placeholder="Écrivez ou collez ici tout ce que vous savez sur votre sujet : méthodes, étapes, conseils, exemples, erreurs à éviter, astuces, expériences personnelles ou tout autre contenu que vous souhaitez retrouver dans votre PDF." data-i18n-placeholder="ph_expertise"></textarea>
     </div>
 
     <div class="btn-row">
-      <button type="button" class="back-btn" onclick="goToStep(1)" data-i18n="btn_retour">Retour</button>
-      <button type="button" class="next-btn" onclick="validateStep2()" data-i18n="btn_continuer">Continuer</button>
+      <button type="button" class="back-btn back-btn-discreet" onclick="goToStep(1)" data-i18n="btn_retour">Retour</button>
+      <button type="button" class="next-btn next-btn-large" onclick="validateStep2()"><span data-i18n="btn_continuer">Continuer</span> <span class="btn-arrow">→</span></button>
     </div>
     <p class="form-msg" id="msg-2"></p>
   </div>
@@ -1088,6 +1071,7 @@
   <!-- ÉTAPE 3 : Design -->
   <div class="step-screen" id="screen-3">
     <div class="eyebrow" data-i18n="step_label_3">Étape 3 / 4</div>
+    <p class="step-progress" data-i18n="progres_75">75 % terminé</p>
     <h1 data-i18n="s3_title">Personnalisez le design</h1>
     <p class="lead" data-i18n="s3_lead">Choisissez le style, les couleurs et la mise en page de votre PDF.</p>
 
@@ -1195,6 +1179,7 @@
   <!-- ÉTAPE 4 : Génération -->
   <div class="step-screen" id="screen-4">
     <div class="eyebrow" data-i18n="step_label_4">Étape 4 / 4</div>
+    <p class="step-progress" data-i18n="progres_100">100 % terminé</p>
     <h1 id="s4-title-default" data-i18n="s4_title">Génération et prévisualisation</h1>
     <h1 id="s4-title-done" class="hidden" data-i18n="s4_title_done">✅ Votre expertise est devenue un produit professionnel !</h1>
     <p class="lead" id="s4-lead-default" data-i18n="s4_lead">L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.</p>
@@ -1204,20 +1189,16 @@
 
     <button type="button" class="next-btn" id="generate-btn" onclick="genererContenu()" data-i18n="btn_generer">Générer mon contenu</button>
     <p class="form-msg" id="msg-4"></p>
-    <div class="autosave-badge hidden" id="autosave-msg"><span>✅</span> <span data-i18n="msg_autosave">Sauvegardé automatiquement</span></div>
 
-    <div class="action-cards-row hidden" id="actions-row">
-      <button type="button" class="action-card" id="preview-btn" onclick="ouvrirPrevisualisation()">
-        <span class="action-card-icon">👁️</span>
-        <span class="action-card-title" data-i18n="btn_previsualiser">Prévisualiser</span>
-        <span class="action-card-desc" data-i18n="desc_previsualiser">Découvrez le rendu final de votre produit avant son téléchargement.</span>
+    <div class="btn-row hidden" id="actions-row">
+      <button type="button" class="back-btn" id="preview-btn" onclick="ouvrirPrevisualisation()">
+        <span class="eye-icon">👁️</span> <span data-i18n="btn_previsualiser">Prévisualiser</span>
       </button>
-      <button type="button" class="action-card" id="download-pdf-btn" onclick="telechargerPDF()">
-        <span class="action-card-icon">📥</span>
-        <span class="action-card-title" data-i18n="btn_telecharger_pdf">Télécharger le PDF</span>
-        <span class="action-card-desc" data-i18n="desc_telecharger">Téléchargez votre ebook professionnel, prêt à être partagé ou vendu.</span>
+      <button type="button" class="next-btn" id="download-pdf-btn" onclick="telechargerPDF()">
+        <span class="eye-icon">📥</span> <span data-i18n="btn_telecharger_pdf">Télécharger le PDF</span>
       </button>
     </div>
+    <p class="field-note pdf-download-note hidden" id="pdf-download-note" data-i18n="note_generation_pdf">1 génération sera utilisée lors du téléchargement.</p>
     <p class="form-msg" id="msg-pdf"></p>
 
     <textarea class="result-box hidden" id="result-box" readonly></textarea>
@@ -1253,6 +1234,10 @@
       lbl_titre: "Titre du PDF", ph_titre: "Ex. : Les fondamentaux du copywriting",
       lbl_sujet: "Sujet", ph_sujet: "Ex. : Rédaction persuasive pour entrepreneurs",
       lbl_ton: "Ton", ph_ton: "Ex. : Persuasif, motivant, direct...",
+      ton_choisir: "Choisissez un ton", ton_pro: "Professionnel", ton_persuasif: "Persuasif", ton_inspirant: "Inspirant",
+      ton_pedagogique: "Pédagogique", ton_conversationnel: "Conversationnel", ton_motivant: "Motivant", ton_direct: "Direct",
+      note_langue_pdf: "Le PDF sera généré entièrement dans la langue sélectionnée.",
+      progres_25: "25 % terminé", progres_50: "50 % terminé", progres_75: "75 % terminé", progres_100: "100 % terminé",
       lbl_public: "Public cible", ph_public: "Ex. : Entrepreneurs et freelances débutants",
       lbl_prenom: "Prénom du créateur", ph_prenom: "Votre prénom", lbl_createur: "Nom de l'auteur", ph_createur: "Votre nom",
       lbl_langue_doc: "Langue du document", opt_francais: "Français", opt_anglais: "Anglais",
@@ -1260,7 +1245,6 @@
       step_label_2: "Étape 2 / 4", s2_title: "Ajoutez vos connaissances",
       s2_lead: "C'est ici que votre expertise prend vie. Décrivez vos connaissances, vos méthodes, vos conseils. Plus les informations sont détaillées, plus l'IA pourra créer un PDF professionnel fidèle à votre expertise.",
       lbl_expertise: "Vos connaissances", ph_expertise: "Écrivez ou collez ici tout ce que vous savez sur votre sujet : méthodes, étapes, conseils, exemples, erreurs à éviter, astuces, expériences personnelles ou tout autre contenu que vous souhaitez retrouver dans votre PDF.",
-      lbl_documents: "Documents de votre expertise (optionnel)", import_docs: "Importez vos documents (Word, PDF, TXT...)",
       step_label_3: "Étape 3 / 4", s3_title: "Personnalisez le design",
       s3_lead: "Choisissez le style, les couleurs et la mise en page de votre PDF.",
       lbl_style_pdf: "Style du PDF", style_pro: "Professionnel", style_luxe: "Luxe", style_min: "Minimaliste", style_mod: "Moderne", style_crea: "Créatif",
@@ -1279,11 +1263,9 @@
       s4_lead: "L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.",
       s4_title_done: "✅ Votre expertise est devenue un produit professionnel !",
       s4_lead_done: "Votre expertise a été transformée en un ebook professionnel, prêt à être prévisualisé ou téléchargé en seulement 2 minutes.",
-      desc_previsualiser: "Découvrez le rendu final de votre produit avant son téléchargement.",
-      desc_telecharger: "Téléchargez votre ebook professionnel, prêt à être partagé ou vendu.",
       btn_regenerer_ebook: "Régénérer mon ebook",
       btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF", btn_telecharger_pdf: "Télécharger le PDF",
-      msg_autosave: "Enregistré automatiquement ✓",
+      note_generation_pdf: "1 génération sera utilisée lors du téléchargement.",
       recap_titre: "Titre", recap_sujet: "Sujet", recap_ton: "Ton", recap_public: "Public cible"
     },
     en: {
@@ -1293,6 +1275,10 @@
       lbl_titre: "PDF title", ph_titre: "E.g.: Copywriting fundamentals",
       lbl_sujet: "Subject", ph_sujet: "E.g.: Persuasive writing for entrepreneurs",
       lbl_ton: "Tone", ph_ton: "E.g.: Persuasive, motivating, direct...",
+      ton_choisir: "Choose a tone", ton_pro: "Professional", ton_persuasif: "Persuasive", ton_inspirant: "Inspiring",
+      ton_pedagogique: "Educational", ton_conversationnel: "Conversational", ton_motivant: "Motivating", ton_direct: "Direct",
+      note_langue_pdf: "The PDF will be generated entirely in the selected language.",
+      progres_25: "25% complete", progres_50: "50% complete", progres_75: "75% complete", progres_100: "100% complete",
       lbl_public: "Target audience", ph_public: "E.g.: Beginner entrepreneurs and freelancers",
       lbl_prenom: "Creator first name", ph_prenom: "Your first name", lbl_createur: "Author name", ph_createur: "Your name",
       lbl_langue_doc: "Document language", opt_francais: "French", opt_anglais: "English",
@@ -1300,7 +1286,6 @@
       step_label_2: "Step 2 / 4", s2_title: "Add your knowledge",
       s2_lead: "This is where your expertise comes to life. Describe your knowledge, methods and advice. The more detailed the information, the better the AI can create a PDF true to your expertise.",
       lbl_expertise: "Your knowledge", ph_expertise: "Write or paste here everything you know about your topic: methods, steps, advice, examples, mistakes to avoid, tips, personal experiences, or any other content you'd like to see in your PDF.",
-      lbl_documents: "Expertise documents (optional)", import_docs: "Import your documents (Word, PDF, TXT...)",
       step_label_3: "Step 3 / 4", s3_title: "Customize the design",
       s3_lead: "Choose the style, colors and layout of your PDF.",
       lbl_style_pdf: "PDF style", style_pro: "Professional", style_luxe: "Luxury", style_min: "Minimalist", style_mod: "Modern", style_crea: "Creative",
@@ -1319,11 +1304,9 @@
       s4_lead: "The AI combines your knowledge, structure and design to create your final PDF.",
       s4_title_done: "✅ Your expertise has become a professional product!",
       s4_lead_done: "Your expertise has been turned into a professional ebook, ready to preview or download in just 2 minutes.",
-      desc_previsualiser: "Discover the final look of your product before downloading it.",
-      desc_telecharger: "Download your professional ebook, ready to share or sell.",
       btn_regenerer_ebook: "Regenerate my ebook",
       btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview", btn_telecharger_pdf: "Download the PDF",
-      msg_autosave: "Auto-saved ✓",
+      note_generation_pdf: "1 generation will be used when downloading.",
       recap_titre: "Title", recap_sujet: "Subject", recap_ton: "Tone", recap_public: "Target audience"
     }
   };
@@ -1393,7 +1376,6 @@
     var resultBox = document.getElementById('result-box');
     var preview = document.getElementById('pdf-preview');
     var actionsRow = document.getElementById('actions-row');
-    var autosaveMsg = document.getElementById('autosave-msg');
 
     msg.textContent = '';
     msg.className = 'form-msg';
@@ -1401,7 +1383,7 @@
     preview.classList.add('hidden');
     preview.innerHTML = '';
     actionsRow.classList.add('hidden');
-    autosaveMsg.classList.add('hidden');
+    document.getElementById('pdf-download-note').classList.add('hidden');
     btn.disabled = true;
     var texteChargement = document.getElementById('lang-switch').textContent === 'FR' ? 'Generating...' : 'Génération en cours...';
     btn.textContent = texteChargement;
@@ -1425,6 +1407,7 @@
         construirePrevisualisation(contenu);
         preview.classList.remove('hidden');
         actionsRow.classList.remove('hidden');
+        document.getElementById('pdf-download-note').classList.remove('hidden');
 
         // Bascule vers l'en-tête "terminé" + bouton devient secondaire (Régénérer)
         document.getElementById('s4-title-default').classList.add('hidden');
@@ -1485,7 +1468,6 @@
       projet.set('contenuGenere', dernierResultatIA);
 
       await projet.save();
-      document.getElementById('autosave-msg').classList.remove('hidden');
     } catch (error) {
       // Échec silencieux : on ne bloque pas l'utilisateur si la sauvegarde échoue,
       // il peut toujours prévisualiser et télécharger son PDF normalement.
@@ -1525,7 +1507,7 @@
 
   async function telechargerPDF(){
     var btn = document.getElementById('download-pdf-btn');
-    var titreSpan = btn.querySelector('.action-card-title');
+    var titreSpan = btn.querySelector('span:last-child');
     var texteOrigine = titreSpan.textContent;
     var msg = document.getElementById('msg-pdf');
     msg.textContent = '';
@@ -1965,37 +1947,6 @@
     });
   });
 
-  // Gestion de l'affichage des fichiers importés
-  var importedFiles = [];
-
-  function renderFileList(){
-    var list = document.getElementById('file-list');
-    list.innerHTML = '';
-    importedFiles.forEach(function(file, index){
-      var li = document.createElement('li');
-      var nameSpan = document.createElement('span');
-      nameSpan.className = 'name';
-      nameSpan.textContent = file.name;
-      var removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.textContent = '✕';
-      removeBtn.onclick = function(){
-        importedFiles.splice(index, 1);
-        renderFileList();
-      };
-      li.appendChild(nameSpan);
-      li.appendChild(removeBtn);
-      list.appendChild(li);
-    });
-  }
-
-  document.getElementById('file-input').addEventListener('change', function(e){
-    Array.from(e.target.files).forEach(function(file){
-      importedFiles.push(file);
-    });
-    renderFileList();
-    e.target.value = ''; // permet de réimporter le même fichier si besoin
-  });
 </script>
 
 </body>
