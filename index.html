@@ -439,7 +439,7 @@
       var toast = document.getElementById('toast');
       toast.classList.add('show');
       setMsg('signup-msg', 'Compte créé avec succès !', 'success');
-      setTimeout(function(){ window.location.href = 'app.html'; }, 2200);
+      setTimeout(function(){ window.location.href = 'dashboard.html'; }, 2200);
     } catch (error) {
       setMsg('signup-msg', 'Erreur : ' + error.message, 'error');
     } finally {
@@ -462,7 +462,7 @@
     try {
       await Parse.User.logIn(email, password);
       setMsg('login-msg', 'Connexion réussie !', 'success');
-      setTimeout(function(){ window.location.href = 'app.html'; }, 1200);
+      setTimeout(function(){ window.location.href = 'dashboard.html'; }, 1200);
     } catch (error) {
       setMsg('login-msg', 'Erreur : ' + error.message, 'error');
     } finally {
