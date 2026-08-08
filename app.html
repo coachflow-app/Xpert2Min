@@ -1245,6 +1245,7 @@
       step_label_2: "Étape 2 / 4", s2_title: "Ajoutez vos connaissances",
       s2_lead: "C'est ici que votre expertise prend vie. Décrivez vos connaissances, vos méthodes, vos conseils. Plus les informations sont détaillées, plus l'IA pourra créer un PDF professionnel fidèle à votre expertise.",
       lbl_expertise: "Vos connaissances", ph_expertise: "Écrivez ou collez ici tout ce que vous savez sur votre sujet : méthodes, étapes, conseils, exemples, erreurs à éviter, astuces, expériences personnelles ou tout autre contenu que vous souhaitez retrouver dans votre PDF.",
+      err_trop_long: "Votre expertise est trop longue pour une seule génération ({n} mots, maximum 15 000). Résumez-la ou divisez-la en plusieurs parties.",
       step_label_3: "Étape 3 / 4", s3_title: "Personnalisez le design",
       s3_lead: "Choisissez le style, les couleurs et la mise en page de votre PDF.",
       lbl_style_pdf: "Style du PDF", style_pro: "Professionnel", style_luxe: "Luxe", style_min: "Minimaliste", style_mod: "Moderne", style_crea: "Créatif",
@@ -1286,6 +1287,7 @@
       step_label_2: "Step 2 / 4", s2_title: "Add your knowledge",
       s2_lead: "This is where your expertise comes to life. Describe your knowledge, methods and advice. The more detailed the information, the better the AI can create a PDF true to your expertise.",
       lbl_expertise: "Your knowledge", ph_expertise: "Write or paste here everything you know about your topic: methods, steps, advice, examples, mistakes to avoid, tips, personal experiences, or any other content you'd like to see in your PDF.",
+      err_trop_long: "Your expertise is too long for a single generation ({n} words, 15,000 max). Summarize it or split it into several parts.",
       step_label_3: "Step 3 / 4", s3_title: "Customize the design",
       s3_lead: "Choose the style, colors and layout of your PDF.",
       lbl_style_pdf: "PDF style", style_pro: "Professional", style_luxe: "Luxury", style_min: "Minimalist", style_mod: "Modern", style_crea: "Creative",
@@ -1930,7 +1932,20 @@
   }
 
   function validateStep2(){
-    document.getElementById('msg-2').textContent = '';
+    var msg = document.getElementById('msg-2');
+    msg.textContent = '';
+    msg.className = 'form-msg';
+
+    var texte = document.getElementById('connaissances').value.trim();
+    var nombreDeMots = texte ? texte.split(/\s+/).length : 0;
+
+    if (nombreDeMots > 15000) {
+      var langue = localStorage.getItem('xpert2min_langue') || 'fr';
+      msg.textContent = traductions[langue].err_trop_long.replace('{n}', nombreDeMots);
+      msg.classList.add('error');
+      return;
+    }
+
     // Pré-remplit le titre de couverture avec le titre saisi à l'étape 1
     document.getElementById('titre-couverture').value = document.getElementById('titre').value;
     goToStep(3);
