@@ -261,10 +261,6 @@
         <div class="stat-label" data-i18n="stat_crees">PDF créés</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value" id="stat-telecharges">0</div>
-        <div class="stat-label" data-i18n="stat_telecharges">PDF téléchargés</div>
-      </div>
-      <div class="stat-card">
         <div class="stat-value" id="stat-enregistres">0</div>
         <div class="stat-label" data-i18n="stat_enregistres">PDF enregistrés</div>
       </div>
@@ -311,7 +307,7 @@
       welcome_sub: "Prêt à transformer une nouvelle expertise en produit professionnel en 2 minutes ?",
       cta_transformer: "📄 Transformer votre expertise",
       titre_mes_pdf: "📚 Mes PDF", chargement_pdf: "Chargement...", aucun_pdf: "Vous n'avez encore créé aucun PDF.",
-      titre_stats: "📊 Statistiques", stat_crees: "PDF créés", stat_telecharges: "PDF téléchargés", stat_enregistres: "PDF enregistrés",
+      titre_stats: "📊 Statistiques", stat_crees: "PDF créés", stat_enregistres: "PDF enregistrés",
       titre_abonnement: "💳 Abonnement actuel", aucun_abonnement: "Aucun abonnement actif",
       param_titre: "⚙️ Paramètres", param_profil: "👤 Profil", param_email: "📧 E-mail", param_langue: "🌐 Langue",
       param_acheter: "🛒 Acheter des générations — Bientôt disponible", param_deconnexion: "🚪 Déconnexion",
@@ -322,7 +318,7 @@
       welcome_sub: "Ready to turn a new expertise into a professional product in 2 minutes?",
       cta_transformer: "📄 Turn your expertise into a product",
       titre_mes_pdf: "📚 My PDFs", chargement_pdf: "Loading...", aucun_pdf: "You haven't created any PDF yet.",
-      titre_stats: "📊 Statistics", stat_crees: "PDFs created", stat_telecharges: "PDFs downloaded", stat_enregistres: "PDFs saved",
+      titre_stats: "📊 Statistics", stat_crees: "PDFs created", stat_enregistres: "PDFs saved",
       titre_abonnement: "💳 Current plan", aucun_abonnement: "No active subscription",
       param_titre: "⚙️ Settings", param_profil: "👤 Profile", param_email: "📧 Email", param_langue: "🌐 Language",
       param_acheter: "🛒 Buy generations — Coming soon", param_deconnexion: "🚪 Log out",
@@ -394,9 +390,7 @@
 
       // Statistiques
       var totalCrees = projets.length;
-      var totalTelecharges = projets.reduce(function(somme, p){ return somme + (p.get('telechargements') || 0); }, 0);
       document.getElementById('stat-crees').textContent = totalCrees;
-      document.getElementById('stat-telecharges').textContent = totalTelecharges;
       document.getElementById('stat-enregistres').textContent = totalCrees;
 
     } catch (error) {
@@ -429,5 +423,4 @@
 </script>
 
 </body>
-           </html>
-  
+</html>
