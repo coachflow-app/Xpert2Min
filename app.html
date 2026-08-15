@@ -1931,21 +1931,6 @@
 
     // --- Vérification finale avant "export" : aucune page ne doit déborder (ajustement auto de la taille du texte) ---
     ajusterDebordements();
-
-    // --- Hauteur fixe et fiable pour chaque page (évite tout décalage d'affichage entre pages) ---
-    forcerHauteurPages();
-  }
-
-  // Calcule et applique en pixels la hauteur exacte de chaque page (format A4 : 210 x 297),
-  // au lieu de compter uniquement sur le CSS "aspect-ratio" qui peut se comporter
-  // différemment selon les téléphones/navigateurs. Garantit que toutes les pages
-  // ont toujours exactement la même hauteur, sans espace vide entre elles.
-  function forcerHauteurPages(){
-    document.querySelectorAll('#pdf-preview .pdf-page').forEach(function(page){
-      var largeur = page.offsetWidth;
-      page.style.aspectRatio = 'auto';
-      page.style.height = Math.round(largeur * 297 / 210) + 'px';
-    });
   }
 
   // Applique un facteur d'échelle à toutes les tailles de texte de contenu selon le choix Petit/Moyen/Grand
