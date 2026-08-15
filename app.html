@@ -1424,8 +1424,9 @@
         enregistrerProjetSilencieux();
       }
     } catch (error) {
-      msg.textContent = 'Erreur : impossible de générer le contenu. Réessayez.';
+      msg.textContent = 'Erreur technique : ' + (error.message || 'inconnue');
       msg.classList.add('error');
+      console.error('Détail erreur genererContenu :', error);
     } finally {
       btn.disabled = false;
       var dejaGenere = !document.getElementById('s4-title-done').classList.contains('hidden');
