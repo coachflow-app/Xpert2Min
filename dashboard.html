@@ -48,9 +48,7 @@
   .logo .x-icon{ width:22px; height:22px; flex-shrink:0; }
   .logo .x-icon svg{ width:100%; height:100%; display:block; }
   .logo span{ color:var(--red); }
-  header nav{ display:flex; align-items:center; gap:14px; }
-  header nav a{ color:var(--grey); text-decoration:none; font-size:13px; white-space:nowrap; }
-  header nav a.active{ color:var(--white); font-weight:600; }
+  header nav{ display:flex; align-items:center; gap:10px; margin-left:auto; }
   .icon-btn{
     background:transparent;
     border:1px solid var(--line);
@@ -77,31 +75,44 @@
   /* MAIN */
   main{ max-width:560px; margin:0 auto; padding:20px 20px 60px; }
 
-  .welcome-block{ margin-bottom:24px; }
+  .welcome-block{ margin-bottom:16px; }
   .welcome-title{
     font-family:'Archivo Black', sans-serif;
     font-size:22px;
-    margin-bottom:6px;
+    margin-bottom:8px;
   }
-  .welcome-sub{ color:var(--grey); font-size:13.5px; line-height:1.5; }
+  .welcome-sub{
+    color:var(--white);
+    opacity:0.92;
+    font-size:15.5px;
+    font-weight:600;
+    line-height:1.45;
+  }
 
   .cta-main{
-    display:block;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
     width:100%;
-    padding:16px 0;
+    padding:14px 0;
     margin-bottom:28px;
     background:var(--red);
     color:#fff;
     border:none;
-    border-radius:10px;
+    border-radius:14px;
     font-size:15.5px;
     font-weight:700;
     font-family:'Inter', sans-serif;
     cursor:pointer;
     text-align:center;
     text-decoration:none;
+    box-shadow:0 8px 22px rgba(232,22,28,0.35);
+    transition:transform .12s ease, box-shadow .12s ease, background .15s ease;
   }
-  .cta-main:hover{ background:#c9121a; }
+  .cta-main:hover{ background:#c9121a; box-shadow:0 10px 26px rgba(232,22,28,0.45); }
+  .cta-main:active{ transform:scale(0.97); box-shadow:0 4px 12px rgba(232,22,28,0.3); }
+  .cta-main .cta-icon{ font-size:15px; }
 
   .section-block{ margin-bottom:28px; }
   .section-title{
@@ -112,13 +123,32 @@
 
   .pdf-list{ display:flex; flex-direction:column; gap:8px; }
   .pdf-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
     background:var(--black);
     border:1px solid var(--line);
     border-radius:10px;
     padding:13px 14px;
+    transition:border-color .15s ease, background .15s ease;
   }
-  .pdf-item-title{ font-size:13.5px; font-weight:600; color:var(--white); margin-bottom:3px; }
+  .pdf-item.clickable{ cursor:pointer; }
+  .pdf-item.clickable:hover{ border-color:var(--red); background:rgba(232,22,28,0.05); }
+  .pdf-item-info{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .pdf-item-icon{ font-size:16px; flex-shrink:0; }
+  .pdf-item-text{ min-width:0; }
+  .pdf-item-title{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--white);
+    margin-bottom:3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
   .pdf-item-date{ font-size:11px; color:var(--grey); }
+  .pdf-item-chevron{ font-size:16px; color:var(--grey); flex-shrink:0; }
   .empty-state{
     color:var(--grey);
     font-size:13px;
@@ -128,31 +158,23 @@
     border-radius:10px;
   }
 
-  .stats-row{ display:flex; gap:10px; }
-  .stat-card{
-    flex:1;
+  .saved-count-block{
+    display:flex;
+    align-items:center;
+    gap:8px;
     background:var(--black);
     border:1px solid var(--line);
     border-radius:10px;
-    padding:14px 10px;
-    text-align:center;
+    padding:13px 14px;
+    font-size:13px;
+    color:var(--grey);
   }
-  .stat-value{
-    font-family:'Archivo Black', sans-serif;
-    font-size:22px;
+  .saved-count-value{
     color:var(--red);
+    font-weight:800;
+    font-family:'Archivo Black', sans-serif;
+    font-size:15px;
   }
-  .stat-label{ font-size:10.5px; color:var(--grey); margin-top:4px; line-height:1.3; }
-
-  .sub-card{
-    background:var(--black);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:16px;
-  }
-  .sub-card-status{ font-size:13.5px; color:var(--grey); }
-  .sub-card-status.active{ color:var(--white); }
-  .sub-card-detail{ font-size:12px; color:var(--grey); margin-top:6px; }
 
   /* SETTINGS OVERLAY */
   .settings-overlay{
@@ -174,6 +196,7 @@
     width:100%;
     max-width:560px;
     padding:22px 20px 30px;
+    position:relative;
   }
   .settings-panel h2{
     font-family:'Archivo Black', sans-serif;
@@ -214,7 +237,6 @@
     font-size:18px;
     cursor:pointer;
   }
-  .settings-panel{ position:relative; }
 </style>
 </head>
 <body>
@@ -230,8 +252,6 @@
     XPERT<span>2</span>MIN
   </div>
   <nav>
-    <a href="app.html" data-i18n="nav_creer">Créer</a>
-    <a href="dashboard.html" class="active" data-i18n="nav_dashboard">Tableau de bord</a>
     <button type="button" class="icon-btn" onclick="ouvrirParametres()">⚙️</button>
     <button type="button" class="lang-switch" id="lang-switch" onclick="toggleLangue()">EN</button>
   </nav>
@@ -244,7 +264,7 @@
     <p class="welcome-sub" data-i18n="welcome_sub">Prêt à transformer une nouvelle expertise en produit professionnel en 2 minutes ?</p>
   </div>
 
-  <a href="app.html" class="cta-main" data-i18n="cta_transformer">📄 Transformer votre expertise</a>
+  <a href="app.html" class="cta-main"><span class="cta-icon">✨</span><span data-i18n="cta_transformer">Transformer votre expertise</span></a>
 
   <div class="section-block">
     <div class="section-title" data-i18n="titre_mes_pdf">📚 Mes PDF</div>
@@ -254,23 +274,8 @@
   </div>
 
   <div class="section-block">
-    <div class="section-title" data-i18n="titre_stats">📊 Statistiques</div>
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-value" id="stat-crees">0</div>
-        <div class="stat-label" data-i18n="stat_crees">PDF créés</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-enregistres">0</div>
-        <div class="stat-label" data-i18n="stat_enregistres">PDF enregistrés</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-block">
-    <div class="section-title" data-i18n="titre_abonnement">💳 Abonnement actuel</div>
-    <div class="sub-card">
-      <div class="sub-card-status" data-i18n="aucun_abonnement">Aucun abonnement actif</div>
+    <div class="saved-count-block">
+      📁 <span data-i18n="lbl_pdf_enregistres">PDF enregistrés</span> : <span class="saved-count-value" id="saved-count">0</span>
     </div>
   </div>
 
@@ -283,16 +288,16 @@
     <h2 data-i18n="param_titre">⚙️ Paramètres</h2>
 
     <div class="settings-row">
-      <span class="settings-row-label" data-i18n="param_profil">👤 Profil</span>
-      <span class="settings-row-value" id="param-nom">—</span>
-    </div>
-    <div class="settings-row">
       <span class="settings-row-label" data-i18n="param_email">📧 E-mail</span>
       <span class="settings-row-value" id="param-email">—</span>
     </div>
     <div class="settings-row">
       <span class="settings-row-label" data-i18n="param_langue">🌐 Langue</span>
       <span class="settings-row-value" id="param-langue-valeur">Français</span>
+    </div>
+    <div class="settings-row">
+      <span class="settings-row-label" data-i18n="param_abonnement">💳 Abonnement</span>
+      <span class="settings-row-value" id="param-abonnement" data-i18n="aucun_abonnement">Aucun abonnement actif</span>
     </div>
 
     <button type="button" class="settings-btn" disabled data-i18n="param_acheter">🛒 Acheter des générations — Bientôt disponible</button>
@@ -303,24 +308,22 @@
 <script>
   var traductions = {
     fr: {
-      nav_creer: "Créer", nav_dashboard: "Tableau de bord",
       welcome_sub: "Prêt à transformer une nouvelle expertise en produit professionnel en 2 minutes ?",
-      cta_transformer: "📄 Transformer votre expertise",
+      cta_transformer: "Transformer votre expertise",
       titre_mes_pdf: "📚 Mes PDF", chargement_pdf: "Chargement...", aucun_pdf: "Vous n'avez encore créé aucun PDF.",
-      titre_stats: "📊 Statistiques", stat_crees: "PDF créés", stat_enregistres: "PDF enregistrés",
-      titre_abonnement: "💳 Abonnement actuel", aucun_abonnement: "Aucun abonnement actif",
-      param_titre: "⚙️ Paramètres", param_profil: "👤 Profil", param_email: "📧 E-mail", param_langue: "🌐 Langue",
+      lbl_pdf_enregistres: "PDF enregistrés",
+      param_titre: "⚙️ Paramètres", param_email: "📧 E-mail", param_langue: "🌐 Langue", param_abonnement: "💳 Abonnement",
+      aucun_abonnement: "Aucun abonnement actif",
       param_acheter: "🛒 Acheter des générations — Bientôt disponible", param_deconnexion: "🚪 Déconnexion",
       bonjour: "Bonjour"
     },
     en: {
-      nav_creer: "Create", nav_dashboard: "Dashboard",
       welcome_sub: "Ready to turn a new expertise into a professional product in 2 minutes?",
-      cta_transformer: "📄 Turn your expertise into a product",
+      cta_transformer: "Turn your expertise into a product",
       titre_mes_pdf: "📚 My PDFs", chargement_pdf: "Loading...", aucun_pdf: "You haven't created any PDF yet.",
-      titre_stats: "📊 Statistics", stat_crees: "PDFs created", stat_enregistres: "PDFs saved",
-      titre_abonnement: "💳 Current plan", aucun_abonnement: "No active subscription",
-      param_titre: "⚙️ Settings", param_profil: "👤 Profile", param_email: "📧 Email", param_langue: "🌐 Language",
+      lbl_pdf_enregistres: "PDFs saved",
+      param_titre: "⚙️ Settings", param_email: "📧 Email", param_langue: "🌐 Language", param_abonnement: "💳 Subscription",
+      aucun_abonnement: "No active subscription",
       param_acheter: "🛒 Buy generations — Coming soon", param_deconnexion: "🚪 Log out",
       bonjour: "Hello"
     }
@@ -351,7 +354,6 @@
   }
 
   var dernierPrenom = '';
-  var dernierNomComplet = '';
 
   function afficherAccueil(){
     var langue = localStorage.getItem('xpert2min_langue') || 'fr';
@@ -372,10 +374,8 @@
       // Prénom pour le message de bienvenue : projet le plus récent
       if (projets.length > 0) {
         dernierPrenom = projets[0].get('prenom') || '';
-        dernierNomComplet = (projets[0].get('prenom') || '') + ' ' + (projets[0].get('createur') || '');
       }
       afficherAccueil();
-      document.getElementById('param-nom').textContent = dernierNomComplet.trim() || '—';
 
       // Liste des PDF
       var liste = document.getElementById('pdf-list');
@@ -384,14 +384,23 @@
       } else {
         liste.innerHTML = projets.map(function(p){
           var date = p.createdAt ? p.createdAt.toLocaleDateString() : '';
-          return '<div class="pdf-item"><div class="pdf-item-title">' + escapeHTML(p.get('titre') || 'Sans titre') + '</div><div class="pdf-item-date">' + date + '</div></div>';
+          var lienPdf = p.get('pdfUrl');
+          var titre = escapeHTML(p.get('titre') || 'Sans titre');
+          if (lienPdf) {
+            return '<div class="pdf-item clickable" onclick="window.open(\'' + lienPdf + '\', \'_blank\')">' +
+              '<div class="pdf-item-info"><span class="pdf-item-icon">📄</span><div class="pdf-item-text">' +
+              '<div class="pdf-item-title">' + titre + '</div><div class="pdf-item-date">' + date + '</div></div></div>' +
+              '<span class="pdf-item-chevron">›</span></div>';
+          }
+          return '<div class="pdf-item">' +
+            '<div class="pdf-item-info"><span class="pdf-item-icon">📄</span><div class="pdf-item-text">' +
+            '<div class="pdf-item-title">' + titre + '</div><div class="pdf-item-date">' + date + '</div></div></div>' +
+            '</div>';
         }).join('');
       }
 
-      // Statistiques
-      var totalCrees = projets.length;
-      document.getElementById('stat-crees').textContent = totalCrees;
-      document.getElementById('stat-enregistres').textContent = totalCrees;
+      // PDF enregistrés
+      document.getElementById('saved-count').textContent = projets.length;
 
     } catch (error) {
       console.error('Erreur de chargement du dashboard :', error.message);
