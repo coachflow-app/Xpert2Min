@@ -383,7 +383,10 @@
         liste.innerHTML = '<p class="empty-state" data-i18n="aucun_pdf">' + traductions[langue].aucun_pdf + '</p>';
       } else {
         liste.innerHTML = projets.map(function(p){
-          var date = p.createdAt ? p.createdAt.toLocaleDateString() : '';
+          var dateDL = p.get('dateTelechargement');
+          var date = dateDL
+            ? (dateDL.toLocaleDateString() + ' à ' + dateDL.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}))
+            : (p.createdAt ? p.createdAt.toLocaleDateString() : '');
           var lienPdf = p.get('pdfUrl');
           var titre = escapeHTML(p.get('titre') || 'Sans titre');
           if (lienPdf) {
