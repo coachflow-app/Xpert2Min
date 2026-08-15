@@ -1539,7 +1539,13 @@
       // --- Étape 2 : un appel IA séparé par chapitre (chaque chapitre a son budget complet) ---
       var texteFinal = '[SOMMAIRE]\n' + titresChapitres.join('\n') + '\n[INTRODUCTION]\n' + planDecoupe.introduction + '\n';
 
+      function pause(ms){ return new Promise(function(resolve){ setTimeout(resolve, ms); }); }
+
       for (var i = 0; i < titresChapitres.length; i++) {
+        if (i > 0) {
+          btn.textContent = estFr ? 'Petite pause...' : 'Short pause...';
+          await pause(2500); // laisse le temps au quota Groq de se libérer entre 2 chapitres
+        }
         btn.textContent = (estFr ? 'Rédaction du chapitre ' : 'Writing chapter ') + (i + 1) + '/' + titresChapitres.length + '...';
         var corpsChapitre = await Parse.Cloud.run('analyserExpertise', {
           titre: titre, sujet: sujet, ton: ton, publicCible: publicCible, expertise: expertise,
