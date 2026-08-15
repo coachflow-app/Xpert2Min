@@ -1510,17 +1510,51 @@
     actionsRow.classList.add('hidden');
     document.getElementById('pdf-download-note').classList.add('hidden');
     btn.disabled = true;
-    var texteChargement = document.getElementById('lang-switch').textContent === 'FR' ? 'Generating...' : 'Génération en cours...';
-    btn.textContent = texteChargement;
+    var estFr = document.getElementById('lang-switch').textContent === 'FR';
 
     try {
-      var resultat = await Parse.Cloud.run('analyserExpertise', {
-        titre: document.getElementById('titre').value,
-        sujet: document.getElementById('sujet').value,
-        ton: document.getElementById('ton').value,
-        publicCible: document.getElementById('public').value,
-        expertise: document.getElementById('connaissances').value
+      var titre = document.getElementById('titre').value;
+      var sujet = document.getElementById('sujet').value;
+      var ton = document.getElementById('ton').value;
+      var publicCible = document.getElementById('public').value;
+      var expertise = document.getElementById('connaissances').value;
+
+      // --- Étape 1 : demander uniquement le plan (sommaire + introduction + conclusion) ---
+      btn.textContent = estFr ? 'Préparation du plan...' : 'Preparing outline...';
+      var reponsePlan = await Parse.Cloud.run('analyserExpertise', {
+        titre: titre, sujet: sujet, ton: ton, publicCible: publicCible, expertise: expertise, mode: 'plan'
       });
+
+      var planDecoupe = decouperReponseIA(reponsePlan);
+      if (!planDecoupe) { throw new Error('Réponse IA invalide (plan).'); }
+
+      var titresChapitres = planDecoupe.sommaire.split('\n')
+        .map(function(l){ return l.replace(/^[-•\d.\)]+\s*/, '').trim(); })
+        .filter(function(l){ return l; });
+
+      if (titresChapitres.length === 0) { throw new Error('Aucun chapitre détecté dans le plan.'); }
+
+      var listeChapitresTexte = titresChapitres.join(', ');
+
+      // --- Étape 2 : un appel IA séparé par chapitre (chaque chapitre a son budget complet) ---
+      var texteFinal = '[SOMMAIRE]\n' + titresChapitres.join('\n') + '\n[INTRODUCTION]\n' + planDecoupe.introduction + '\n';
+
+      for (var i = 0; i < titresChapitres.length; i++) {
+        btn.textContent = (estFr ? 'Rédaction du chapitre ' : 'Writing chapter ') + (i + 1) + '/' + titresChapitres.length + '...';
+        var corpsChapitre = await Parse.Cloud.run('analyserExpertise', {
+          titre: titre, sujet: sujet, ton: ton, publicCible: publicCible, expertise: expertise,
+          mode: 'chapitre',
+          chapitreTitre: titresChapitres[i],
+          chapitreIndex: i + 1,
+          totalChapitres: titresChapitres.length,
+          listeChapitres: listeChapitresTexte
+        });
+        texteFinal += '[CHAPITRE ' + (i + 1) + ': ' + titresChapitres[i] + ']\n' + (corpsChapitre || '').trim() + '\n';
+      }
+
+      texteFinal += '[CONCLUSION]\n' + planDecoupe.conclusion;
+
+      var resultat = texteFinal;
 
       dernierResultatIA = resultat;
       var contenu = decouperReponseIA(resultat);
@@ -1684,6 +1718,7 @@
           var projetQuery = new Parse.Query(Project);
           var projetAMettreAJour = await projetQuery.get(idProjetActuel);
           projetAMettreAJour.set('pdfUrl', resultat.url);
+          projetAMettreAJour.set('dateTelechargement', new Date());
           await projetAMettreAJour.save();
         } catch (erreurSauvegardeLien) {
           console.error('Erreur de sauvegarde du lien PDF :', erreurSauvegardeLien.message);
