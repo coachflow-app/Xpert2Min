@@ -1371,6 +1371,7 @@
   }
 
   var dernierResultatIA = null; // texte brut renvoyé par l'IA, pour la sauvegarde
+  var idProjetActuel = null; // identifiant du projet sauvegardé, pour y rattacher le lien du PDF ensuite
 
   async function genererContenu(){
     var btn = document.getElementById('generate-btn');
@@ -1470,6 +1471,7 @@
       projet.set('contenuGenere', dernierResultatIA);
 
       await projet.save();
+      idProjetActuel = projet.id;
     } catch (error) {
       // Échec silencieux : on ne bloque pas l'utilisateur si la sauvegarde échoue,
       // il peut toujours prévisualiser et télécharger son PDF normalement.
@@ -1532,6 +1534,19 @@
       document.body.appendChild(lien);
       lien.click();
       document.body.removeChild(lien);
+
+      // Sauvegarde du lien PDF sur le projet, pour pouvoir le rouvrir depuis le Dashboard
+      if (idProjetActuel) {
+        try {
+          var Project = Parse.Object.extend('Project');
+          var projetQuery = new Parse.Query(Project);
+          var projetAMettreAJour = await projetQuery.get(idProjetActuel);
+          projetAMettreAJour.set('pdfUrl', resultat.url);
+          await projetAMettreAJour.save();
+        } catch (erreurSauvegardeLien) {
+          console.error('Erreur de sauvegarde du lien PDF :', erreurSauvegardeLien.message);
+        }
+      }
     } catch (error) {
       msg.textContent = 'Erreur : ' + (error.message || 'impossible de générer le PDF.');
       msg.classList.add('error');
