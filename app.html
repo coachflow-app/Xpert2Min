@@ -1546,7 +1546,7 @@
         enregistrerProjetSilencieux();
       }
     } catch (error) {
-      msg.textContent = 'Erreur technique : ' + (error.message || 'inconnue');
+      msg.textContent = 'Erreur : impossible de générer le contenu. Réessayez.';
       msg.classList.add('error');
       console.error('Détail erreur genererContenu :', error);
     } finally {
@@ -1771,6 +1771,12 @@
   var LABELS_CALLOUT = { ASTUCE: 'Astuce', CONSEIL: 'Conseil', EXEMPLE: 'Exemple', IMPORTANT: 'Important' };
 
   // ----- Découpe le texte d'un chapitre en paragraphes + encadrés premium, avec lettrine sur le tout premier paragraphe -----
+  // Convertit le format **gras** (Markdown) utilisé parfois par l'IA en vrai gras HTML,
+  // et retire tout astérisque isolé qui resterait (jamais d'astérisque visible à l'écran).
+  function convertirGrasMarkdown(texteEchappe){
+    return texteEchappe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*/g, '');
+  }
+
   function construireCorpsChapitre(texte, couleurAccent, couleurAccent2){
     var regex = /\[(ASTUCE|CONSEIL|EXEMPLE|IMPORTANT)\]([\s\S]*?)\[\/\1\]/g;
     var html = '';
@@ -1782,14 +1788,15 @@
       var out = '';
       var paragraphes = bloc.split(/\n{1,}/).filter(function(p){ return p.trim(); });
       paragraphes.forEach(function(p){
-        var texteEchappe = escapeHTML(p.trim());
-        if (premierParagraphe) {
-          var premiereLettre = texteEchappe.charAt(0);
-          var reste = texteEchappe.slice(1);
+        var texteConverti = convertirGrasMarkdown(escapeHTML(p.trim()));
+        if (premierParagraphe && !/^</.test(texteConverti)) {
+          var premiereLettre = texteConverti.charAt(0);
+          var reste = texteConverti.slice(1);
           out += '<div class="chapter-body"><span class="drop-cap" style="color:' + couleurAccent + '">' + premiereLettre + '</span>' + reste + '</div>';
           premierParagraphe = false;
         } else {
-          out += '<div class="chapter-body">' + texteEchappe + '</div>';
+          out += '<div class="chapter-body">' + texteConverti + '</div>';
+          premierParagraphe = false;
         }
       });
       return out;
@@ -1803,13 +1810,13 @@
       var couleurCallout = (type === 'ASTUCE' || type === 'IMPORTANT') ? couleurAccent : couleurAccent2;
       html += '<div class="callout" style="border-left-color:' + couleurCallout + '">' +
         '<div class="callout-label" style="color:' + couleurCallout + '">' + iconeAccent(couleurCallout) + LABELS_CALLOUT[type] + '</div>' +
-        '<div>' + escapeHTML(contenuCallout) + '</div></div>';
+        '<div>' + convertirGrasMarkdown(escapeHTML(contenuCallout)) + '</div></div>';
       lastIndex = regex.lastIndex;
     }
     var reste = texte.slice(lastIndex);
     if (reste.trim()) html += rendreParagraphes(reste);
 
-    return html || '<div class="chapter-body">' + escapeHTML(texte) + '</div>';
+    return html || '<div class="chapter-body">' + convertirGrasMarkdown(escapeHTML(texte)) + '</div>';
   }
 
   // ----- En-tête / pied de page cohérents (identité visuelle sur toutes les pages de contenu) -----
