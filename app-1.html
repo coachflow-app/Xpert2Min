@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xpert2Min — Créer mon PDF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
+<script src="https://unpkg.com/grapesjs"></script>
+<style>
+  :root{
+    --black:#0A0A0B;
+    --black-2:#141416;
+    --red:#E8161C;
+    --white:#F5F5F5;
+    --grey:#8A8A8F;
+    --line:#242426;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Inter', sans-serif;
+    background:var(--black-2);
+    color:var(--white);
+    min-height:100vh;
+  }
+
+  /* HEADER */
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px 18px;
+    background:var(--black);
+    border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-family:'Archivo Black', sans-serif;
+    font-size:14px;
+    white-space:nowrap;
+  }
+  .logo .x-icon{ width:22px; height:22px; flex-shrink:0; }
+  .logo .x-icon svg{ width:100%; height:100%; display:block; }
+  .logo span{ color:var(--red); }
+  header nav{
+    display:flex;
+    gap:18px;
+    flex-shrink:0;
+  }
+  header nav a{
+    color:var(--grey);
+    text-decoration:none;
+    font-size:13px;
+    white-space:nowrap;
+  }
+  header nav a.active{ color:var(--white); font-weight:600; }
+  .lang-switch{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--white);
+    font-size:11.5px;
+    font-weight:700;
+    padding:5px 9px;
+    border-radius:6px;
+    cursor:pointer;
+    font-family:'Inter', sans-serif;
+  }
+  .lang-switch:hover{ border-color:var(--red); }
+
+  @media (max-width:420px){
+    .logo{ font-size:12.5px; }
+    header nav{ gap:12px; }
+    header nav a{ font-size:12px; }
+  }
+
+  /* STEPS BAR */
+  .steps{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    padding:14px 16px;
+    max-width:520px;
+    margin:0 auto;
+  }
+  .step-dot{
+    flex:1;
+    height:3px;
+    background:var(--line);
+    border-radius:2px;
+  }
+  .step-dot.active{ background:var(--red); }
+
+  /* MAIN */
+  main{
+    max-width:560px;
+    margin:0 auto;
+    padding:8px 20px 50px;
+  }
+  .eyebrow{
+    font-size:12px;
+    color:var(--red);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Archivo Black', sans-serif;
+    font-size:23px;
+    line-height:1.15;
+    margin-bottom:4px;
+  }
+  .step-progress{
+    font-size:11px;
+    color:var(--grey);
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  .lead{
+    color:var(--grey);
+    font-size:13.5px;
+    margin-bottom:28px;
+    line-height:1.5;
+  }
+
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block;
+    font-size:11.5px;
+    color:#a7a7ad;
+    font-weight:600;
+    margin-bottom:4px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    padding:10px 13px;
+    background:#1c1c20;
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--white);
+    font-size:14px;
+    font-family:'Inter', sans-serif;
+    outline:none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--red); }
+  .field input::placeholder, .field textarea::placeholder{ color:#5c5c62; line-height:1.5; }
+  .field textarea{ min-height:130px; resize:vertical; line-height:1.6; }
+  .textarea-large{ min-height:260px !important; }
+  .next-btn-large{ padding:15px 0 !important; font-size:16px !important; }
+  .back-btn-discreet{ opacity:0.7; }
+  .two-col-row{
+    display:flex;
+    gap:10px;
+  }
+  .two-col-row > div{ flex:1; }
+
+  .lang-choice{ display:flex; gap:10px; }
+  .lang-choice label{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:11px 0;
+    border:1px solid var(--line);
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13.5px;
+    color:var(--grey);
+    text-transform:none;
+    margin:0;
+  }
+  .lang-choice input{ width:auto; accent-color:var(--red); }
+  .lang-choice input:checked + span{ color:var(--white); }
+  .field-note{
+    font-size:11.5px;
+    color:var(--grey);
+    margin-top:8px;
+    line-height:1.4;
+  }
+  .btn-arrow{
+    display:inline-block;
+    transition:transform .15s ease;
+  }
+  .next-btn:hover .btn-arrow{ transform:translateX(3px); }
+
+
+  /* ÉTAPE 3 : Design */
+  .style-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+  }
+  .style-card{
+    padding:11px 6px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--grey);
+    font-size:12px;
+    font-weight:600;
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+    text-align:center;
+  }
+  .style-card.selected{
+    border-color:var(--red);
+    color:var(--white);
+    background:rgba(232,22,28,0.08);
+  }
+
+  .color-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .color-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    font-size:11.5px;
+    color:var(--grey);
+    text-align:center;
+    width:78px;
+  }
+  .color-item input[type="color"]{
+    width:44px;
+    height:44px;
+    padding:0;
+    border:1px solid var(--line);
+    border-radius:50%;
+    background:none;
+    cursor:pointer;
+  }
+
+  .checkbox-line{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:9px 0;
+    font-size:13.5px;
+    color:var(--white);
+    text-transform:none;
+    letter-spacing:normal;
+    cursor:pointer;
+  }
+  .checkbox-line input{
+    width:16px;
+    height:16px;
+    accent-color:var(--red);
+    cursor:pointer;
+  }
+
+  .sub-field{
+    margin:0 0 10px 26px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .sub-field input, .sub-field textarea{
+    padding:9px 12px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:7px;
+    color:var(--white);
+    font-size:13px;
+    font-family:'Inter', sans-serif;
+    outline:none;
+  }
+  .sub-field input:focus, .sub-field textarea:focus{ border-color:var(--red); }
+
+  /* ÉTAPE 4 : Génération */
+  .recap-card{
+    background:linear-gradient(160deg, var(--black), #17171a);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 20px;
+    margin-bottom:22px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .recap-row{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .recap-row:not(:last-child){
+    padding-bottom:14px;
+    border-bottom:1px solid var(--line);
+  }
+  .recap-icon{
+    font-size:17px;
+    flex-shrink:0;
+    width:26px;
+    text-align:center;
+  }
+  .recap-row-label{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--grey);
+    margin-bottom:3px;
+  }
+  .recap-row-value{
+    font-size:13.5px;
+    color:var(--white);
+    line-height:1.5;
+  }
+
+  .result-box{
+    width:100%;
+    min-height:320px;
+    margin-top:16px;
+    padding:14px 16px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--white);
+    font-size:13.5px;
+    line-height:1.6;
+    font-family:'Inter', sans-serif;
+    resize:vertical;
+  }
+
+  /* PRÉVISUALISATION VISUELLE DU PDF — document continu, comme un vrai lecteur PDF */
+  .pdf-preview{
+    margin-top:16px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    background:#3a3a3d;
+    padding:14px 0;
+  }
+  .pdf-page{
+    background:#fff;
+    color:#1a1a1a;
+    border-radius:0;
+    padding:30px 24px 42px;
+    box-shadow:none;
+    border-bottom:2px solid #26262a;
+    position:relative;
+    font-family:'Inter', sans-serif;
+    width:100%;
+    max-width:420px;
+    aspect-ratio:210 / 297;
+    overflow:hidden;
+  }
+  .pdf-page.cover{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:#fff;
+    gap:14px;
+    overflow:hidden;
+    padding:0;
+  }
+  .cover-emblem{
+    width:58px; height:58px;
+    border:2px solid;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Archivo Black', sans-serif;
+    font-size:16px;
+    margin:0 auto 6px;
+  }
+  .cover-emblem.corner-position{
+    position:absolute;
+    top:20px;
+    left:20px;
+    margin:0;
+    z-index:2;
+  }
+  .cover-watermark{
+    position:absolute;
+    bottom:14px;
+    left:0;
+    right:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    opacity:0.22;
+    font-size:7.5px;
+    letter-spacing:0.09em;
+    font-weight:700;
+    z-index:2;
+  }
+
+  /* Éléments graphiques premium supplémentaires par style */
+  .deco-line{
+    position:absolute;
+    top:44%;
+    left:0;
+    width:34px;
+    height:3px;
+    z-index:1;
+  }
+  .luxe-corner-dot{
+    position:absolute;
+    top:18px;
+    left:18px;
+    width:6px; height:6px;
+    border-radius:50%;
+  }
+  .deco-dots{
+    position:absolute;
+    bottom:22px;
+    right:22px;
+    width:60px;
+    height:14px;
+    background-image:radial-gradient(currentColor 1.5px, transparent 1.5px);
+    background-size:10px 10px;
+    opacity:0.5;
+    z-index:1;
+  }
+  .deco-ring{
+    position:absolute;
+    top:20px;
+    right:20px;
+    width:46px; height:46px;
+    border:1.5px solid;
+    border-radius:50%;
+    opacity:0.5;
+    z-index:1;
+  }
+  .pdf-page.cover .cover-title{
+    font-family:'Archivo Black', sans-serif;
+    font-size:26px;
+    line-height:1.2;
+  }
+  .pdf-page.cover .cover-quote{
+    font-size:12.5px;
+    font-style:italic;
+    opacity:0.9;
+    max-width:78%;
+  }
+  .pdf-page.cover .cover-auteur{
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    opacity:0.85;
+  }
+  .pdf-page.cover .cover-auto-tag{
+    font-size:10px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    opacity:0.55;
+  }
+
+  /* --- Composition PROFESSIONNEL : bloc diagonal net --- */
+  .cover-professionnel{
+    background:#fff;
+    color:#161616;
+    position:relative;
+    padding:40px 30px;
+  }
+  .cover-professionnel .diag-block{
+    position:absolute;
+    inset:0;
+    clip-path:polygon(0 62%, 100% 38%, 100% 100%, 0 100%);
+    z-index:0;
+  }
+  .cover-professionnel .cover-content{ position:relative; z-index:1; display:flex; flex-direction:column; gap:12px; align-items:center; }
+  .cover-professionnel .logo-box{
+    width:56px; height:56px;
+    border:2px solid currentColor;
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:6px;
+    overflow:hidden;
+  }
+  .cover-professionnel .cover-title{ color:#161616; }
+  .cover-professionnel.has-block-title .cover-title{ color:#fff; }
+
+  /* --- Composition LUXE : cadre fin + séparateur --- */
+  .cover-luxe{
+    background:#0d0d0d;
+    padding:26px;
+  }
+  .cover-luxe .luxe-frame{
+    border:1px solid rgba(255,255,255,0.5);
+    padding:38px 26px;
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    position:relative;
+  }
+  .cover-luxe .luxe-frame::before, .cover-luxe .luxe-frame::after{
+    content:"";
+    position:absolute;
+    width:18px; height:18px;
+    border-top:1px solid; border-left:1px solid;
+  }
+  .cover-luxe .luxe-frame::before{ top:8px; left:8px; }
+  .cover-luxe .luxe-frame::after{ bottom:8px; right:8px; border:none; border-bottom:1px solid; border-right:1px solid; }
+  .cover-luxe .cover-title{ font-family:'Archivo Black', sans-serif; letter-spacing:0.04em; font-size:22px; }
+  .cover-luxe .luxe-sep{ width:60px; height:1px; background:currentColor; opacity:0.6; }
+
+  /* --- Composition MINIMALISTE : blanc, épuré --- */
+  .cover-minimaliste{
+    background:#fdfdfd;
+    color:#161616;
+    padding:50px 30px;
+  }
+  .cover-minimaliste .cover-title{ font-size:24px; }
+  .cover-minimaliste .min-underline{ width:44px; height:3px; }
+
+  /* --- Composition MODERNE : cercles superposés --- */
+  .cover-moderne{
+    background:#111;
+    position:relative;
+    padding:40px 26px;
+  }
+  .cover-moderne .blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(2px);
+    opacity:0.85;
+  }
+  .cover-moderne .cover-content{ position:relative; z-index:1; display:flex; flex-direction:column; gap:12px; align-items:flex-start; text-align:left; width:100%; }
+
+  /* --- Composition CRÉATIF : blocs superposés asymétriques --- */
+  .cover-creatif{
+    background:#111;
+    position:relative;
+    padding:36px 24px;
+  }
+  .cover-creatif .shard{
+    position:absolute;
+    opacity:0.9;
+  }
+  .cover-creatif .cover-content{ position:relative; z-index:2; }
+  .cover-creatif .cover-title{ font-size:24px; }
+
+  /* --- Variantes "Style de couverture" (se superposent au style choisi) --- */
+  .couv-epuree .diag-block, .couv-epuree .blob, .couv-epuree .shard,
+  .couv-epuree .deco-line, .couv-epuree .deco-dots, .couv-epuree .deco-ring{
+    display:none !important;
+  }
+  .couv-bandeau::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:16%;
+    background:currentColor;
+    opacity:0.9;
+    z-index:0;
+  }
+  .couv-cadre::after{
+    content:"";
+    position:absolute;
+    inset:16px;
+    border:2px solid currentColor;
+    opacity:0.5;
+    pointer-events:none;
+    z-index:2;
+  }
+
+
+
+  .pdf-page .page-label{
+    position:absolute;
+    top:14px;
+    left:20px;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    opacity:0.45;
+  }
+  .pdf-page h2.section-title{
+    font-family:'Archivo Black', sans-serif;
+    font-size:19px;
+    margin-bottom:16px;
+    margin-top:10px;
+  }
+  .pdf-page .chapter-title{
+    font-family:'Archivo Black', sans-serif;
+    font-size:16px;
+    margin-bottom:10px;
+    position:relative;
+    z-index:1;
+  }
+  .pdf-page .chapter-title.style-numbered::before{
+    content:attr(data-num) ". ";
+  }
+  .pdf-page .chapter-title.style-fullwidth{
+    display:block;
+    padding-bottom:8px;
+    border-bottom:2px solid;
+  }
+  .pdf-page .chapter-body{
+    font-size:13px;
+    line-height:1.75;
+    white-space:pre-line;
+    margin-bottom:10px;
+    position:relative;
+    z-index:1;
+  }
+
+  /* Numéro de chapitre géant en filigrane (identité visuelle premium) */
+  .chapter-num-bg{
+    position:absolute;
+    top:6px;
+    right:14px;
+    font-family:'Archivo Black', sans-serif;
+    font-size:96px;
+    line-height:1;
+    opacity:0.06;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* Lettrine (première lettre agrandie, style livre premium) */
+  .drop-cap{
+    float:left;
+    font-family:'Archivo Black', sans-serif;
+    font-size:2.6em;
+    line-height:0.82;
+    padding:2px 6px 0 0;
+  }
+
+  /* Encadrés premium : astuce / conseil / exemple / important */
+  .callout{
+    position:relative;
+    z-index:1;
+    margin:12px 0 14px;
+    padding:11px 13px;
+    border-radius:7px;
+    border-left:3px solid;
+    background:rgba(0,0,0,0.035);
+    font-size:12px;
+    line-height:1.55;
+  }
+  .callout-label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-weight:800;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:4px;
+  }
+  .callout-icon{
+    width:14px; height:14px;
+    border-radius:3px;
+    display:inline-block;
+    flex-shrink:0;
+  }
+
+  /* En-tête / pied de page (identité cohérente sur toutes les pages de contenu) */
+  .page-header-x2m{
+    position:absolute;
+    top:12px;
+    left:24px;
+    right:24px;
+    display:flex;
+    justify-content:space-between;
+    font-size:8.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    opacity:0.4;
+    z-index:1;
+  }
+  .page-footer-x2m{
+    position:absolute;
+    bottom:12px;
+    left:24px;
+    right:24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:9px;
+    opacity:0.45;
+    z-index:1;
+  }
+  .page-footer-x2m .footer-dot{
+    width:5px; height:5px;
+    border-radius:50%;
+    display:inline-block;
+    margin-right:6px;
+  }
+
+  /* Motif de secours quand aucune image n'est fournie (jamais d'espace vide) */
+  .fallback-motif{
+    position:absolute;
+    inset:0;
+    opacity:0.05;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* Image importée optimisée : recadrage propre, jamais déformée */
+  .creator-image{
+    width:100%;
+    aspect-ratio:16/9;
+    object-fit:cover;
+    object-position:center;
+    border-radius:8px;
+    display:block;
+    margin:10px 0 14px;
+  }
+
+  .pdf-page ol.summary-list{
+    padding-left:20px;
+    font-size:13.5px;
+    line-height:2;
+    position:relative;
+    z-index:1;
+  }
+  .pdf-page ol.summary-list.style-plain{
+    list-style:none;
+    padding-left:0;
+  }
+  .pdf-page ol.summary-list.style-plain li{
+    border-bottom:1px dashed #ddd;
+    padding:6px 0;
+  }
+  .sommaire-item{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    padding:8px 0;
+    font-size:13px;
+  }
+  .sommaire-badge{
+    width:22px; height:22px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10.5px;
+    font-weight:800;
+    color:#fff;
+    flex-shrink:0;
+  }
+  .sommaire-item.style-line{ border-bottom:1px dashed #ddd; }
+  .sommaire-item.style-chip{ border-radius:6px; padding:9px 10px; margin-bottom:6px; }
+
+  .pdf-note{
+    font-size:11.5px;
+    color:var(--grey);
+    text-align:center;
+    margin-top:6px;
+  }
+
+  /* Optimisation impression / haute résolution (préparation Puppeteer) */
+  @media print{
+    .pdf-preview{ background:none; padding:0; }
+    .pdf-page{ box-shadow:none; page-break-after:always; }
+  }
+
+  /* Bouton Prévisualiser */
+  .preview-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    flex:1;
+    padding:11px 14px;
+    background:transparent;
+    color:var(--white);
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:13.5px;
+    font-weight:600;
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+  }
+  .preview-btn:hover{ border-color:var(--red); }
+  #actions-row{ margin-top:22px; }
+
+  .action-cards-row{
+    display:flex;
+    gap:12px;
+  }
+  .action-card{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+    padding:16px 15px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:12px;
+    cursor:pointer;
+    text-align:left;
+    font-family:'Inter', sans-serif;
+    transition:border-color .18s ease, transform .12s ease, background .18s ease;
+  }
+  .action-card:hover{
+    border-color:var(--red);
+    background:rgba(232,22,28,0.06);
+    transform:translateY(-2px);
+  }
+  .action-card:active{ transform:translateY(0) scale(0.98); }
+  .action-card-icon{ font-size:19px; }
+  .action-card-title{
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--white);
+  }
+  .action-card-desc{
+    font-size:11px;
+    color:var(--grey);
+    line-height:1.4;
+  }
+  .downloading{ opacity:0.7; animation:pulse-download 0.9s ease-in-out infinite; }
+  .pdf-download-note{ text-align:center; margin-top:8px; }
+  @keyframes pulse-download{
+    0%, 100%{ transform:scale(1); }
+    50%{ transform:scale(0.97); }
+  }
+
+  .autosave-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    margin:10px auto 0;
+    padding:7px 14px;
+    background:rgba(76,175,80,0.1);
+    border:1px solid rgba(76,175,80,0.3);
+    border-radius:20px;
+    font-size:11.5px;
+    color:#4CAF50;
+    width:fit-content;
+  }
+
+  .step4-footer{
+    margin-top:26px;
+    display:flex;
+    justify-content:flex-start;
+  }
+
+  .preview-btn .eye-icon{ font-size:15px; }
+
+  /* Overlay plein écran de prévisualisation */
+  .preview-overlay{
+    position:fixed;
+    inset:0;
+    background:#0A0A0B;
+    z-index:100;
+    display:flex;
+    flex-direction:column;
+    opacity:1;
+    transition:opacity .22s ease;
+  }
+  .preview-overlay.is-opening{ opacity:0; }
+  .hidden{ display:none !important; }
+  .preview-overlay.hidden{ display:none; }
+  .preview-overlay-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 18px;
+    background:var(--black);
+    border-bottom:1px solid var(--line);
+    color:var(--white);
+    font-size:14px;
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .preview-close-btn{
+    background:none;
+    border:none;
+    color:var(--grey);
+    font-size:20px;
+    cursor:pointer;
+    line-height:1;
+    padding:4px 8px;
+  }
+  .preview-close-btn:hover{ color:var(--red); }
+  .preview-overlay-body{
+    flex:1;
+    overflow-y:auto;
+  }
+
+
+  .next-btn{
+    width:100%;
+    padding:11px 0;
+    margin-top:10px;
+    background:var(--red);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .next-btn:hover{ background:#c9121a; }
+
+  .btn-row{ display:flex; gap:10px; margin-top:12px; }
+  .btn-row .next-btn{ margin-top:0; }
+  .back-btn{
+    flex:0 0 auto;
+    padding:11px 18px;
+    background:transparent;
+    color:var(--grey);
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .back-btn:hover{ border-color:var(--grey); color:var(--white); }
+
+  .step-screen{ display:none; }
+  .step-screen.active{ display:block; }
+
+  .soon-box{
+    border:1px dashed var(--line);
+    border-radius:10px;
+    padding:34px 20px;
+    text-align:center;
+    color:var(--grey);
+    font-size:13.5px;
+  }
+  .soon-btn{
+    width:100%;
+    padding:11px 0;
+    margin-top:16px;
+    background:var(--line);
+    color:var(--grey);
+    border:none;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:700;
+    cursor:not-allowed;
+  }
+
+  .form-msg{
+    min-height:16px;
+    font-size:13px;
+    margin-top:10px;
+    text-align:center;
+    color:var(--red);
+  }
+  .form-msg.success{ color:#4CAF50; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="x-icon">
+      <svg viewBox="0 0 200 200" fill="none">
+        <polygon points="30,30 85,30 170,170 115,170" fill="#E8161C"/>
+        <polygon points="170,30 115,30 30,170 85,170" fill="#F5F5F5"/>
+      </svg>
+    </div>
+    XPERT<span>2</span>MIN
+  </div>
+  <nav>
+    <a href="app.html" class="active" data-i18n="nav_creer">Créer</a>
+    <a href="dashboard.html" data-i18n="nav_dashboard">Tableau de bord</a>
+    <button type="button" class="lang-switch" id="lang-switch" onclick="toggleLangue()">EN</button>
+  </nav>
+</header>
+
+<div class="steps">
+  <div class="step-dot active"></div>
+  <div class="step-dot"></div>
+  <div class="step-dot"></div>
+  <div class="step-dot"></div>
+</div>
+
+<main>
+
+  <!-- ÉTAPE 1 : Informations générales -->
+  <div class="step-screen active" id="screen-1">
+    <div class="eyebrow" data-i18n="step_label_1">Étape 1 / 4</div>
+    <p class="step-progress" data-i18n="progres_25">25 % terminé</p>
+    <h1 data-i18n="s1_title">Transformez votre expertise en produit</h1>
+    <p class="lead" data-i18n="s1_lead">Renseignez ces informations. L'IA transformera votre expertise en un PDF professionnel prêt à être vendu en 2 minutes.</p>
+
+    <div class="field">
+      <label for="titre" data-i18n="lbl_titre">Titre du PDF</label>
+      <input type="text" id="titre" placeholder="Ex. : Les fondamentaux du copywriting" data-i18n-placeholder="ph_titre" required>
+    </div>
+
+    <div class="field">
+      <label for="sujet" data-i18n="lbl_sujet">Sujet</label>
+      <input type="text" id="sujet" placeholder="Ex. : Rédaction persuasive pour entrepreneurs" data-i18n-placeholder="ph_sujet" required>
+    </div>
+
+    <div class="field">
+      <label for="ton" data-i18n="lbl_ton">Ton</label>
+      <select id="ton" required>
+        <option value="" data-i18n="ton_choisir" disabled selected>Choisissez un ton</option>
+        <option data-i18n="ton_pro">Professionnel</option>
+        <option data-i18n="ton_persuasif">Persuasif</option>
+        <option data-i18n="ton_inspirant">Inspirant</option>
+        <option data-i18n="ton_pedagogique">Pédagogique</option>
+        <option data-i18n="ton_conversationnel">Conversationnel</option>
+        <option data-i18n="ton_motivant">Motivant</option>
+        <option data-i18n="ton_direct">Direct</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="public" data-i18n="lbl_public">Public cible</label>
+      <input type="text" id="public" placeholder="Ex. : Entrepreneurs et freelances débutants" data-i18n-placeholder="ph_public" required>
+    </div>
+
+    <div class="field">
+      <div class="two-col-row">
+        <div>
+          <label for="prenom" data-i18n="lbl_prenom">Prénom du créateur</label>
+          <input type="text" id="prenom" placeholder="Votre prénom" data-i18n-placeholder="ph_prenom" required>
+        </div>
+        <div>
+          <label for="createur" data-i18n="lbl_createur">Nom de l'auteur</label>
+          <input type="text" id="createur" placeholder="Votre nom" data-i18n-placeholder="ph_createur" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="lbl_langue_doc">Langue du document</label>
+      <div class="lang-choice">
+        <label><input type="radio" name="langue" value="fr" checked><span data-i18n="opt_francais">Français</span></label>
+        <label><input type="radio" name="langue" value="en"><span data-i18n="opt_anglais">Anglais</span></label>
+      </div>
+      <p class="field-note" data-i18n="note_langue_pdf">Le PDF sera généré entièrement dans la langue sélectionnée.</p>
+    </div>
+
+    <button type="button" class="next-btn" onclick="validateStep1()"><span data-i18n="btn_continuer">Continuer</span> <span class="btn-arrow">→</span></button>
+    <p class="form-msg" id="msg-1"></p>
+  </div>
+
+  <!-- ÉTAPE 2 : Connaissances -->
+  <div class="step-screen" id="screen-2">
+    <div class="eyebrow" data-i18n="step_label_2">Étape 2 / 4</div>
+    <p class="step-progress" data-i18n="progres_50">50 % terminé</p>
+    <h1 data-i18n="s2_title">Ajoutez vos connaissances</h1>
+    <p class="lead" data-i18n="s2_lead">C'est ici que votre expertise prend vie. Décrivez vos connaissances, vos méthodes, vos conseils. Plus les informations sont détaillées, plus l'IA pourra créer un PDF professionnel fidèle à votre expertise.</p>
+
+    <div class="field">
+      <label for="connaissances" data-i18n="lbl_expertise">Vos connaissances</label>
+      <textarea id="connaissances" class="textarea-large" placeholder="Écrivez ou collez ici tout ce que vous savez sur votre sujet : méthodes, étapes, conseils, exemples, erreurs à éviter, astuces, expériences personnelles ou tout autre contenu que vous souhaitez retrouver dans votre PDF." data-i18n-placeholder="ph_expertise"></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="back-btn back-btn-discreet" onclick="goToStep(1)" data-i18n="btn_retour">Retour</button>
+      <button type="button" class="next-btn next-btn-large" onclick="validateStep2()"><span data-i18n="btn_continuer">Continuer</span> <span class="btn-arrow">→</span></button>
+    </div>
+    <p class="form-msg" id="msg-2"></p>
+  </div>
+
+  <!-- ÉTAPE 3 : Design -->
+  <div class="step-screen" id="screen-3">
+    <div class="eyebrow" data-i18n="step_label_3">Étape 3 / 4</div>
+    <p class="step-progress" data-i18n="progres_75">75 % terminé</p>
+    <h1 data-i18n="s3_title">Personnalisez le design</h1>
+    <p class="lead" data-i18n="s3_lead">Choisissez le style, les couleurs et la mise en page de votre PDF.</p>
+
+    <div class="field">
+      <label data-i18n="lbl_style_pdf">Style du PDF</label>
+      <div class="style-grid" id="style-grid">
+        <button type="button" class="style-card" data-value="professionnel" data-i18n="style_pro">Professionnel</button>
+        <button type="button" class="style-card" data-value="luxe" data-i18n="style_luxe">Luxe</button>
+        <button type="button" class="style-card" data-value="minimaliste" data-i18n="style_min">Minimaliste</button>
+        <button type="button" class="style-card" data-value="moderne" data-i18n="style_mod">Moderne</button>
+        <button type="button" class="style-card" data-value="creatif" data-i18n="style_crea">Créatif</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="lbl_couleurs">Couleurs</label>
+      <div class="color-row">
+        <div class="color-item">
+          <input type="color" id="couleur-principale" value="#E8161C">
+          <span data-i18n="col_principale">Couleur principale</span>
+        </div>
+        <div class="color-item">
+          <input type="color" id="couleur-secondaire" value="#0A0A0B">
+          <span data-i18n="col_secondaire">Couleur secondaire</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="police" data-i18n="lbl_police">Style de police</label>
+      <select id="police">
+        <option>Inter</option>
+        <option>Archivo Black</option>
+        <option>Georgia</option>
+        <option>Times New Roman</option>
+        <option>Montserrat</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="taille-texte" data-i18n="lbl_taille">Taille du texte</label>
+      <select id="taille-texte">
+        <option value="petit" data-i18n="taille_petit">Petit</option>
+        <option value="moyen" selected data-i18n="taille_moyen">Moyen</option>
+        <option value="grand" data-i18n="taille_grand">Grand</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="titre-couverture" data-i18n="lbl_titre_couv">Titre (couverture)</label>
+      <input type="text" id="titre-couverture" placeholder="Repris automatiquement de l'étape 1" data-i18n-placeholder="ph_titre_couv">
+    </div>
+
+    <div class="field">
+      <label for="citation" data-i18n="lbl_citation">Citation éventuelle (optionnel)</label>
+      <input type="text" id="citation" placeholder="Une citation à afficher sur la couverture" data-i18n-placeholder="ph_citation">
+    </div>
+
+    <div class="field">
+      <label for="style-chapitres" data-i18n="lbl_style_chap">Style des chapitres</label>
+      <select id="style-chapitres">
+        <option data-i18n="chap_numerotes">Numérotés</option>
+        <option data-i18n="chap_icones">Avec icônes</option>
+        <option data-i18n="chap_pleine">Titres pleine largeur</option>
+        <option data-i18n="chap_min">Minimaliste</option>
+      </select>
+    </div>
+
+
+    <div class="field">
+      <label class="checkbox-line"><input type="checkbox" id="numero-pages" checked><span data-i18n="chk_numero_page">Numéro de page</span></label>
+      <label class="checkbox-line"><input type="checkbox" id="entete-pied" checked><span data-i18n="chk_entete">En-tête / pied de page</span></label>
+    </div>
+
+    <div class="field">
+      <label data-i18n="lbl_elements_supp">Éléments supplémentaires</label>
+
+      <label class="checkbox-line"><input type="checkbox" id="elt-copyright" onchange="toggleSubField('copyright-sub', this)"><span data-i18n="chk_copyright">Copyright</span></label>
+
+      <label class="checkbox-line"><input type="checkbox" id="elt-page-auteur" onchange="toggleSubField('auteur-sub', this)"><span data-i18n="chk_page_auteur">Page auteur</span></label>
+      <div class="sub-field hidden" id="auteur-sub">
+        <textarea id="bio-auteur" rows="3" placeholder="Courte biographie du créateur..." data-i18n-placeholder="ph_bio"></textarea>
+      </div>
+
+      <label class="checkbox-line"><input type="checkbox" id="elt-page-contact" onchange="toggleSubField('contact-sub', this)"><span data-i18n="chk_page_contact">Page contact</span></label>
+      <div class="sub-field hidden" id="contact-sub">
+        <input type="email" id="contact-email" placeholder="E-mail de contact" data-i18n-placeholder="ph_contact_email">
+        <input type="tel" id="contact-tel" placeholder="Téléphone (optionnel)" data-i18n-placeholder="ph_contact_tel">
+      </div>
+
+      <label class="checkbox-line"><input type="checkbox" id="elt-reseaux" onchange="toggleSubField('reseaux-sub', this)"><span data-i18n="chk_reseaux">Réseaux sociaux</span></label>
+      <div class="sub-field hidden" id="reseaux-sub">
+        <input type="text" id="reseau-instagram" placeholder="Instagram (optionnel)" data-i18n-placeholder="ph_instagram">
+        <input type="text" id="reseau-linkedin" placeholder="LinkedIn (optionnel)" data-i18n-placeholder="ph_linkedin">
+        <input type="text" id="reseau-site" placeholder="Site web (optionnel)" data-i18n-placeholder="ph_site">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="back-btn" onclick="goToStep(2)" data-i18n="btn_retour">Retour</button>
+      <button type="button" class="next-btn" onclick="goToStep(4)" data-i18n="btn_continuer">Continuer</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 4 : Génération -->
+  <div class="step-screen" id="screen-4">
+    <div class="eyebrow" data-i18n="step_label_4">Étape 4 / 4</div>
+    <p class="step-progress" data-i18n="progres_100">100 % terminé</p>
+    <h1 id="s4-title-default" data-i18n="s4_title">Génération et prévisualisation</h1>
+    <h1 id="s4-title-done" class="hidden" data-i18n="s4_title_done">✅ Votre expertise est devenue un produit professionnel !</h1>
+    <p class="lead" id="s4-lead-default" data-i18n="s4_lead">L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.</p>
+    <p class="lead hidden" id="s4-lead-done" data-i18n="s4_lead_done">Votre expertise a été transformée en un ebook professionnel, prêt à être prévisualisé ou téléchargé en seulement 2 minutes.</p>
+
+    <div class="recap-card" id="recap-box"></div>
+
+    <button type="button" class="next-btn" id="generate-btn" onclick="genererContenu()" data-i18n="btn_generer">Générer mon contenu</button>
+    <p class="form-msg" id="msg-4"></p>
+
+    <div class="btn-row hidden" id="actions-row">
+      <button type="button" class="back-btn" id="preview-btn" onclick="ouvrirPrevisualisation()">
+        <span class="eye-icon">👁️</span> <span data-i18n="btn_previsualiser">Prévisualiser</span>
+      </button>
+      <button type="button" class="next-btn" id="download-pdf-btn" onclick="telechargerPDF()">
+        <span class="eye-icon">📥</span> <span data-i18n="btn_telecharger_pdf">Télécharger le PDF</span>
+      </button>
+    </div>
+    <p class="field-note pdf-download-note hidden" id="pdf-download-note" data-i18n="note_generation_pdf">1 génération sera utilisée lors du téléchargement.</p>
+    <p class="form-msg" id="msg-pdf"></p>
+
+    <textarea class="result-box hidden" id="result-box" readonly></textarea>
+
+    <div class="step4-footer">
+      <button type="button" class="back-btn" onclick="goToStep(3)" data-i18n="btn_retour">Retour</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- FENÊTRE DE PRÉVISUALISATION PLEIN ÉCRAN -->
+<div class="preview-overlay hidden" id="preview-overlay">
+  <div class="preview-overlay-header">
+    <span data-i18n="preview_titre">Prévisualisation du PDF</span>
+    <button type="button" class="preview-close-btn" onclick="fermerPrevisualisation()">✕</button>
+  </div>
+  <div class="preview-overlay-body" id="preview-overlay-body">
+    <div class="pdf-preview" id="pdf-preview"></div>
+  </div>
+</div>
+
+<!-- Moteur GrapesJS invisible : construit les pages en coulisses, jamais affiché -->
+<div id="gjs-hidden" style="position:fixed; top:-99999px; left:-99999px; width:800px; height:1131px; overflow:hidden;"></div>
+
+<script>
+  // ----- Système de langue de l'interface (FR / EN) -----
+  var traductions = {
+    fr: {
+      nav_creer: "Créer", nav_dashboard: "Tableau de bord",
+      step_label_1: "Étape 1 / 4", s1_title: "Transformez votre expertise en produit",
+      s1_lead: "Renseignez ces informations. L'IA transformera votre expertise en un PDF professionnel prêt à être vendu en 2 minutes.",
+      lbl_titre: "Titre du PDF", ph_titre: "Ex. : Les fondamentaux du copywriting",
+      lbl_sujet: "Sujet", ph_sujet: "Ex. : Rédaction persuasive pour entrepreneurs",
+      lbl_ton: "Ton", ph_ton: "Ex. : Persuasif, motivant, direct...",
+      ton_choisir: "Choisissez un ton", ton_pro: "Professionnel", ton_persuasif: "Persuasif", ton_inspirant: "Inspirant",
+      ton_pedagogique: "Pédagogique", ton_conversationnel: "Conversationnel", ton_motivant: "Motivant", ton_direct: "Direct",
+      note_langue_pdf: "Le PDF sera généré entièrement dans la langue sélectionnée.",
+      progres_25: "25 % terminé", progres_50: "50 % terminé", progres_75: "75 % terminé", progres_100: "100 % terminé",
+      lbl_public: "Public cible", ph_public: "Ex. : Entrepreneurs et freelances débutants",
+      lbl_prenom: "Prénom du créateur", ph_prenom: "Votre prénom", lbl_createur: "Nom de l'auteur", ph_createur: "Votre nom",
+      lbl_langue_doc: "Langue du document", opt_francais: "Français", opt_anglais: "Anglais",
+      btn_continuer: "Continuer", btn_retour: "Retour",
+      step_label_2: "Étape 2 / 4", s2_title: "Ajoutez vos connaissances",
+      s2_lead: "C'est ici que votre expertise prend vie. Décrivez vos connaissances, vos méthodes, vos conseils. Plus les informations sont détaillées, plus l'IA pourra créer un PDF professionnel fidèle à votre expertise.",
+      lbl_expertise: "Vos connaissances", ph_expertise: "Écrivez ou collez ici tout ce que vous savez sur votre sujet : méthodes, étapes, conseils, exemples, erreurs à éviter, astuces, expériences personnelles ou tout autre contenu que vous souhaitez retrouver dans votre PDF.",
+      err_trop_long: "Votre expertise est trop longue pour une seule génération ({n} mots, maximum 15 000). Résumez-la ou divisez-la en plusieurs parties.",
+      step_label_3: "Étape 3 / 4", s3_title: "Personnalisez le design",
+      s3_lead: "Choisissez le style, les couleurs et la mise en page de votre PDF.",
+      lbl_style_pdf: "Style du PDF", style_pro: "Professionnel", style_luxe: "Luxe", style_min: "Minimaliste", style_mod: "Moderne", style_crea: "Créatif",
+      lbl_couleurs: "Couleurs", col_principale: "Couleur principale", col_secondaire: "Couleur secondaire",
+      lbl_police: "Style de police", lbl_taille: "Taille du texte", taille_petit: "Petit", taille_moyen: "Moyen", taille_grand: "Grand",
+      lbl_titre_couv: "Titre (couverture)", ph_titre_couv: "Repris automatiquement de l'étape 1",
+      
+      lbl_citation: "Citation éventuelle (optionnel)", ph_citation: "Une citation à afficher sur la couverture",
+      lbl_style_chap: "Style des chapitres", chap_numerotes: "Numérotés", chap_icones: "Avec icônes", chap_pleine: "Titres pleine largeur", chap_min: "Minimaliste",
+      
+      chk_numero_page: "Numéro de page", chk_entete: "En-tête / pied de page",
+      lbl_elements_supp: "Éléments supplémentaires", chk_copyright: "Copyright", chk_page_auteur: "Page auteur", chk_page_contact: "Page contact", chk_reseaux: "Réseaux sociaux",
+      ph_bio: "Courte biographie du créateur...", ph_contact_email: "E-mail de contact", ph_contact_tel: "Téléphone (optionnel)",
+      ph_instagram: "Instagram (optionnel)", ph_linkedin: "LinkedIn (optionnel)", ph_site: "Site web (optionnel)",
+      step_label_4: "Étape 4 / 4", s4_title: "Génération et prévisualisation",
+      s4_lead: "L'IA combine vos connaissances, la structure et le design pour créer votre PDF final.",
+      s4_title_done: "✅ Votre expertise est devenue un produit professionnel !",
+      s4_lead_done: "Votre expertise a été transformée en un ebook professionnel, prêt à être prévisualisé ou téléchargé en seulement 2 minutes.",
+      btn_regenerer_ebook: "Régénérer mon ebook",
+      btn_generer: "Générer mon contenu", btn_previsualiser: "Prévisualiser", preview_titre: "Prévisualisation du PDF", btn_telecharger_pdf: "Télécharger le PDF",
+      note_generation_pdf: "1 génération sera utilisée lors du téléchargement.",
+      recap_titre: "Titre", recap_sujet: "Sujet", recap_ton: "Ton", recap_public: "Public cible"
+    },
+    en: {
+      nav_creer: "Create", nav_dashboard: "Dashboard",
+      step_label_1: "Step 1 / 4", s1_title: "Turn your expertise into a product",
+      s1_lead: "Fill in this information. The AI will turn your expertise into a professional, sales-ready PDF in 2 minutes.",
+      lbl_titre: "PDF title", ph_titre: "E.g.: Copywriting fundamentals",
+      lbl_sujet: "Subject", ph_sujet: "E.g.: Persuasive writing for entrepreneurs",
+      lbl_ton: "Tone", ph_ton: "E.g.: Persuasive, motivating, direct...",
+      ton_choisir: "Choose a tone", ton_pro: "Professional", ton_persuasif: "Persuasive", ton_inspirant: "Inspiring",
+      ton_pedagogique: "Educational", ton_conversationnel: "Conversational", ton_motivant: "Motivating", ton_direct: "Direct",
+      note_langue_pdf: "The PDF will be generated entirely in the selected language.",
+      progres_25: "25% complete", progres_50: "50% complete", progres_75: "75% complete", progres_100: "100% complete",
+      lbl_public: "Target audience", ph_public: "E.g.: Beginner entrepreneurs and freelancers",
+      lbl_prenom: "Creator first name", ph_prenom: "Your first name", lbl_createur: "Author name", ph_createur: "Your name",
+      lbl_langue_doc: "Document language", opt_francais: "French", opt_anglais: "English",
+      btn_continuer: "Continue", btn_retour: "Back",
+      step_label_2: "Step 2 / 4", s2_title: "Add your knowledge",
+      s2_lead: "This is where your expertise comes to life. Describe your knowledge, methods and advice. The more detailed the information, the better the AI can create a PDF true to your expertise.",
+      lbl_expertise: "Your knowledge", ph_expertise: "Write or paste here everything you know about your topic: methods, steps, advice, examples, mistakes to avoid, tips, personal experiences, or any other content you'd like to see in your PDF.",
+      err_trop_long: "Your expertise is too long for a single generation ({n} words, 15,000 max). Summarize it or split it into several parts.",
+      step_label_3: "Step 3 / 4", s3_title: "Customize the design",
+      s3_lead: "Choose the style, colors and layout of your PDF.",
+      lbl_style_pdf: "PDF style", style_pro: "Professional", style_luxe: "Luxury", style_min: "Minimalist", style_mod: "Modern", style_crea: "Creative",
+      lbl_couleurs: "Colors", col_principale: "Primary color", col_secondaire: "Secondary color",
+      lbl_police: "Font style", lbl_taille: "Text size", taille_petit: "Small", taille_moyen: "Medium", taille_grand: "Large",
+      lbl_titre_couv: "Title (cover)", ph_titre_couv: "Auto-filled from step 1",
+      
+      lbl_citation: "Optional quote", ph_citation: "A quote to display on the cover",
+      lbl_style_chap: "Chapter style", chap_numerotes: "Numbered", chap_icones: "With icons", chap_pleine: "Full-width titles", chap_min: "Minimalist",
+      
+      chk_numero_page: "Page number", chk_entete: "Header / footer",
+      lbl_elements_supp: "Additional elements", chk_copyright: "Copyright", chk_page_auteur: "Author page", chk_page_contact: "Contact page", chk_reseaux: "Social media",
+      ph_bio: "Short creator bio...", ph_contact_email: "Contact email", ph_contact_tel: "Phone (optional)",
+      ph_instagram: "Instagram (optional)", ph_linkedin: "LinkedIn (optional)", ph_site: "Website (optional)",
+      step_label_4: "Step 4 / 4", s4_title: "Generation and preview",
+      s4_lead: "The AI combines your knowledge, structure and design to create your final PDF.",
+      s4_title_done: "✅ Your expertise has become a professional product!",
+      s4_lead_done: "Your expertise has been turned into a professional ebook, ready to preview or download in just 2 minutes.",
+      btn_regenerer_ebook: "Regenerate my ebook",
+      btn_generer: "Generate my content", btn_previsualiser: "Preview", preview_titre: "PDF Preview", btn_telecharger_pdf: "Download the PDF",
+      note_generation_pdf: "1 generation will be used when downloading.",
+      recap_titre: "Title", recap_sujet: "Subject", recap_ton: "Tone", recap_public: "Target audience"
+    }
+  };
+
+  function appliquerLangue(langue){
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var cle = el.getAttribute('data-i18n');
+      if (traductions[langue][cle] !== undefined) el.textContent = traductions[langue][cle];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+      var cle = el.getAttribute('data-i18n-placeholder');
+      if (traductions[langue][cle] !== undefined) el.placeholder = traductions[langue][cle];
+    });
+    document.getElementById('lang-switch').textContent = (langue === 'fr') ? 'EN' : 'FR';
+    document.documentElement.lang = langue;
+    localStorage.setItem('xpert2min_langue', langue);
+  }
+
+  function toggleLangue(){
+    var actuelle = localStorage.getItem('xpert2min_langue') || 'fr';
+    var nouvelle = actuelle === 'fr' ? 'en' : 'fr';
+    appliquerLangue(nouvelle);
+  }
+
+  appliquerLangue(localStorage.getItem('xpert2min_langue') || 'fr');
+
+  Parse.initialize("s1YvHg4CRjirbCydEjFLoBnkSxnNHBlXeBLSmJxq", "WgwearpWgCysVARQz6etPeujBL0ZspvkRCafYuZT");
+  Parse.serverURL = "https://parseapi.back4app.com/";
+
+  // Protection de la page : si personne n'est connecté, retour à la connexion
+  if (!Parse.User.current()) {
+    window.location.href = "index.html";
+  }
+
+  // Navigation entre les étapes
+  function goToStep(n){
+    document.querySelectorAll('.step-screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById('screen-' + n).classList.add('active');
+    document.querySelectorAll('.step-dot').forEach(function(dot, i){
+      dot.classList.toggle('active', i < n);
+    });
+    if (n === 4) {
+      remplirRecap();
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function remplirRecap(){
+    var recap = document.getElementById('recap-box');
+    var langue = localStorage.getItem('xpert2min_langue') || 'fr';
+    var t = traductions[langue];
+    function ligne(icone, label, valeur){
+      return '<div class="recap-row"><div class="recap-icon">' + icone + '</div><div><div class="recap-row-label">' + label + '</div><div class="recap-row-value">' + escapeHTML(valeur || '—') + '</div></div></div>';
+    }
+    recap.innerHTML =
+      ligne('📘', t.recap_titre, document.getElementById('titre').value) +
+      ligne('🏷️', t.recap_sujet, document.getElementById('sujet').value) +
+      ligne('🎯', t.recap_ton, document.getElementById('ton').value) +
+      ligne('👥', t.recap_public, document.getElementById('public').value);
+  }
+
+  var dernierResultatIA = null; // texte brut renvoyé par l'IA, pour la sauvegarde
+  var idProjetActuel = null; // identifiant du projet sauvegardé, pour y rattacher le lien du PDF ensuite
+
+  async function genererContenu(){
+    var btn = document.getElementById('generate-btn');
+    var msg = document.getElementById('msg-4');
+    var resultBox = document.getElementById('result-box');
+    var preview = document.getElementById('pdf-preview');
+    var actionsRow = document.getElementById('actions-row');
+
+    msg.textContent = '';
+    msg.className = 'form-msg';
+    resultBox.classList.add('hidden');
+    preview.classList.add('hidden');
+    preview.innerHTML = '';
+    actionsRow.classList.add('hidden');
+    document.getElementById('pdf-download-note').classList.add('hidden');
+    btn.disabled = true;
+    var texteChargement = document.getElementById('lang-switch').textContent === 'FR' ? 'Generating...' : 'Génération en cours...';
+    btn.textContent = texteChargement;
+
+    try {
+      var resultat = await Parse.Cloud.run('analyserExpertise', {
+        titre: document.getElementById('titre').value,
+        sujet: document.getElementById('sujet').value,
+        ton: document.getElementById('ton').value,
+        publicCible: document.getElementById('public').value,
+        expertise: document.getElementById('connaissances').value
+      });
+
+      dernierResultatIA = resultat;
+      var contenu = decouperReponseIA(resultat);
+
+      if (!contenu) {
+        resultBox.value = resultat;
+        resultBox.classList.remove('hidden');
+      } else {
+        construirePrevisualisation(contenu);
+        preview.classList.remove('hidden');
+        actionsRow.classList.remove('hidden');
+        document.getElementById('pdf-download-note').classList.remove('hidden');
+
+        // Bascule vers l'en-tête "terminé" + bouton devient secondaire (Régénérer)
+        document.getElementById('s4-title-default').classList.add('hidden');
+        document.getElementById('s4-title-done').classList.remove('hidden');
+        document.getElementById('s4-lead-default').classList.add('hidden');
+        document.getElementById('s4-lead-done').classList.remove('hidden');
+        btn.classList.add('back-btn');
+        btn.classList.remove('next-btn');
+
+        // Sauvegarde automatique et silencieuse (plus de bouton dédié)
+        enregistrerProjetSilencieux();
+      }
+    } catch (error) {
+      msg.textContent = 'Erreur technique : ' + (error.message || 'inconnue');
+      msg.classList.add('error');
+      console.error('Détail erreur genererContenu :', error);
+    } finally {
+      btn.disabled = false;
+      var dejaGenere = !document.getElementById('s4-title-done').classList.contains('hidden');
+      var langueActuelle = document.getElementById('lang-switch').textContent === 'FR' ? 'en' : 'fr';
+      btn.textContent = dejaGenere ? traductions[langueActuelle].btn_regenerer_ebook : traductions[langueActuelle].btn_generer;
+    }
+  }
+
+  // ----- Enregistrement du projet dans Back4App -----
+  async function enregistrerProjetSilencieux(){
+    try {
+      var Project = Parse.Object.extend('Project');
+      var projet = new Project();
+
+      projet.set('utilisateur', Parse.User.current());
+      projet.set('titre', document.getElementById('titre').value);
+      projet.set('sujet', document.getElementById('sujet').value);
+      projet.set('ton', document.getElementById('ton').value);
+      projet.set('publicCible', document.getElementById('public').value);
+      projet.set('prenom', document.getElementById('prenom').value);
+      projet.set('createur', document.getElementById('createur').value);
+      projet.set('langueDocument', document.querySelector('input[name="langue"]:checked').value);
+      projet.set('expertise', document.getElementById('connaissances').value);
+
+      var styleCardSelectionnee = document.querySelector('.style-card.selected');
+      projet.set('design', {
+        style: styleCardSelectionnee ? styleCardSelectionnee.getAttribute('data-value') : 'professionnel',
+        couleurPrincipale: document.getElementById('couleur-principale').value,
+        couleurSecondaire: document.getElementById('couleur-secondaire').value,
+        police: document.getElementById('police').value,
+        tailleTexte: document.getElementById('taille-texte').value,
+        titreCouverture: document.getElementById('titre-couverture').value,
+        citation: document.getElementById('citation').value,
+        styleChapitres: document.getElementById('style-chapitres').value,
+        numeroPages: document.getElementById('numero-pages').checked,
+        entetePied: document.getElementById('entete-pied').checked,
+        copyright: document.getElementById('elt-copyright').checked,
+        pageAuteur: document.getElementById('elt-page-auteur').checked,
+        pageContact: document.getElementById('elt-page-contact').checked,
+        reseaux: document.getElementById('elt-reseaux').checked
+      });
+
+      projet.set('contenuGenere', dernierResultatIA);
+
+      await projet.save();
+      idProjetActuel = projet.id;
+    } catch (error) {
+      // Échec silencieux : on ne bloque pas l'utilisateur si la sauvegarde échoue,
+      // il peut toujours prévisualiser et télécharger son PDF normalement.
+      console.error('Erreur de sauvegarde automatique :', error.message);
+    }
+  }
+
+  // ----- Téléchargement du vrai fichier PDF (généré côté serveur via Puppeteer) -----
+  // Construit un document HTML autonome (avec ses propres styles) à partir de ce qui est déjà affiché en prévisualisation
+  function construireHTMLPourPDF(){
+    var styleCSS = document.querySelector('style').innerHTML;
+    var pagesHTML = document.getElementById('pdf-preview').innerHTML;
+    var cssExportPDF =
+      'body{background:#fff;margin:0;}' +
+      '.pdf-preview{background:none !important;padding:0 !important;}' +
+      '.pdf-page{max-width:none !important;width:210mm !important;height:296mm !important;aspect-ratio:auto !important;overflow:hidden !important;page-break-after:always;padding:22mm 18mm 26mm !important;box-sizing:border-box;}' +
+      '.pdf-page.cover{padding:0 !important;}' +
+      '.cover-title{font-size:2.6em !important;line-height:1.15 !important;}' +
+      '.cover-quote{font-size:1em !important;}' +
+      '.cover-auteur{font-size:0.85em !important;}' +
+      '.section-title{font-size:1.7em !important;margin-bottom:14mm !important;}' +
+      '.chapter-title{font-size:1.5em !important;margin-bottom:8mm !important;}' +
+      '.chapter-body{font-size:1.05em !important;line-height:1.7 !important;margin-bottom:5mm !important;}' +
+      '.callout{font-size:0.95em !important;padding:5mm 6mm !important;margin:6mm 0 7mm !important;}' +
+      '.callout-label{font-size:0.85em !important;}' +
+      '.sommaire-item{font-size:1.05em !important;padding:3mm 0 !important;}' +
+      '.drop-cap{font-size:2.8em !important;}' +
+      '.chapter-num-bg{font-size:9em !important;}' +
+      '.page-header-x2m{font-size:0.7em !important;top:10mm !important;left:18mm !important;right:18mm !important;}' +
+      '.page-footer-x2m{font-size:0.75em !important;bottom:10mm !important;left:18mm !important;right:18mm !important;}' +
+      '.cover-watermark{bottom:10mm !important;}';
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">' +
+      '<style>' + styleCSS + cssExportPDF +
+      '</style></head><body><div class="pdf-preview">' + pagesHTML + '</div></body></html>';
+  }
+
+  async function telechargerPDF(){
+    var btn = document.getElementById('download-pdf-btn');
+    var titreSpan = btn.querySelector('span:last-child');
+    var texteOrigine = titreSpan.textContent;
+    var msg = document.getElementById('msg-pdf');
+    msg.textContent = '';
+    msg.className = 'form-msg';
+    btn.disabled = true;
+    btn.classList.add('downloading');
+    titreSpan.textContent = document.getElementById('lang-switch').textContent === 'FR' ? 'Generating PDF...' : 'Génération du PDF en cours...';
+
+    try {
+      var htmlComplet = construireHTMLPourPDF();
+      var resultat = await Parse.Cloud.run('genererPDF', {
+        titre: document.getElementById('titre').value,
+        html: htmlComplet
+      });
+
+      // resultat.url = lien du fichier PDF hébergé sur Back4App
+      var nomFichier = nettoyerNomFichier(document.getElementById('titre').value) + '.pdf';
+      var lien = document.createElement('a');
+
+      // On récupère le fichier nous-mêmes pour pouvoir forcer le vrai nom du PDF
+      // (un lien direct vers un autre domaine ne permet pas de renommer le fichier).
+      try {
+        var reponsePdf = await fetch(resultat.url);
+        var blobPdf = await reponsePdf.blob();
+        var urlLocale = URL.createObjectURL(blobPdf);
+        lien.href = urlLocale;
+        lien.download = nomFichier;
+        document.body.appendChild(lien);
+        lien.click();
+        document.body.removeChild(lien);
+        URL.revokeObjectURL(urlLocale);
+      } catch (erreurTelechargement) {
+        // Repli de sécurité : si la récupération échoue, on garde l'ancien comportement
+        // pour que le téléchargement fonctionne quand même.
+        console.error('Nom de fichier personnalisé impossible, repli sur le lien direct :', erreurTelechargement.message);
+        lien.href = resultat.url;
+        lien.download = nomFichier;
+        document.body.appendChild(lien);
+        lien.click();
+        document.body.removeChild(lien);
+      }
+
+      // Sauvegarde du lien PDF sur le projet, pour pouvoir le rouvrir depuis le Dashboard
+      if (idProjetActuel) {
+        try {
+          var Project = Parse.Object.extend('Project');
+          var projetQuery = new Parse.Query(Project);
+          var projetAMettreAJour = await projetQuery.get(idProjetActuel);
+          projetAMettreAJour.set('pdfUrl', resultat.url);
+          await projetAMettreAJour.save();
+        } catch (erreurSauvegardeLien) {
+          console.error('Erreur de sauvegarde du lien PDF :', erreurSauvegardeLien.message);
+        }
+      }
+    } catch (error) {
+      msg.textContent = 'Erreur : ' + (error.message || 'impossible de générer le PDF.');
+      msg.classList.add('error');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('downloading');
+      titreSpan.textContent = texteOrigine;
+    }
+  }
+
+  function ouvrirPrevisualisation(){
+    document.getElementById('preview-overlay').classList.add('is-opening');
+    document.getElementById('preview-overlay').classList.remove('hidden');
+    document.getElementById('preview-overlay-body').scrollTop = 0;
+    setTimeout(function(){ document.getElementById('preview-overlay').classList.remove('is-opening'); }, 10);
+  }
+
+  function fermerPrevisualisation(){
+    document.getElementById('preview-overlay').classList.add('hidden');
+  }
+
+  // Découpe le texte brut de l'IA en morceaux, à partir des balises [SOMMAIRE], [INTRODUCTION], [CHAPITRE X: titre], [CONCLUSION]
+  function decouperReponseIA(texte){
+    if (!texte || texte.indexOf('[SOMMAIRE]') === -1) return null;
+
+    var sections = texte.split(/\[(SOMMAIRE|INTRODUCTION|CONCLUSION|CHAPITRE \d+:[^\]]*)\]/);
+    var resultat = { sommaire: '', introduction: '', conclusion: '', chapitres: [] };
+
+    for (var i = 1; i < sections.length; i += 2){
+      var etiquette = sections[i].trim();
+      var contenu = (sections[i + 1] || '').trim();
+
+      if (etiquette === 'SOMMAIRE') resultat.sommaire = contenu;
+      else if (etiquette === 'INTRODUCTION') resultat.introduction = contenu;
+      else if (etiquette === 'CONCLUSION') resultat.conclusion = contenu;
+      else if (etiquette.indexOf('CHAPITRE') === 0) {
+        var titreChapitre = etiquette.split(':').slice(1).join(':').trim();
+        resultat.chapitres.push({ titre: titreChapitre || ('Chapitre ' + (resultat.chapitres.length + 1)), texte: contenu });
+      }
+    }
+    return resultat;
+  }
+
+  // Construit la prévisualisation visuelle du PDF à partir du contenu découpé + des choix de design
+  // ----- Moteur GrapesJS invisible : passe chaque page à travers GrapesJS pour la construction finale -----
+  var gjsEditor = null;
+  function getGjsEditor(){
+    if (!gjsEditor && window.grapesjs) {
+      try {
+        gjsEditor = grapesjs.init({
+          container: '#gjs-hidden',
+          fromElement: false,
+          height: '1131px',
+          width: '800px',
+          storageManager: false,
+          panels: { defaults: [] },
+          layerManager: { appendTo: '#gjs-hidden' }
+        });
+      } catch(e) { gjsEditor = null; }
+    }
+    return gjsEditor;
+  }
+  function assemblerAvecGrapesJS(htmlInterne){
+    var editor = getGjsEditor();
+    if (!editor) return htmlInterne;
+    try {
+      editor.setComponents(htmlInterne);
+      return editor.getHtml();
+    } catch(e) {
+      return htmlInterne;
+    }
+  }
+
+  // ----- Icône unique et cohérente pour tout le document (un seul style, jamais mélangé) -----
+  function iconeAccent(couleur){
+    return '<span class="callout-icon" style="background:' + couleur + '"></span>';
+  }
+
+  var ICONES_CALLOUT = { ASTUCE: '★', CONSEIL: '◆', EXEMPLE: '▸', IMPORTANT: '■' };
+  var LABELS_CALLOUT = { ASTUCE: 'Astuce', CONSEIL: 'Conseil', EXEMPLE: 'Exemple', IMPORTANT: 'Important' };
+
+  // ----- Découpe le texte d'un chapitre en paragraphes + encadrés premium, avec lettrine sur le tout premier paragraphe -----
+  function construireCorpsChapitre(texte, couleurAccent, couleurAccent2){
+    var regex = /\[(ASTUCE|CONSEIL|EXEMPLE|IMPORTANT)\]([\s\S]*?)\[\/\1\]/g;
+    var html = '';
+    var lastIndex = 0;
+    var match;
+    var premierParagraphe = true;
+
+    function rendreParagraphes(bloc){
+      var out = '';
+      var paragraphes = bloc.split(/\n{1,}/).filter(function(p){ return p.trim(); });
+      paragraphes.forEach(function(p){
+        var texteEchappe = escapeHTML(p.trim());
+        if (premierParagraphe) {
+          var premiereLettre = texteEchappe.charAt(0);
+          var reste = texteEchappe.slice(1);
+          out += '<div class="chapter-body"><span class="drop-cap" style="color:' + couleurAccent + '">' + premiereLettre + '</span>' + reste + '</div>';
+          premierParagraphe = false;
+        } else {
+          out += '<div class="chapter-body">' + texteEchappe + '</div>';
+        }
+      });
+      return out;
+    }
+
+    while ((match = regex.exec(texte)) !== null) {
+      var avant = texte.slice(lastIndex, match.index);
+      if (avant.trim()) html += rendreParagraphes(avant);
+      var type = match[1];
+      var contenuCallout = match[2].trim();
+      var couleurCallout = (type === 'ASTUCE' || type === 'IMPORTANT') ? couleurAccent : couleurAccent2;
+      html += '<div class="callout" style="border-left-color:' + couleurCallout + '">' +
+        '<div class="callout-label" style="color:' + couleurCallout + '">' + iconeAccent(couleurCallout) + LABELS_CALLOUT[type] + '</div>' +
+        '<div>' + escapeHTML(contenuCallout) + '</div></div>';
+      lastIndex = regex.lastIndex;
+    }
+    var reste = texte.slice(lastIndex);
+    if (reste.trim()) html += rendreParagraphes(reste);
+
+    return html || '<div class="chapter-body">' + escapeHTML(texte) + '</div>';
+  }
+
+  // ----- En-tête / pied de page cohérents (identité visuelle sur toutes les pages de contenu) -----
+  function headerFooterHTML(titreDoc, numPage, couleur, afficherHeader, afficherFooter){
+    var html = '';
+    if (afficherHeader) {
+      html += '<div class="page-header-x2m"><span>' + escapeHTML(titreDoc) + '</span><span>XPERT2MIN</span></div>';
+    }
+    if (afficherFooter) {
+      html += '<div class="page-footer-x2m"><span><span class="footer-dot" style="background:' + couleur + '"></span>Xpert2Min</span><span>' + numPage + '</span></div>';
+    }
+    return html;
+  }
+
+  // ----- Motif de secours (jamais d'espace vide si aucune image) -----
+  // ----- Filigrane discret Xpert2Min (remplace l'ancien texte "généré automatiquement") -----
+  function xpertWatermarkHTML(){
+    return '<div class="cover-watermark">' +
+      '<svg viewBox="0 0 200 200" width="10" height="10"><polygon points="30,30 85,30 170,170 115,170" fill="currentColor"/><polygon points="170,30 115,30 30,170 85,170" fill="currentColor" opacity="0.55"/></svg>' +
+      '<span>XPERT2MIN</span></div>';
+  }
+
+  function motifSecoursHTML(couleur){
+    return '<svg class="fallback-motif" viewBox="0 0 100 100" preserveAspectRatio="none">' +
+      '<circle cx="85" cy="15" r="40" fill="' + couleur + '"/>' +
+      '<circle cx="10" cy="95" r="25" fill="' + couleur + '"/>' +
+      '</svg>';
+  }
+
+  function construirePrevisualisation(contenu){
+    var preview = document.getElementById('pdf-preview');
+    preview.innerHTML = '';
+
+    // Palette volontairement limitée à 3 couleurs maximum (identité visuelle cohérente)
+    var couleurPrincipale = document.getElementById('couleur-principale').value;
+    var couleurSecondaire = document.getElementById('couleur-secondaire').value;
+    var police = document.getElementById('police').value;
+    var titreCouverture = document.getElementById('titre-couverture').value || document.getElementById('titre').value;
+    var citation = document.getElementById('citation').value;
+    var styleChapitres = document.getElementById('style-chapitres').value;
+    var tailleTexteChoisie = document.getElementById('taille-texte').value;
+    var afficherPageAuteur = document.getElementById('elt-page-auteur').checked;
+    var afficherContact = document.getElementById('elt-page-contact').checked;
+    var afficherCopyright = document.getElementById('elt-copyright').checked;
+    var afficherNumeroPage = document.getElementById('numero-pages').checked;
+    var afficherEntetePied = document.getElementById('entete-pied').checked;
+    var titreDoc = document.getElementById('titre').value;
+
+    var styleCardSelectionnee = document.querySelector('.style-card.selected');
+    var styleChoisi = styleCardSelectionnee ? styleCardSelectionnee.getAttribute('data-value') : 'professionnel';
+
+    // Titre de couverture : taille ajustée automatiquement selon la longueur (jamais de débordement)
+    var tailleTitreCouverture = titreCouverture.length > 40 ? '20px' : (titreCouverture.length > 22 ? '25px' : '30px');
+    var tailleCitation = citation && citation.length > 90 ? '11px' : '12.5px';
+
+    var numeroPageActuel = 0;
+    function prochainNumero(){ numeroPageActuel++; return numeroPageActuel; }
+
+    // --- Page de couverture ---
+    var cover = document.createElement('div');
+    cover.className = 'pdf-page cover cover-' + styleChoisi;
+    cover.style.fontFamily = police;
+
+    var quoteHTML = citation ? '<div class="cover-quote" style="font-size:' + tailleCitation + '">« ' + escapeHTML(citation) + ' »</div>' : '';
+    var auteurHTML = '<div class="cover-auteur">' + escapeHTML(nomComplet()) + '</div>';
+    var titreHTML = '<div class="cover-title" style="font-size:' + tailleTitreCouverture + '">' + escapeHTML(titreCouverture) + '</div>';
+
+    var coverInnerHTML = '';
+    if (styleChoisi === 'professionnel') {
+      cover.style.color = '#161616';
+      coverInnerHTML =
+        '<div class="diag-block" style="background:' + couleurPrincipale + '"></div>' +
+        '<div class="deco-line" style="background:' + couleurSecondaire + '"></div>' +
+        '<div class="cover-content">' +
+          titreHTML + quoteHTML + auteurHTML +
+        '</div>' + xpertWatermarkHTML();
+    }
+    else if (styleChoisi === 'luxe') {
+      cover.style.color = '#fff';
+      coverInnerHTML =
+        '<div class="luxe-frame" style="border-color:' + couleurPrincipale + '55">' +
+          '<div class="luxe-corner-dot" style="background:' + couleurPrincipale + '"></div>' +
+          titreHTML +
+          '<div class="luxe-sep" style="background:' + couleurPrincipale + '"></div>' +
+          quoteHTML + auteurHTML +
+        '</div>' + xpertWatermarkHTML();
+    }
+    else if (styleChoisi === 'minimaliste') {
+      cover.style.color = '#161616';
+      coverInnerHTML =
+        '<div class="cover-content">' +
+          titreHTML +
+          '<div class="min-underline" style="background:' + couleurPrincipale + '"></div>' +
+          quoteHTML + auteurHTML +
+        '</div>' + xpertWatermarkHTML();
+    }
+    else if (styleChoisi === 'moderne') {
+      cover.style.color = '#fff';
+      coverInnerHTML =
+        '<div class="blob" style="width:220px;height:220px;top:-60px;right:-60px;background:' + couleurPrincipale + '"></div>' +
+        '<div class="blob" style="width:150px;height:150px;bottom:-40px;left:-30px;background:' + couleurSecondaire + ';opacity:0.7"></div>' +
+        '<div class="deco-dots" style="color:' + couleurSecondaire + '"></div>' +
+        '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
+    }
+    else { // créatif
+      cover.style.color = '#fff';
+      coverInnerHTML =
+        '<div class="shard" style="width:70%;height:55%;top:-10%;left:-15%;background:' + couleurPrincipale + ';clip-path:polygon(0 0,100% 0,60% 100%,0 80%)"></div>' +
+        '<div class="shard" style="width:60%;height:50%;bottom:-12%;right:-15%;background:' + couleurSecondaire + ';opacity:0.85;clip-path:polygon(40% 0,100% 20%,100% 100%,0 100%)"></div>' +
+        '<div class="deco-ring" style="border-color:' + couleurSecondaire + '"></div>' +
+        '<div class="cover-content">' + titreHTML + quoteHTML + auteurHTML + '</div>' + xpertWatermarkHTML();
+    }
+    // Construction finale de la page via GrapesJS (moteur de design)
+    cover.innerHTML = coverInnerHTML;
+    preview.appendChild(cover);
+
+    // --- Page(s) sommaire (style adapté automatiquement au style choisi) ---
+    // Pagination automatique : si le sommaire ne tient pas sur une page, la suite continue
+    // sur une page "Sommaire (suite)" — aucun texte n'est jamais coupé ou tronqué.
+    var itemsSommaireHTML = contenu.chapitres.map(function(ch, i){
+      if (styleChoisi === 'minimaliste') {
+        return '<div class="sommaire-item style-line">' + escapeHTML(ch.titre) + '</div>';
+      } else if (styleChoisi === 'creatif') {
+        return '<div class="sommaire-item style-chip" style="background:' + (i % 2 === 0 ? couleurPrincipale + '18' : couleurSecondaire + '18') + '"><span class="sommaire-badge" style="background:' + couleurPrincipale + '">' + (i + 1) + '</span>' + escapeHTML(ch.titre) + '</div>';
+      } else {
+        return '<div class="sommaire-item"><span class="sommaire-badge" style="background:' + couleurPrincipale + '">' + (i + 1) + '</span>' + escapeHTML(ch.titre) + '</div>';
+      }
+    });
+
+    function creerPageSommaire(titrePage){
+      var pageSommaire = document.createElement('div');
+      pageSommaire.className = 'pdf-page';
+      pageSommaire.style.fontFamily = police;
+      var conteneurListe = document.createElement('div');
+      var numPageSommaire = prochainNumero();
+      pageSommaire.innerHTML = '<h2 class="section-title" style="color:' + couleurPrincipale + '">' + titrePage + '</h2>' +
+        headerFooterHTML(titreDoc, numPageSommaire, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
+      pageSommaire.insertBefore(conteneurListe, pageSommaire.querySelector('.page-header-x2m') || null);
+      preview.appendChild(pageSommaire);
+      return { page: pageSommaire, conteneur: conteneurListe };
+    }
+
+    var pageSommaireActuelle = creerPageSommaire('Sommaire');
+    var estPremierePageSommaire = true;
+
+    itemsSommaireHTML.forEach(function(itemHTML){
+      // On ajoute l'élément, puis on vérifie si la page déborde encore
+      pageSommaireActuelle.conteneur.insertAdjacentHTML('beforeend', itemHTML);
+      if (pageSommaireActuelle.page.scrollHeight > pageSommaireActuelle.page.clientHeight) {
+        // Ça ne rentre plus : on retire cet élément et on le reporte sur une nouvelle page
+        pageSommaireActuelle.conteneur.lastElementChild.remove();
+        pageSommaireActuelle = creerPageSommaire('Sommaire (suite)');
+        estPremierePageSommaire = false;
+        pageSommaireActuelle.conteneur.insertAdjacentHTML('beforeend', itemHTML);
+      }
+    });
+
+    // --- Page introduction ---
+    if (contenu.introduction) {
+      var intro = document.createElement('div');
+      intro.className = 'pdf-page';
+      intro.style.fontFamily = police;
+      var numIntro = prochainNumero();
+      intro.innerHTML = ('<h2 class="section-title" style="color:' + couleurPrincipale + '">Introduction</h2>' +
+        construireCorpsChapitre(contenu.introduction, couleurPrincipale, couleurSecondaire) +
+        headerFooterHTML(titreDoc, numIntro, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
+      preview.appendChild(intro);
+    }
+
+    // --- Pages de chapitres ---
+    contenu.chapitres.forEach(function(ch, index){
+      var page = document.createElement('div');
+      page.className = 'pdf-page';
+      page.style.fontFamily = police;
+      var titreClass = 'chapter-title';
+      if (styleChapitres === 'Numérotés') titreClass += ' style-numbered';
+      if (styleChapitres === 'Titres pleine largeur') titreClass += ' style-fullwidth';
+      var numPage = prochainNumero();
+      page.innerHTML = (
+        '<div class="chapter-num-bg" style="color:' + couleurPrincipale + '">' + String(index + 1).padStart(2, '0') + '</div>' +
+        '<div class="' + titreClass + '" data-num="' + (index + 1) + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">' + escapeHTML(ch.titre) + '</div>' +
+        construireCorpsChapitre(ch.texte, couleurPrincipale, couleurSecondaire) +
+        motifSecoursHTML(couleurSecondaire) +
+        headerFooterHTML(titreDoc, numPage, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
+      preview.appendChild(page);
+    });
+
+    // --- Page conclusion ---
+    if (contenu.conclusion) {
+      var concl = document.createElement('div');
+      concl.className = 'pdf-page';
+      concl.style.fontFamily = police;
+      var numConcl = prochainNumero();
+      concl.innerHTML = ('<h2 class="section-title" style="color:' + couleurPrincipale + '">Conclusion</h2>' +
+        construireCorpsChapitre(contenu.conclusion, couleurPrincipale, couleurSecondaire) +
+        headerFooterHTML(titreDoc, numConcl, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
+      preview.appendChild(concl);
+    }
+
+    // --- Page optionnelle combinée : auteur / contact / réseaux / copyright ---
+    var afficherReseaux = document.getElementById('elt-reseaux').checked;
+    if (afficherPageAuteur || afficherContact || afficherReseaux || afficherCopyright) {
+      var pageInfos = document.createElement('div');
+      pageInfos.className = 'pdf-page';
+      pageInfos.style.fontFamily = police;
+      var blocs = '';
+
+      if (afficherPageAuteur) {
+        var bio = document.getElementById('bio-auteur').value;
+        blocs += '<h2 class="section-title" style="color:' + couleurPrincipale + '">' + escapeHTML(nomComplet()) + '</h2>';
+        if (bio) blocs += '<div class="chapter-body" style="margin-bottom:18px">' + escapeHTML(bio) + '</div>';
+      }
+      if (afficherContact) {
+        var email = document.getElementById('contact-email').value;
+        var tel = document.getElementById('contact-tel').value;
+        blocs += '<p style="font-size:13px;margin-bottom:6px;color:' + couleurPrincipale + '"><b>Contact</b></p>';
+        if (email) blocs += '<p style="font-size:12.5px;margin-bottom:4px">' + escapeHTML(email) + '</p>';
+        if (tel) blocs += '<p style="font-size:12.5px;margin-bottom:16px">' + escapeHTML(tel) + '</p>';
+      }
+      if (afficherReseaux) {
+        var insta = document.getElementById('reseau-instagram').value;
+        var linkedin = document.getElementById('reseau-linkedin').value;
+        var site = document.getElementById('reseau-site').value;
+        if (insta || linkedin || site) {
+          blocs += '<p style="font-size:13px;margin-bottom:6px;color:' + couleurPrincipale + '"><b>Réseaux</b></p>';
+          if (insta) blocs += '<p style="font-size:12.5px;margin-bottom:4px">Instagram : ' + escapeHTML(insta) + '</p>';
+          if (linkedin) blocs += '<p style="font-size:12.5px;margin-bottom:4px">LinkedIn : ' + escapeHTML(linkedin) + '</p>';
+          if (site) blocs += '<p style="font-size:12.5px;margin-bottom:16px">Site : ' + escapeHTML(site) + '</p>';
+        }
+      }
+      if (afficherCopyright) {
+        blocs += '<p style="font-size:11px;opacity:0.6;margin-top:20px">© ' + new Date().getFullYear() + ' — ' + escapeHTML(nomComplet()) + '. Tous droits réservés.</p>';
+      }
+      var numInfos = prochainNumero();
+      pageInfos.innerHTML = (blocs + headerFooterHTML(titreDoc, numInfos, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
+      preview.appendChild(pageInfos);
+    }
+
+    // --- Application de la taille de texte choisie (Petit/Moyen/Grand) ---
+    appliquerTailleTexte(tailleTexteChoisie);
+
+    // --- Vérification finale avant "export" : aucune page ne doit déborder (ajustement auto de la taille du texte) ---
+    ajusterDebordements();
+
+    // --- Hauteur fixe et fiable pour chaque page (évite tout décalage d'affichage entre pages) ---
+    forcerHauteurPages();
+  }
+
+  // Calcule et applique en pixels la hauteur exacte de chaque page (format A4 : 210 x 297),
+  // au lieu de compter uniquement sur le CSS "aspect-ratio" qui peut se comporter
+  // différemment selon les téléphones/navigateurs. Garantit que toutes les pages
+  // ont toujours exactement la même hauteur, sans espace vide entre elles.
+  function forcerHauteurPages(){
+    document.querySelectorAll('#pdf-preview .pdf-page').forEach(function(page){
+      var largeur = page.offsetWidth;
+      page.style.aspectRatio = 'auto';
+      page.style.height = Math.round(largeur * 297 / 210) + 'px';
+    });
+  }
+
+  // Applique un facteur d'échelle à toutes les tailles de texte de contenu selon le choix Petit/Moyen/Grand
+  function appliquerTailleTexte(taille){
+    var echelles = { petit: 0.88, moyen: 1, grand: 1.16 };
+    var echelle = echelles[taille] || 1;
+    if (echelle === 1) return;
+    var selecteurs = '.chapter-body, .callout, .callout-label, .sommaire-item, .cover-title, .cover-quote, .section-title, .chapter-title, .cover-auteur';
+    document.querySelectorAll('#pdf-preview ' + selecteurs).forEach(function(el){
+      var tailleActuelle = parseFloat(window.getComputedStyle(el).fontSize);
+      el.style.fontSize = (tailleActuelle * echelle) + 'px';
+    });
+  }
+
+  // Passe sur toutes les pages générées : si le contenu dépasse le format A4, réduit progressivement le texte pour que rien ne soit coupé
+  function ajusterDebordements(){
+    document.querySelectorAll('.pdf-page').forEach(function(page){
+      var tentative = 0;
+      while (page.scrollHeight > page.clientHeight + 3 && tentative < 14) {
+        var corps = page.querySelectorAll('.chapter-body, .callout, .sommaire-item, .cover-title, .cover-quote');
+        corps.forEach(function(el){
+          var tailleActuelle = parseFloat(window.getComputedStyle(el).fontSize);
+          if (tailleActuelle > 8) el.style.fontSize = (tailleActuelle - 0.35) + 'px';
+        });
+        var interlignes = page.querySelectorAll('.chapter-body');
+        interlignes.forEach(function(el){
+          var lh = parseFloat(window.getComputedStyle(el).lineHeight);
+          if (lh > 15) el.style.lineHeight = (lh - 0.5) + 'px';
+        });
+        tentative++;
+      }
+    });
+  }
+
+  // Transforme le titre du PDF en nom de fichier valide (retire les caractères interdits)
+  function nettoyerNomFichier(titre){
+    var nom = (titre || 'xpert2min').trim();
+    nom = nom.replace(/[\\/:*?"<>|]/g, ''); // caractères interdits dans un nom de fichier
+    nom = nom.replace(/\s+/g, ' ').trim();
+    return nom || 'xpert2min';
+  }
+
+  function nomComplet(){
+    var prenom = document.getElementById('prenom').value.trim();
+    var nom = document.getElementById('createur').value.trim();
+    return (prenom + ' ' + nom).trim();
+  }
+
+  function escapeHTML(str){
+    var div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  function validateStep1(){
+    var required = ['titre', 'sujet', 'ton', 'public', 'createur', 'prenom'];
+    for (var i = 0; i < required.length; i++){
+      if (!document.getElementById(required[i]).value.trim()){
+        document.getElementById('msg-1').textContent = 'Merci de remplir tous les champs.';
+        return;
+      }
+    }
+    document.getElementById('msg-1').textContent = '';
+    goToStep(2);
+  }
+
+  function validateStep2(){
+    var msg = document.getElementById('msg-2');
+    msg.textContent = '';
+    msg.className = 'form-msg';
+
+    var texte = document.getElementById('connaissances').value.trim();
+    var nombreDeMots = texte ? texte.split(/\s+/).length : 0;
+
+    if (nombreDeMots > 15000) {
+      var langue = localStorage.getItem('xpert2min_langue') || 'fr';
+      msg.textContent = traductions[langue].err_trop_long.replace('{n}', nombreDeMots);
+      msg.classList.add('error');
+      return;
+    }
+
+    // Pré-remplit le titre de couverture avec le titre saisi à l'étape 1
+    document.getElementById('titre-couverture').value = document.getElementById('titre').value;
+    goToStep(3);
+  }
+
+  // Sélection du style de PDF (étape 3)
+  function toggleSubField(id, checkbox){
+    document.getElementById(id).classList.toggle('hidden', !checkbox.checked);
+  }
+  document.querySelectorAll('.style-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      document.querySelectorAll('.style-card').forEach(function(c){ c.classList.remove('selected'); });
+      card.classList.add('selected');
+    });
+  });
+
+</script>
+
+</body>
+</html>
