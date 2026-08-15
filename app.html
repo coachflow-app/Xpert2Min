@@ -1528,12 +1528,31 @@
       });
 
       // resultat.url = lien du fichier PDF hébergé sur Back4App
+      var nomFichier = nettoyerNomFichier(document.getElementById('titre').value) + '.pdf';
       var lien = document.createElement('a');
-      lien.href = resultat.url;
-      lien.download = (document.getElementById('titre').value || 'xpert2min') + '.pdf';
-      document.body.appendChild(lien);
-      lien.click();
-      document.body.removeChild(lien);
+
+      // On récupère le fichier nous-mêmes pour pouvoir forcer le vrai nom du PDF
+      // (un lien direct vers un autre domaine ne permet pas de renommer le fichier).
+      try {
+        var reponsePdf = await fetch(resultat.url);
+        var blobPdf = await reponsePdf.blob();
+        var urlLocale = URL.createObjectURL(blobPdf);
+        lien.href = urlLocale;
+        lien.download = nomFichier;
+        document.body.appendChild(lien);
+        lien.click();
+        document.body.removeChild(lien);
+        URL.revokeObjectURL(urlLocale);
+      } catch (erreurTelechargement) {
+        // Repli de sécurité : si la récupération échoue, on garde l'ancien comportement
+        // pour que le téléchargement fonctionne quand même.
+        console.error('Nom de fichier personnalisé impossible, repli sur le lien direct :', erreurTelechargement.message);
+        lien.href = resultat.url;
+        lien.download = nomFichier;
+        document.body.appendChild(lien);
+        lien.click();
+        document.body.removeChild(lien);
+      }
 
       // Sauvegarde du lien PDF sur le projet, pour pouvoir le rouvrir depuis le Dashboard
       if (idProjetActuel) {
@@ -1784,11 +1803,10 @@
     cover.innerHTML = coverInnerHTML;
     preview.appendChild(cover);
 
-    // --- Page sommaire (style adapté automatiquement au style choisi) ---
-    var sommaire = document.createElement('div');
-    sommaire.className = 'pdf-page';
-    sommaire.style.fontFamily = police;
-    var listItems = contenu.chapitres.map(function(ch, i){
+    // --- Page(s) sommaire (style adapté automatiquement au style choisi) ---
+    // Pagination automatique : si le sommaire ne tient pas sur une page, la suite continue
+    // sur une page "Sommaire (suite)" — aucun texte n'est jamais coupé ou tronqué.
+    var itemsSommaireHTML = contenu.chapitres.map(function(ch, i){
       if (styleChoisi === 'minimaliste') {
         return '<div class="sommaire-item style-line">' + escapeHTML(ch.titre) + '</div>';
       } else if (styleChoisi === 'creatif') {
@@ -1796,11 +1814,35 @@
       } else {
         return '<div class="sommaire-item"><span class="sommaire-badge" style="background:' + couleurPrincipale + '">' + (i + 1) + '</span>' + escapeHTML(ch.titre) + '</div>';
       }
-    }).join('');
-    var numSommaire = prochainNumero();
-    sommaire.innerHTML = ('<h2 class="section-title" style="color:' + couleurPrincipale + '">Sommaire</h2><div>' + listItems + '</div>' +
-      headerFooterHTML(titreDoc, numSommaire, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
-    preview.appendChild(sommaire);
+    });
+
+    function creerPageSommaire(titrePage){
+      var pageSommaire = document.createElement('div');
+      pageSommaire.className = 'pdf-page';
+      pageSommaire.style.fontFamily = police;
+      var conteneurListe = document.createElement('div');
+      var numPageSommaire = prochainNumero();
+      pageSommaire.innerHTML = '<h2 class="section-title" style="color:' + couleurPrincipale + '">' + titrePage + '</h2>' +
+        headerFooterHTML(titreDoc, numPageSommaire, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
+      pageSommaire.insertBefore(conteneurListe, pageSommaire.querySelector('.page-header-x2m') || null);
+      preview.appendChild(pageSommaire);
+      return { page: pageSommaire, conteneur: conteneurListe };
+    }
+
+    var pageSommaireActuelle = creerPageSommaire('Sommaire');
+    var estPremierePageSommaire = true;
+
+    itemsSommaireHTML.forEach(function(itemHTML){
+      // On ajoute l'élément, puis on vérifie si la page déborde encore
+      pageSommaireActuelle.conteneur.insertAdjacentHTML('beforeend', itemHTML);
+      if (pageSommaireActuelle.page.scrollHeight > pageSommaireActuelle.page.clientHeight) {
+        // Ça ne rentre plus : on retire cet élément et on le reporte sur une nouvelle page
+        pageSommaireActuelle.conteneur.lastElementChild.remove();
+        pageSommaireActuelle = creerPageSommaire('Sommaire (suite)');
+        estPremierePageSommaire = false;
+        pageSommaireActuelle.conteneur.insertAdjacentHTML('beforeend', itemHTML);
+      }
+    });
 
     // --- Page introduction ---
     if (contenu.introduction) {
@@ -1888,6 +1930,21 @@
 
     // --- Vérification finale avant "export" : aucune page ne doit déborder (ajustement auto de la taille du texte) ---
     ajusterDebordements();
+
+    // --- Hauteur fixe et fiable pour chaque page (évite tout décalage d'affichage entre pages) ---
+    forcerHauteurPages();
+  }
+
+  // Calcule et applique en pixels la hauteur exacte de chaque page (format A4 : 210 x 297),
+  // au lieu de compter uniquement sur le CSS "aspect-ratio" qui peut se comporter
+  // différemment selon les téléphones/navigateurs. Garantit que toutes les pages
+  // ont toujours exactement la même hauteur, sans espace vide entre elles.
+  function forcerHauteurPages(){
+    document.querySelectorAll('#pdf-preview .pdf-page').forEach(function(page){
+      var largeur = page.offsetWidth;
+      page.style.aspectRatio = 'auto';
+      page.style.height = Math.round(largeur * 297 / 210) + 'px';
+    });
   }
 
   // Applique un facteur d'échelle à toutes les tailles de texte de contenu selon le choix Petit/Moyen/Grand
@@ -1920,6 +1977,14 @@
         tentative++;
       }
     });
+  }
+
+  // Transforme le titre du PDF en nom de fichier valide (retire les caractères interdits)
+  function nettoyerNomFichier(titre){
+    var nom = (titre || 'xpert2min').trim();
+    nom = nom.replace(/[\\/:*?"<>|]/g, ''); // caractères interdits dans un nom de fichier
+    nom = nom.replace(/\s+/g, ' ').trim();
+    return nom || 'xpert2min';
   }
 
   function nomComplet(){
