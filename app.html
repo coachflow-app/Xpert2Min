@@ -195,27 +195,120 @@
 
 
   /* ÉTAPE 3 : Design */
-  .style-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
+
+  /* Case carrée "Modèle" qui ouvre la liste des 15 modèles */
+  .modele-select-box{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    width:96px;
+    height:96px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:12px;
+    color:var(--white);
+    cursor:pointer;
+    text-align:center;
+    padding:8px;
+    font-family:'Inter', sans-serif;
+  }
+  .modele-select-box:hover{ border-color:var(--red); }
+  .modele-select-box .modele-select-icon{ font-size:20px; }
+  .modele-select-box .modele-select-label{
+    font-size:11px;
+    font-weight:700;
+    line-height:1.25;
+  }
+  .modele-select-box .modele-select-valeur{
+    font-size:9.5px;
+    color:var(--grey);
+    line-height:1.25;
+  }
+
+  /* Overlay de la liste des 15 modèles */
+  .modele-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    z-index:110;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .modele-overlay.hidden{ display:none; }
+  .modele-overlay-panel{
+    background:var(--black);
+    border-top:1px solid var(--line);
+    border-radius:16px 16px 0 0;
+    width:100%;
+    max-width:560px;
+    max-height:78vh;
+    padding:20px 20px 26px;
+    overflow-y:auto;
+    position:relative;
+  }
+  .modele-overlay-panel h2{
+    font-family:'Archivo Black', sans-serif;
+    font-size:16px;
+    margin-bottom:14px;
+  }
+  .modele-overlay-close{
+    position:absolute;
+    top:16px; right:16px;
+    background:none;
+    border:none;
+    color:var(--grey);
+    font-size:18px;
+    cursor:pointer;
+  }
+  .modele-liste{
+    display:flex;
+    flex-direction:column;
     gap:8px;
   }
   .style-card{
-    padding:11px 6px;
+    padding:12px 14px;
     background:var(--black);
     border:1px solid var(--line);
     border-radius:8px;
-    color:var(--grey);
-    font-size:12px;
+    color:var(--white);
+    font-size:13.5px;
     font-weight:600;
     font-family:'Inter', sans-serif;
     cursor:pointer;
-    text-align:center;
+    text-align:left;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
   }
   .style-card.selected{
     border-color:var(--red);
     color:var(--white);
     background:rgba(232,22,28,0.08);
+  }
+  .style-card.disabled{
+    color:var(--grey);
+    cursor:not-allowed;
+    opacity:0.55;
+  }
+  .style-card .badge-bientot{
+    font-size:9.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--grey);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:2px 6px;
+  }
+
+  .design-row-top{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:16px;
   }
 
   .color-row{
@@ -1076,29 +1169,56 @@
     <p class="lead" data-i18n="s3_lead">Choisissez le style, les couleurs et la mise en page de votre PDF.</p>
 
     <div class="field">
-      <label data-i18n="lbl_style_pdf">Style du PDF</label>
-      <div class="style-grid" id="style-grid">
-        <button type="button" class="style-card" data-value="professionnel" data-i18n="style_pro">Professionnel</button>
-        <button type="button" class="style-card" data-value="luxe" data-i18n="style_luxe">Luxe</button>
-        <button type="button" class="style-card" data-value="minimaliste" data-i18n="style_min">Minimaliste</button>
-        <button type="button" class="style-card" data-value="moderne" data-i18n="style_mod">Moderne</button>
-        <button type="button" class="style-card" data-value="creatif" data-i18n="style_crea">Créatif</button>
+      <div class="design-row-top">
+        <div>
+          <label data-i18n="lbl_style_pdf">Modèle</label>
+          <div class="modele-select-box" onclick="ouvrirModeleOverlay()">
+            <span class="modele-select-icon">🎨</span>
+            <span class="modele-select-label" data-i18n="lbl_modele_case">Modèle</span>
+            <span class="modele-select-valeur" id="modele-select-valeur" data-i18n="style_pro">Professionnel</span>
+          </div>
+        </div>
+        <div>
+          <label data-i18n="lbl_couleurs">Couleurs</label>
+          <div class="color-row">
+            <div class="color-item">
+              <input type="color" id="couleur-principale" value="#E8161C">
+              <span data-i18n="col_principale">Couleur principale</span>
+            </div>
+            <div class="color-item">
+              <input type="color" id="couleur-secondaire" value="#0A0A0B">
+              <span data-i18n="col_secondaire">Couleur secondaire</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="field">
-      <label data-i18n="lbl_couleurs">Couleurs</label>
-      <div class="color-row">
-        <div class="color-item">
-          <input type="color" id="couleur-principale" value="#E8161C">
-          <span data-i18n="col_principale">Couleur principale</span>
-        </div>
-        <div class="color-item">
-          <input type="color" id="couleur-secondaire" value="#0A0A0B">
-          <span data-i18n="col_secondaire">Couleur secondaire</span>
+    <!-- OVERLAY : liste complète des 15 modèles -->
+    <div class="modele-overlay hidden" id="modele-overlay">
+      <div class="modele-overlay-panel">
+        <button type="button" class="modele-overlay-close" onclick="fermerModeleOverlay()">✕</button>
+        <h2 data-i18n="lbl_choisir_modele">Choisir un modèle</h2>
+        <div class="modele-liste" id="style-grid">
+          <button type="button" class="style-card selected" data-value="professionnel" data-i18n="style_pro">Professionnel</button>
+          <button type="button" class="style-card" data-value="luxe" data-i18n="style_luxe">Luxe</button>
+          <button type="button" class="style-card" data-value="minimaliste" data-i18n="style_min">Minimaliste</button>
+          <button type="button" class="style-card" data-value="moderne" data-i18n="style_mod">Moderne</button>
+          <button type="button" class="style-card" data-value="creatif" data-i18n="style_crea">Créatif</button>
+          <button type="button" class="style-card disabled" data-value="3d-hero" disabled><span>3D Hero</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
+          <button type="button" class="style-card disabled" data-value="cinema-poster" disabled><span>Cinema Poster</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
+          <button type="button" class="style-card disabled" data-value="visual-metaphor" disabled><span>Visual Metaphor</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
+          <button type="button" class="style-card disabled" data-value="split-visual" disabled><span>Split Visual</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
+          <button type="button" class="style-card disabled" data-value="depth-layers" disabled><span>Depth Layers</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
+          <button type="button" class="style-card disabled" data-value="typographic-art" disabled><span>Typographic Art</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
+          <button type="button" class="style-card disabled" data-value="future-product" disabled><span>Future Product</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
+          <button type="button" class="style-card disabled" data-value="luxury-object" disabled><span>Luxury Object</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
+          <button type="button" class="style-card disabled" data-value="editorial-art" disabled><span>Editorial Art</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
+          <button type="button" class="style-card disabled" data-value="transformation" disabled><span>Transformation</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
         </div>
       </div>
     </div>
+
 
     <div class="field">
       <label for="police" data-i18n="lbl_police">Style de police</label>
@@ -1249,6 +1369,7 @@
       step_label_3: "Étape 3 / 4", s3_title: "Personnalisez le design",
       s3_lead: "Choisissez le style, les couleurs et la mise en page de votre PDF.",
       lbl_style_pdf: "Style du PDF", style_pro: "Professionnel", style_luxe: "Luxe", style_min: "Minimaliste", style_mod: "Moderne", style_crea: "Créatif",
+      lbl_modele_case: "Modèle", lbl_choisir_modele: "Choisir un modèle", badge_bientot: "Bientôt",
       lbl_couleurs: "Couleurs", col_principale: "Couleur principale", col_secondaire: "Couleur secondaire",
       lbl_police: "Style de police", lbl_taille: "Taille du texte", taille_petit: "Petit", taille_moyen: "Moyen", taille_grand: "Grand",
       lbl_titre_couv: "Titre (couverture)", ph_titre_couv: "Repris automatiquement de l'étape 1",
@@ -1291,6 +1412,7 @@
       step_label_3: "Step 3 / 4", s3_title: "Customize the design",
       s3_lead: "Choose the style, colors and layout of your PDF.",
       lbl_style_pdf: "PDF style", style_pro: "Professional", style_luxe: "Luxury", style_min: "Minimalist", style_mod: "Modern", style_crea: "Creative",
+      lbl_modele_case: "Model", lbl_choisir_modele: "Choose a model", badge_bientot: "Coming soon",
       lbl_couleurs: "Colors", col_principale: "Primary color", col_secondaire: "Secondary color",
       lbl_police: "Font style", lbl_taille: "Text size", taille_petit: "Small", taille_moyen: "Medium", taille_grand: "Large",
       lbl_titre_couv: "Title (cover)", ph_titre_couv: "Auto-filled from step 1",
@@ -2017,14 +2139,24 @@
     goToStep(3);
   }
 
-  // Sélection du style de PDF (étape 3)
+  // Sélection du style de PDF (étape 3) — via la case "Modèle" et sa liste
   function toggleSubField(id, checkbox){
     document.getElementById(id).classList.toggle('hidden', !checkbox.checked);
   }
+  function ouvrirModeleOverlay(){
+    document.getElementById('modele-overlay').classList.remove('hidden');
+  }
+  function fermerModeleOverlay(){
+    document.getElementById('modele-overlay').classList.add('hidden');
+  }
   document.querySelectorAll('.style-card').forEach(function(card){
+    if (card.disabled) return;
     card.addEventListener('click', function(){
       document.querySelectorAll('.style-card').forEach(function(c){ c.classList.remove('selected'); });
       card.classList.add('selected');
+      var texteAffiche = card.querySelector('span') ? card.querySelector('span').textContent : card.textContent;
+      document.getElementById('modele-select-valeur').textContent = texteAffiche.trim();
+      fermerModeleOverlay();
     });
   });
 
