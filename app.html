@@ -1512,6 +1512,16 @@
     btn.disabled = true;
     var estFr = document.getElementById('lang-switch').textContent === 'FR';
 
+    function pause(ms){ return new Promise(function(resolve){ setTimeout(resolve, ms); }); }
+    function compterMots(texte){ return (texte || '').trim().split(/\s+/).filter(Boolean).length; }
+
+    var premierAppelIA = true;
+    async function appellerIA(params){
+      if (!premierAppelIA) { await pause(2500); } // laisse le temps au quota Groq de se libérer entre 2 appels
+      premierAppelIA = false;
+      return await Parse.Cloud.run('analyserExpertise', params);
+    }
+
     try {
       var titre = document.getElementById('titre').value;
       var sujet = document.getElementById('sujet').value;
@@ -1519,46 +1529,85 @@
       var publicCible = document.getElementById('public').value;
       var expertise = document.getElementById('connaissances').value;
 
-      // --- Étape 1 : demander uniquement le plan (sommaire + introduction + conclusion) ---
+      // --- Étape 1 : découper l'expertise brute en blocs (~1500 mots chacun) ---
+      var motsExpertise = expertise.trim().split(/\s+/).filter(Boolean);
+      var TAILLE_BLOC = 1500;
+      var blocs = [];
+      for (var d = 0; d < motsExpertise.length; d += TAILLE_BLOC) {
+        blocs.push(motsExpertise.slice(d, d + TAILLE_BLOC).join(' '));
+      }
+      if (blocs.length === 0) blocs = [expertise];
+
+      // --- Étape 2 : analyser progressivement chaque bloc → mémoire structurée ---
+      var resumesBlocs = [];
+      for (var b = 0; b < blocs.length; b++) {
+        btn.textContent = (estFr ? 'Analyse du bloc ' : 'Analyzing block ') + (b + 1) + '/' + blocs.length + '...';
+        var resume = await appellerIA({
+          titre: titre, sujet: sujet, mode: 'bloc',
+          blocTexte: blocs[b], blocIndex: b + 1, totalBlocs: blocs.length
+        });
+        resumesBlocs.push((resume || '').trim());
+      }
+      var memoireComplete = resumesBlocs.map(function(r, idx){ return '[BLOC ' + (idx + 1) + ']\n' + r; }).join('\n\n');
+
+      // --- Étape 3 : générer le plan à partir de la mémoire condensée ---
       btn.textContent = estFr ? 'Préparation du plan...' : 'Preparing outline...';
-      var reponsePlan = await Parse.Cloud.run('analyserExpertise', {
-        titre: titre, sujet: sujet, ton: ton, publicCible: publicCible, expertise: expertise, mode: 'plan'
+      var reponsePlan = await appellerIA({
+        titre: titre, sujet: sujet, ton: ton, publicCible: publicCible,
+        mode: 'plan', memoire: memoireComplete
       });
 
-      var planDecoupe = decouperReponseIA(reponsePlan);
-      if (!planDecoupe) { throw new Error('Réponse IA invalide (plan).'); }
+      var planAnalyse = analyserReponsePlan(reponsePlan);
+      if (!planAnalyse || planAnalyse.titres.length === 0) { throw new Error('Réponse IA invalide (plan).'); }
 
-      var titresChapitres = planDecoupe.sommaire.split('\n')
-        .map(function(l){ return l.replace(/^[-•\d.\)]+\s*/, '').trim(); })
-        .filter(function(l){ return l; });
-
-      if (titresChapitres.length === 0) { throw new Error('Aucun chapitre détecté dans le plan.'); }
-
+      var titresChapitres = planAnalyse.titres;
       var listeChapitresTexte = titresChapitres.join(', ');
 
-      // --- Étape 2 : un appel IA séparé par chapitre (chaque chapitre a son budget complet) ---
-      var texteFinal = '[SOMMAIRE]\n' + titresChapitres.join('\n') + '\n[INTRODUCTION]\n' + planDecoupe.introduction + '\n';
-
-      function pause(ms){ return new Promise(function(resolve){ setTimeout(resolve, ms); }); }
+      // --- Étape 4 : générer chaque chapitre avec uniquement sa mémoire pertinente ---
+      var texteFinal = '[SOMMAIRE]\n' + titresChapitres.join('\n') + '\n[INTRODUCTION]\n' + planAnalyse.introduction + '\n';
+      var MOTS_MIN_CHAPITRE = 750;
+      var MAX_COMPLEMENTS = 3;
 
       for (var i = 0; i < titresChapitres.length; i++) {
-        if (i > 0) {
-          btn.textContent = estFr ? 'Petite pause...' : 'Short pause...';
-          await pause(2500); // laisse le temps au quota Groq de se libérer entre 2 chapitres
-        }
         btn.textContent = (estFr ? 'Rédaction du chapitre ' : 'Writing chapter ') + (i + 1) + '/' + titresChapitres.length + '...';
-        var corpsChapitre = await Parse.Cloud.run('analyserExpertise', {
-          titre: titre, sujet: sujet, ton: ton, publicCible: publicCible, expertise: expertise,
+
+        var blocsPertinents = planAnalyse.mapping[i + 1] || [];
+        var memoirePertinente = '';
+        if (blocsPertinents.length > 0) {
+          memoirePertinente = blocsPertinents.map(function(numBloc){
+            var idx = numBloc - 1;
+            return (resumesBlocs[idx] !== undefined) ? ('[BLOC ' + numBloc + ']\n' + resumesBlocs[idx]) : '';
+          }).filter(Boolean).join('\n\n');
+        }
+        if (!memoirePertinente) memoirePertinente = memoireComplete; // filet de sécurité si le découpage échoue
+
+        var corpsChapitre = await appellerIA({
+          titre: titre, sujet: sujet, ton: ton, publicCible: publicCible,
           mode: 'chapitre',
-          chapitreTitre: titresChapitres[i],
-          chapitreIndex: i + 1,
-          totalChapitres: titresChapitres.length,
-          listeChapitres: listeChapitresTexte
+          chapitreTitre: titresChapitres[i], chapitreIndex: i + 1, totalChapitres: titresChapitres.length,
+          listeChapitres: listeChapitresTexte, memoire: memoirePertinente
         });
-        texteFinal += '[CHAPITRE ' + (i + 1) + ': ' + titresChapitres[i] + ']\n' + (corpsChapitre || '').trim() + '\n';
+        corpsChapitre = (corpsChapitre || '').trim();
+
+        // --- Étape 5 : vérifier la longueur, compléter automatiquement si besoin ---
+        var tentativesComplement = 0;
+        while (compterMots(corpsChapitre) < MOTS_MIN_CHAPITRE && tentativesComplement < MAX_COMPLEMENTS) {
+          tentativesComplement++;
+          btn.textContent = (estFr ? 'Développement du chapitre ' : 'Expanding chapter ') + (i + 1) + '/' + titresChapitres.length + '...';
+          var suite = await appellerIA({
+            titre: titre, sujet: sujet, ton: ton, publicCible: publicCible,
+            mode: 'suite',
+            chapitreTitre: titresChapitres[i], texteDejaEcrit: corpsChapitre, memoire: memoirePertinente
+          });
+          suite = (suite || '').trim();
+          if (!suite) break;
+          corpsChapitre += '\n' + suite;
+        }
+
+        texteFinal += '[CHAPITRE ' + (i + 1) + ': ' + titresChapitres[i] + ']\n' + corpsChapitre + '\n';
       }
 
-      texteFinal += '[CONCLUSION]\n' + planDecoupe.conclusion;
+      texteFinal += '[CONCLUSION]\n' + planAnalyse.conclusion;
 
       var resultat = texteFinal;
 
@@ -1595,6 +1644,38 @@
       var langueActuelle = document.getElementById('lang-switch').textContent === 'FR' ? 'en' : 'fr';
       btn.textContent = dejaGenere ? traductions[langueActuelle].btn_regenerer_ebook : traductions[langueActuelle].btn_generer;
     }
+  }
+
+  // Analyse la réponse de l'étape "plan" : titres des chapitres + répartition des blocs + intro/conclusion
+  function analyserReponsePlan(texte){
+    if (!texte || texte.indexOf('[SOMMAIRE]') === -1) return null;
+    var sections = texte.split(/\[(SOMMAIRE|MAPPING|INTRODUCTION|CONCLUSION)\]/);
+    var resultat = { titres: [], mapping: {}, introduction: '', conclusion: '' };
+
+    for (var i = 1; i < sections.length; i += 2){
+      var etiquette = sections[i].trim();
+      var contenu = (sections[i + 1] || '').trim();
+
+      if (etiquette === 'SOMMAIRE') {
+        resultat.titres = contenu.split('\n')
+          .map(function(l){ return l.replace(/^[-•\d.\)]+\s*/, '').trim(); })
+          .filter(function(l){ return l; });
+      } else if (etiquette === 'MAPPING') {
+        contenu.split('\n').forEach(function(ligne){
+          var m = ligne.match(/^\s*(\d+)\s*:\s*([\d,\s]+)/);
+          if (m) {
+            var numChapitre = parseInt(m[1], 10);
+            var numsBlocs = m[2].split(',').map(function(n){ return parseInt(n.trim(), 10); }).filter(function(n){ return !isNaN(n); });
+            resultat.mapping[numChapitre] = numsBlocs;
+          }
+        });
+      } else if (etiquette === 'INTRODUCTION') {
+        resultat.introduction = contenu;
+      } else if (etiquette === 'CONCLUSION') {
+        resultat.conclusion = contenu;
+      }
+    }
+    return resultat;
   }
 
   // ----- Enregistrement du projet dans Back4App -----
