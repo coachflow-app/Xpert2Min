@@ -1565,11 +1565,15 @@
 
       // --- Étape 4 : générer chaque chapitre avec uniquement sa mémoire pertinente ---
       var texteFinal = '[SOMMAIRE]\n' + titresChapitres.join('\n') + '\n[INTRODUCTION]\n' + planAnalyse.introduction + '\n';
-      var MOTS_MIN_CHAPITRE = 750;
+      var MOTS_MIN_CHAPITRE = 600; // ≈ 1,5 page
       var MAX_COMPLEMENTS = 3;
+      // Rotation des modèles : chaque chapitre utilise un modèle différent, peu importe leur nombre total
+      var LISTE_MODELES_CHAPITRE = ['openai/gpt-oss-20b', 'qwen/qwen3.6-27b', 'openai/gpt-oss-120b'];
 
       for (var i = 0; i < titresChapitres.length; i++) {
         btn.textContent = (estFr ? 'Rédaction du chapitre ' : 'Writing chapter ') + (i + 1) + '/' + titresChapitres.length + '...';
+
+        var modeleChapitre = LISTE_MODELES_CHAPITRE[i % LISTE_MODELES_CHAPITRE.length];
 
         var blocsPertinents = planAnalyse.mapping[i + 1] || [];
         var memoirePertinente = '';
@@ -1583,7 +1587,7 @@
 
         var corpsChapitre = await appellerIA({
           titre: titre, sujet: sujet, ton: ton, publicCible: publicCible,
-          mode: 'chapitre',
+          mode: 'chapitre', modeleForce: modeleChapitre,
           chapitreTitre: titresChapitres[i], chapitreIndex: i + 1, totalChapitres: titresChapitres.length,
           listeChapitres: listeChapitresTexte, memoire: memoirePertinente
         });
@@ -1596,7 +1600,7 @@
           btn.textContent = (estFr ? 'Développement du chapitre ' : 'Expanding chapter ') + (i + 1) + '/' + titresChapitres.length + '...';
           var suite = await appellerIA({
             titre: titre, sujet: sujet, ton: ton, publicCible: publicCible,
-            mode: 'suite',
+            mode: 'suite', modeleForce: modeleChapitre,
             chapitreTitre: titresChapitres[i], texteDejaEcrit: corpsChapitre, memoire: memoirePertinente
           });
           suite = (suite || '').trim();
