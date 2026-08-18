@@ -1733,6 +1733,8 @@
     var styleCSS = document.querySelector('style').innerHTML;
     var pagesHTML = document.getElementById('pdf-preview').innerHTML;
     var cssExportPDF =
+      '@page{size:A4;margin:0;}' +
+      'html{margin:0 !important;padding:0 !important;}' +
       'body{background:#fff;margin:0;}' +
       '.pdf-preview{background:none !important;padding:0 !important;}' +
       '.pdf-page{max-width:none !important;width:210mm !important;height:296mm !important;aspect-ratio:auto !important;overflow:hidden !important;page-break-after:always;padding:22mm 18mm 26mm !important;box-sizing:border-box;}' +
@@ -1916,7 +1918,12 @@
   // Convertit le format **gras** (Markdown) utilisé parfois par l'IA en vrai gras HTML,
   // et retire tout astérisque isolé qui resterait (jamais d'astérisque visible à l'écran).
   function convertirGrasMarkdown(texteEchappe){
-    return texteEchappe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*/g, '');
+    return texteEchappe
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*/g, '')
+      .replace(/^#{1,6}\s*/, '')       // retire un titre Markdown (###...) en début de paragraphe
+      .replace(/\n#{1,6}\s*/g, '\n')   // même chose si ça apparaît après un retour à la ligne
+      .replace(/`/g, '');             // retire les apostrophes inversées isolées
   }
 
   // Comme construireCorpsChapitre, mais retourne chaque paragraphe/encadré séparément
