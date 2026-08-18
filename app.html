@@ -1829,7 +1829,23 @@
     document.getElementById('preview-overlay').classList.add('is-opening');
     document.getElementById('preview-overlay').classList.remove('hidden');
     document.getElementById('preview-overlay-body').scrollTop = 0;
-    setTimeout(function(){ document.getElementById('preview-overlay').classList.remove('is-opening'); }, 10);
+    setTimeout(function(){
+      document.getElementById('preview-overlay').classList.remove('is-opening');
+      forcerHauteurPages();
+    }, 10);
+  }
+
+  // Calcule et applique en pixels la hauteur exacte de chaque page (format A4 : 210 x 297),
+  // pour éviter tout espace vide entre deux pages dû au CSS "aspect-ratio".
+  // Appelée uniquement une fois la prévisualisation réellement visible (largeur mesurable).
+  function forcerHauteurPages(){
+    document.querySelectorAll('#pdf-preview .pdf-page').forEach(function(page){
+      var largeur = page.offsetWidth;
+      if (largeur > 0) {
+        page.style.aspectRatio = 'auto';
+        page.style.height = Math.round(largeur * 297 / 210) + 'px';
+      }
+    });
   }
 
   function fermerPrevisualisation(){
@@ -1905,6 +1921,18 @@
 
   // Comme construireCorpsChapitre, mais retourne chaque paragraphe/encadré séparément
   // (nécessaire pour pouvoir répartir un chapitre trop long sur plusieurs pages).
+  // Découpe un texte trop long en plusieurs morceaux raisonnables (≈180 mots chacun),
+  // pour qu'un seul paragraphe géant ne puisse jamais dépasser la capacité d'une page à lui seul.
+  function decouperTexteLong(texte, maxMots){
+    var mots = texte.split(/\s+/).filter(Boolean);
+    if (mots.length <= maxMots) return [texte];
+    var morceaux = [];
+    for (var i = 0; i < mots.length; i += maxMots) {
+      morceaux.push(mots.slice(i, i + maxMots).join(' '));
+    }
+    return morceaux;
+  }
+
   function construireFragmentsChapitre(texte, couleurAccent, couleurAccent2){
     var regex = /\[(ASTUCE|CONSEIL|EXEMPLE|IMPORTANT)\]([\s\S]*?)\[\/\1\]/g;
     var fragments = [];
@@ -1915,15 +1943,18 @@
     function ajouterParagraphes(bloc){
       var paragraphes = bloc.split(/\n{1,}/).filter(function(p){ return p.trim(); });
       paragraphes.forEach(function(p){
-        var texteConverti = convertirGrasMarkdown(escapeHTML(p.trim()));
-        if (premierParagraphe && !/^</.test(texteConverti)) {
-          var premiereLettre = texteConverti.charAt(0);
-          var reste = texteConverti.slice(1);
-          fragments.push('<div class="chapter-body"><span class="drop-cap" style="color:' + couleurAccent + '">' + premiereLettre + '</span>' + reste + '</div>');
-        } else {
-          fragments.push('<div class="chapter-body">' + texteConverti + '</div>');
-        }
-        premierParagraphe = false;
+        var morceaux = decouperTexteLong(p.trim(), 180);
+        morceaux.forEach(function(morceau){
+          var texteConverti = convertirGrasMarkdown(escapeHTML(morceau));
+          if (premierParagraphe && !/^</.test(texteConverti)) {
+            var premiereLettre = texteConverti.charAt(0);
+            var reste = texteConverti.slice(1);
+            fragments.push('<div class="chapter-body"><span class="drop-cap" style="color:' + couleurAccent + '">' + premiereLettre + '</span>' + reste + '</div>');
+          } else {
+            fragments.push('<div class="chapter-body">' + texteConverti + '</div>');
+          }
+          premierParagraphe = false;
+        });
       });
     }
 
