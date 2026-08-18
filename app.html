@@ -1903,6 +1903,48 @@
     return texteEchappe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*/g, '');
   }
 
+  // Comme construireCorpsChapitre, mais retourne chaque paragraphe/encadré séparément
+  // (nécessaire pour pouvoir répartir un chapitre trop long sur plusieurs pages).
+  function construireFragmentsChapitre(texte, couleurAccent, couleurAccent2){
+    var regex = /\[(ASTUCE|CONSEIL|EXEMPLE|IMPORTANT)\]([\s\S]*?)\[\/\1\]/g;
+    var fragments = [];
+    var lastIndex = 0;
+    var match;
+    var premierParagraphe = true;
+
+    function ajouterParagraphes(bloc){
+      var paragraphes = bloc.split(/\n{1,}/).filter(function(p){ return p.trim(); });
+      paragraphes.forEach(function(p){
+        var texteConverti = convertirGrasMarkdown(escapeHTML(p.trim()));
+        if (premierParagraphe && !/^</.test(texteConverti)) {
+          var premiereLettre = texteConverti.charAt(0);
+          var reste = texteConverti.slice(1);
+          fragments.push('<div class="chapter-body"><span class="drop-cap" style="color:' + couleurAccent + '">' + premiereLettre + '</span>' + reste + '</div>');
+        } else {
+          fragments.push('<div class="chapter-body">' + texteConverti + '</div>');
+        }
+        premierParagraphe = false;
+      });
+    }
+
+    while ((match = regex.exec(texte)) !== null) {
+      var avant = texte.slice(lastIndex, match.index);
+      if (avant.trim()) ajouterParagraphes(avant);
+      var type = match[1];
+      var contenuCallout = match[2].trim();
+      var couleurCallout = (type === 'ASTUCE' || type === 'IMPORTANT') ? couleurAccent : couleurAccent2;
+      fragments.push('<div class="callout" style="border-left-color:' + couleurCallout + '">' +
+        '<div class="callout-label" style="color:' + couleurCallout + '">' + iconeAccent(couleurCallout) + LABELS_CALLOUT[type] + '</div>' +
+        '<div>' + convertirGrasMarkdown(escapeHTML(contenuCallout)) + '</div></div>');
+      lastIndex = regex.lastIndex;
+    }
+    var reste = texte.slice(lastIndex);
+    if (reste.trim()) ajouterParagraphes(reste);
+
+    if (fragments.length === 0) fragments.push('<div class="chapter-body">' + convertirGrasMarkdown(escapeHTML(texte)) + '</div>');
+    return fragments;
+  }
+
   function construireCorpsChapitre(texte, couleurAccent, couleurAccent2){
     var regex = /\[(ASTUCE|CONSEIL|EXEMPLE|IMPORTANT)\]([\s\S]*?)\[\/\1\]/g;
     var html = '';
@@ -2114,32 +2156,67 @@
 
     // --- Pages de chapitres ---
     contenu.chapitres.forEach(function(ch, index){
-      var page = document.createElement('div');
-      page.className = 'pdf-page';
-      page.style.fontFamily = police;
       var titreClass = 'chapter-title';
       if (styleChapitres === 'Numérotés') titreClass += ' style-numbered';
       if (styleChapitres === 'Titres pleine largeur') titreClass += ' style-fullwidth';
-      var numPage = prochainNumero();
-      page.innerHTML = (
-        '<div class="chapter-num-bg" style="color:' + couleurPrincipale + '">' + String(index + 1).padStart(2, '0') + '</div>' +
-        '<div class="' + titreClass + '" data-num="' + (index + 1) + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">' + escapeHTML(ch.titre) + '</div>' +
-        construireCorpsChapitre(ch.texte, couleurPrincipale, couleurSecondaire) +
-        motifSecoursHTML(couleurSecondaire) +
-        headerFooterHTML(titreDoc, numPage, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
-      preview.appendChild(page);
+
+      function creerPageChapitre(estPremierePage){
+        var page = document.createElement('div');
+        page.className = 'pdf-page';
+        page.style.fontFamily = police;
+        var numPage = prochainNumero();
+        var enTeteHTML = estPremierePage
+          ? ('<div class="chapter-num-bg" style="color:' + couleurPrincipale + '">' + String(index + 1).padStart(2, '0') + '</div>' +
+             '<div class="' + titreClass + '" data-num="' + (index + 1) + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">' + escapeHTML(ch.titre) + '</div>')
+          : ('<div class="' + titreClass + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '; opacity:0.6; font-size:13px;">' + escapeHTML(ch.titre) + ' (suite)</div>');
+        var conteneurCorps = document.createElement('div');
+        page.innerHTML = enTeteHTML + motifSecoursHTML(couleurSecondaire) + headerFooterHTML(titreDoc, numPage, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
+        page.insertBefore(conteneurCorps, page.querySelector('.page-header-x2m') || null);
+        preview.appendChild(page);
+        return { page: page, conteneur: conteneurCorps };
+      }
+
+      var fragments = construireFragmentsChapitre(ch.texte, couleurPrincipale, couleurSecondaire);
+      var pageChapitreActuelle = creerPageChapitre(true);
+
+      fragments.forEach(function(fragmentHTML){
+        pageChapitreActuelle.conteneur.insertAdjacentHTML('beforeend', fragmentHTML);
+        if (pageChapitreActuelle.page.scrollHeight > pageChapitreActuelle.page.clientHeight) {
+          // Ça ne rentre plus sur cette page : on le reporte proprement sur une nouvelle page
+          pageChapitreActuelle.conteneur.lastElementChild.remove();
+          pageChapitreActuelle = creerPageChapitre(false);
+          pageChapitreActuelle.conteneur.insertAdjacentHTML('beforeend', fragmentHTML);
+        }
+      });
     });
 
     // --- Page conclusion ---
     if (contenu.conclusion) {
-      var concl = document.createElement('div');
-      concl.className = 'pdf-page';
-      concl.style.fontFamily = police;
-      var numConcl = prochainNumero();
-      concl.innerHTML = ('<h2 class="section-title" style="color:' + couleurPrincipale + '">Conclusion</h2>' +
-        construireCorpsChapitre(contenu.conclusion, couleurPrincipale, couleurSecondaire) +
-        headerFooterHTML(titreDoc, numConcl, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
-      preview.appendChild(concl);
+      var titreConclClass = 'section-title';
+      function creerPageConclusion(estPremierePage){
+        var pageC = document.createElement('div');
+        pageC.className = 'pdf-page';
+        pageC.style.fontFamily = police;
+        var numPageC = prochainNumero();
+        var enTeteHTML = '<h2 class="' + titreConclClass + '" style="color:' + couleurPrincipale + '">' + (estPremierePage ? 'Conclusion' : 'Conclusion (suite)') + '</h2>';
+        var conteneurCorps = document.createElement('div');
+        pageC.innerHTML = enTeteHTML + headerFooterHTML(titreDoc, numPageC, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
+        pageC.insertBefore(conteneurCorps, pageC.querySelector('.page-header-x2m') || null);
+        preview.appendChild(pageC);
+        return { page: pageC, conteneur: conteneurCorps };
+      }
+
+      var fragmentsConclusion = construireFragmentsChapitre(contenu.conclusion, couleurPrincipale, couleurSecondaire);
+      var pageConclusionActuelle = creerPageConclusion(true);
+
+      fragmentsConclusion.forEach(function(fragmentHTML){
+        pageConclusionActuelle.conteneur.insertAdjacentHTML('beforeend', fragmentHTML);
+        if (pageConclusionActuelle.page.scrollHeight > pageConclusionActuelle.page.clientHeight) {
+          pageConclusionActuelle.conteneur.lastElementChild.remove();
+          pageConclusionActuelle = creerPageConclusion(false);
+          pageConclusionActuelle.conteneur.insertAdjacentHTML('beforeend', fragmentHTML);
+        }
+      });
     }
 
     // --- Page optionnelle combinée : auteur / contact / réseaux / copyright ---
