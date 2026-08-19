@@ -1310,6 +1310,10 @@
     <button type="button" class="next-btn" id="generate-btn" onclick="genererContenu()" data-i18n="btn_generer">Générer mon contenu</button>
     <p class="form-msg" id="msg-4"></p>
 
+    <!-- BOUTON TEMPORAIRE — à retirer une fois le nouveau moteur PDF validé -->
+    <button type="button" style="width:100%; margin-top:14px; padding:13px 0; background:#1c1c20; color:#4CAF50; border:1px dashed #4CAF50; border-radius:8px; font-weight:700; cursor:pointer;" onclick="testerMoteurPDFDeterministe()">🧪 Tester le nouveau moteur PDF</button>
+    <p class="form-msg" id="msg-test-pdf"></p>
+
     <div class="btn-row hidden" id="actions-row">
       <button type="button" class="back-btn" id="preview-btn" onclick="ouvrirPrevisualisation()">
         <span class="eye-icon">👁️</span> <span data-i18n="btn_previsualiser">Prévisualiser</span>
@@ -1494,6 +1498,24 @@
 
   var dernierResultatIA = null; // texte brut renvoyé par l'IA, pour la sauvegarde
   var idProjetActuel = null; // identifiant du projet sauvegardé, pour y rattacher le lien du PDF ensuite
+
+  // --- TEMPORAIRE : test du nouveau moteur PDF déterministe (à retirer une fois validé) ---
+  async function testerMoteurPDFDeterministe(){
+    var msg = document.getElementById('msg-test-pdf');
+    msg.textContent = 'Génération en cours...';
+    msg.className = 'form-msg';
+    try {
+      var resultat = await Parse.Cloud.run('genererPDFDeterministe', {
+        titre: document.getElementById('titre').value || 'Titre de test'
+      });
+      msg.textContent = 'Réussi ! Ouverture du PDF...';
+      window.open(resultat.url, '_blank');
+    } catch (erreur) {
+      msg.textContent = 'Erreur : ' + (erreur.message || 'inconnue');
+      msg.classList.add('error');
+      console.error('Erreur test PDF déterministe :', erreur);
+    }
+  }
 
   async function genererContenu(){
     var btn = document.getElementById('generate-btn');
