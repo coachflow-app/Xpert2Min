@@ -1506,7 +1506,11 @@
     msg.className = 'form-msg';
     try {
       var resultat = await Parse.Cloud.run('genererPDFDeterministe', {
-        titre: document.getElementById('titre').value || 'Titre de test'
+        titre: document.getElementById('titre').value || 'Titre de test',
+        couleurPrincipale: document.getElementById('couleur-principale').value,
+        couleurSecondaire: document.getElementById('couleur-secondaire').value,
+        police: document.getElementById('police').value,
+        tailleTexte: document.getElementById('taille-texte').value
       });
       msg.textContent = 'Réussi ! Ouverture du PDF...';
       window.open(resultat.url, '_blank');
