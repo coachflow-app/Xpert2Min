@@ -1510,7 +1510,10 @@
         couleurPrincipale: document.getElementById('couleur-principale').value,
         couleurSecondaire: document.getElementById('couleur-secondaire').value,
         police: document.getElementById('police').value,
-        tailleTexte: document.getElementById('taille-texte').value
+        tailleTexte: document.getElementById('taille-texte').value,
+        styleChoisi: document.querySelector('.style-card.selected') ? document.querySelector('.style-card.selected').getAttribute('data-value') : 'professionnel',
+        createur: document.getElementById('createur').value,
+        citation: document.getElementById('citation').value
       });
       msg.textContent = 'Réussi ! Ouverture du PDF...';
       window.open(resultat.url, '_blank');
