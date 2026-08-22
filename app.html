@@ -1513,7 +1513,18 @@
         tailleTexte: document.getElementById('taille-texte').value,
         styleChoisi: document.querySelector('.style-card.selected') ? document.querySelector('.style-card.selected').getAttribute('data-value') : 'professionnel',
         createur: document.getElementById('createur').value,
-        citation: document.getElementById('citation').value
+        citation: document.getElementById('citation').value,
+        styleChapitres: document.getElementById('style-chapitres').value,
+        copyright: document.getElementById('elt-copyright').checked,
+        pageAuteur: document.getElementById('elt-page-auteur').checked,
+        bioAuteur: document.getElementById('bio-auteur').value,
+        pageContact: document.getElementById('elt-page-contact').checked,
+        contactEmail: document.getElementById('contact-email').value,
+        contactTel: document.getElementById('contact-tel').value,
+        reseaux: document.getElementById('elt-reseaux').checked,
+        instagram: document.getElementById('reseau-instagram').value,
+        linkedin: document.getElementById('reseau-linkedin').value,
+        site: document.getElementById('reseau-site').value
       });
       msg.textContent = 'Réussi ! Ouverture du PDF...';
       window.open(resultat.url, '_blank');
