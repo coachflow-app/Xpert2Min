@@ -1310,10 +1310,6 @@
     <button type="button" class="next-btn" id="generate-btn" onclick="genererContenu()" data-i18n="btn_generer">Générer mon contenu</button>
     <p class="form-msg" id="msg-4"></p>
 
-    <!-- BOUTON TEMPORAIRE — à retirer une fois le nouveau moteur PDF validé -->
-    <button type="button" style="width:100%; margin-top:14px; padding:13px 0; background:#1c1c20; color:#4CAF50; border:1px dashed #4CAF50; border-radius:8px; font-weight:700; cursor:pointer;" onclick="testerMoteurPDFDeterministe()">🧪 Tester le nouveau moteur PDF</button>
-    <p class="form-msg" id="msg-test-pdf"></p>
-
     <div class="btn-row hidden" id="actions-row">
       <button type="button" class="back-btn" id="preview-btn" onclick="ouvrirPrevisualisation()">
         <span class="eye-icon">👁️</span> <span data-i18n="btn_previsualiser">Prévisualiser</span>
@@ -1498,42 +1494,6 @@
 
   var dernierResultatIA = null; // texte brut renvoyé par l'IA, pour la sauvegarde
   var idProjetActuel = null; // identifiant du projet sauvegardé, pour y rattacher le lien du PDF ensuite
-
-  // --- TEMPORAIRE : test du nouveau moteur PDF déterministe (à retirer une fois validé) ---
-  async function testerMoteurPDFDeterministe(){
-    var msg = document.getElementById('msg-test-pdf');
-    msg.textContent = 'Génération en cours...';
-    msg.className = 'form-msg';
-    try {
-      var resultat = await Parse.Cloud.run('genererPDFDeterministe', {
-        titre: document.getElementById('titre').value || 'Titre de test',
-        couleurPrincipale: document.getElementById('couleur-principale').value,
-        couleurSecondaire: document.getElementById('couleur-secondaire').value,
-        police: document.getElementById('police').value,
-        tailleTexte: document.getElementById('taille-texte').value,
-        styleChoisi: document.querySelector('.style-card.selected') ? document.querySelector('.style-card.selected').getAttribute('data-value') : 'professionnel',
-        createur: document.getElementById('createur').value,
-        citation: document.getElementById('citation').value,
-        styleChapitres: document.getElementById('style-chapitres').value,
-        copyright: document.getElementById('elt-copyright').checked,
-        pageAuteur: document.getElementById('elt-page-auteur').checked,
-        bioAuteur: document.getElementById('bio-auteur').value,
-        pageContact: document.getElementById('elt-page-contact').checked,
-        contactEmail: document.getElementById('contact-email').value,
-        contactTel: document.getElementById('contact-tel').value,
-        reseaux: document.getElementById('elt-reseaux').checked,
-        instagram: document.getElementById('reseau-instagram').value,
-        linkedin: document.getElementById('reseau-linkedin').value,
-        site: document.getElementById('reseau-site').value
-      });
-      msg.textContent = 'Réussi ! Ouverture du PDF...';
-      window.open(resultat.url, '_blank');
-    } catch (erreur) {
-      msg.textContent = 'Erreur : ' + (erreur.message || 'inconnue');
-      msg.classList.add('error');
-      console.error('Erreur test PDF déterministe :', erreur);
-    }
-  }
 
   async function genererContenu(){
     var btn = document.getElementById('generate-btn');
@@ -1811,18 +1771,38 @@
     titreSpan.textContent = document.getElementById('lang-switch').textContent === 'FR' ? 'Generating PDF...' : 'Génération du PDF en cours...';
 
     try {
-      var htmlComplet = construireHTMLPourPDF();
-      var resultat = await Parse.Cloud.run('genererPDF', {
+      var contenu = decouperReponseIA(dernierResultatIA);
+      if (!contenu) { throw new Error('Aucun contenu généré à mettre en PDF. Génère ton contenu avant de télécharger.'); }
+
+      var resultat = await Parse.Cloud.run('genererPDFDeterministe', {
         titre: document.getElementById('titre').value,
-        html: htmlComplet
+        couleurPrincipale: document.getElementById('couleur-principale').value,
+        couleurSecondaire: document.getElementById('couleur-secondaire').value,
+        police: document.getElementById('police').value,
+        tailleTexte: document.getElementById('taille-texte').value,
+        styleChoisi: document.querySelector('.style-card.selected') ? document.querySelector('.style-card.selected').getAttribute('data-value') : 'professionnel',
+        createur: document.getElementById('createur').value,
+        citation: document.getElementById('citation').value,
+        styleChapitres: document.getElementById('style-chapitres').value,
+        copyright: document.getElementById('elt-copyright').checked,
+        pageAuteur: document.getElementById('elt-page-auteur').checked,
+        bioAuteur: document.getElementById('bio-auteur').value,
+        pageContact: document.getElementById('elt-page-contact').checked,
+        contactEmail: document.getElementById('contact-email').value,
+        contactTel: document.getElementById('contact-tel').value,
+        reseaux: document.getElementById('elt-reseaux').checked,
+        instagram: document.getElementById('reseau-instagram').value,
+        linkedin: document.getElementById('reseau-linkedin').value,
+        site: document.getElementById('reseau-site').value,
+        introduction: contenu.introduction,
+        conclusion: contenu.conclusion,
+        chapitres: contenu.chapitres
       });
 
-      // resultat.url = lien du fichier PDF hébergé sur Back4App
+      // resultat.url = lien du fichier PDF hébergé sur Back4App (permanent, ne périme jamais)
       var nomFichier = nettoyerNomFichier(document.getElementById('titre').value) + '.pdf';
       var lien = document.createElement('a');
 
-      // On récupère le fichier nous-mêmes pour pouvoir forcer le vrai nom du PDF
-      // (un lien direct vers un autre domaine ne permet pas de renommer le fichier).
       try {
         var reponsePdf = await fetch(resultat.url);
         var blobPdf = await reponsePdf.blob();
@@ -1834,8 +1814,6 @@
         document.body.removeChild(lien);
         URL.revokeObjectURL(urlLocale);
       } catch (erreurTelechargement) {
-        // Repli de sécurité : si la récupération échoue, on garde l'ancien comportement
-        // pour que le téléchargement fonctionne quand même.
         console.error('Nom de fichier personnalisé impossible, repli sur le lien direct :', erreurTelechargement.message);
         lien.href = resultat.url;
         lien.download = nomFichier;
