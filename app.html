@@ -130,6 +130,20 @@
     line-height:1.5;
   }
 
+  /* ÉTAPE 4 : mise en page compacte pour tenir sur un seul écran sans défilement */
+  #screen-4 h1{ font-size:18px; margin-bottom:3px; }
+  #screen-4 .lead{ font-size:12px; margin-bottom:14px; line-height:1.35; }
+  #screen-4 .eyebrow{ margin-bottom:3px; }
+  #screen-4 .step-progress{ margin-bottom:5px; }
+  #screen-4 .recap-card{ padding:12px 14px; gap:8px; margin-bottom:12px; }
+  #screen-4 .recap-row:not(:last-child){ padding-bottom:8px; }
+  #screen-4 .recap-icon{ font-size:14px; width:20px; }
+  #screen-4 .recap-row-label{ font-size:9px; margin-bottom:1px; }
+  #screen-4 .recap-row-value{ font-size:12px; line-height:1.3; }
+  #screen-4 #generate-btn{ padding:12px 0; font-size:14px; }
+  #screen-4 .step4-footer{ margin-top:12px; }
+
+
   .field{ margin-bottom:16px; }
   .field label{
     display:block;
@@ -1065,8 +1079,6 @@
     XPERT<span>2</span>MIN
   </div>
   <nav>
-    <a href="app.html" class="active" data-i18n="nav_creer">Créer</a>
-    <a href="dashboard.html" data-i18n="nav_dashboard">Tableau de bord</a>
     <button type="button" class="lang-switch" id="lang-switch" onclick="toggleLangue()">EN</button>
   </nav>
 </header>
@@ -1099,7 +1111,7 @@
 
     <div class="field">
       <label for="ton" data-i18n="lbl_ton">Ton</label>
-      <select id="ton" required>
+      <select id="ton" required onchange="document.getElementById('ton-autre-champ').classList.toggle('hidden', this.value !== 'autre')">
         <option value="" data-i18n="ton_choisir" disabled selected>Choisissez un ton</option>
         <option data-i18n="ton_pro">Professionnel</option>
         <option data-i18n="ton_persuasif">Persuasif</option>
@@ -1108,7 +1120,13 @@
         <option data-i18n="ton_conversationnel">Conversationnel</option>
         <option data-i18n="ton_motivant">Motivant</option>
         <option data-i18n="ton_direct">Direct</option>
+        <option value="autre" data-i18n="ton_autre">Autre</option>
       </select>
+    </div>
+
+    <div class="field hidden" id="ton-autre-champ">
+      <label for="ton-autre" data-i18n="lbl_ton_autre">Précisez le ton souhaité</label>
+      <input type="text" id="ton-autre" placeholder="Ex. : Ironique, poétique, familier..." data-i18n-placeholder="ph_ton_autre">
     </div>
 
     <div class="field">
@@ -1355,7 +1373,8 @@
       lbl_sujet: "Sujet", ph_sujet: "Ex. : Rédaction persuasive pour entrepreneurs",
       lbl_ton: "Ton", ph_ton: "Ex. : Persuasif, motivant, direct...",
       ton_choisir: "Choisissez un ton", ton_pro: "Professionnel", ton_persuasif: "Persuasif", ton_inspirant: "Inspirant",
-      ton_pedagogique: "Pédagogique", ton_conversationnel: "Conversationnel", ton_motivant: "Motivant", ton_direct: "Direct",
+      ton_pedagogique: "Pédagogique", ton_conversationnel: "Conversationnel", ton_motivant: "Motivant", ton_direct: "Direct", ton_autre: "Autre",
+      lbl_ton_autre: "Précisez le ton souhaité", ph_ton_autre: "Ex. : Ironique, poétique, familier...",
       note_langue_pdf: "Le PDF sera généré entièrement dans la langue sélectionnée.",
       progres_25: "25 % terminé", progres_50: "50 % terminé", progres_75: "75 % terminé", progres_100: "100 % terminé",
       lbl_public: "Public cible", ph_public: "Ex. : Entrepreneurs et freelances débutants",
@@ -1398,7 +1417,8 @@
       lbl_sujet: "Subject", ph_sujet: "E.g.: Persuasive writing for entrepreneurs",
       lbl_ton: "Tone", ph_ton: "E.g.: Persuasive, motivating, direct...",
       ton_choisir: "Choose a tone", ton_pro: "Professional", ton_persuasif: "Persuasive", ton_inspirant: "Inspiring",
-      ton_pedagogique: "Educational", ton_conversationnel: "Conversational", ton_motivant: "Motivating", ton_direct: "Direct",
+      ton_pedagogique: "Educational", ton_conversationnel: "Conversational", ton_motivant: "Motivating", ton_direct: "Direct", ton_autre: "Other",
+      lbl_ton_autre: "Specify the desired tone", ph_ton_autre: "E.g.: Ironic, poetic, casual...",
       note_langue_pdf: "The PDF will be generated entirely in the selected language.",
       progres_25: "25% complete", progres_50: "50% complete", progres_75: "75% complete", progres_100: "100% complete",
       lbl_public: "Target audience", ph_public: "E.g.: Beginner entrepreneurs and freelancers",
@@ -1488,12 +1508,20 @@
     recap.innerHTML =
       ligne('📘', t.recap_titre, document.getElementById('titre').value) +
       ligne('🏷️', t.recap_sujet, document.getElementById('sujet').value) +
-      ligne('🎯', t.recap_ton, document.getElementById('ton').value) +
+      ligne('🎯', t.recap_ton, obtenirTon()) +
       ligne('👥', t.recap_public, document.getElementById('public').value);
   }
 
   var dernierResultatIA = null; // texte brut renvoyé par l'IA, pour la sauvegarde
   var idProjetActuel = null; // identifiant du projet sauvegardé, pour y rattacher le lien du PDF ensuite
+
+  function obtenirTon(){
+    var select = document.getElementById('ton');
+    if (select.value === 'autre') {
+      return document.getElementById('ton-autre').value.trim() || 'Autre';
+    }
+    return select.value;
+  }
 
   async function genererContenu(){
     var btn = document.getElementById('generate-btn');
@@ -1525,7 +1553,7 @@
     try {
       var titre = document.getElementById('titre').value;
       var sujet = document.getElementById('sujet').value;
-      var ton = document.getElementById('ton').value;
+      var ton = obtenirTon();
       var publicCible = document.getElementById('public').value;
       var expertise = document.getElementById('connaissances').value;
 
@@ -1691,7 +1719,7 @@
       projet.set('utilisateur', Parse.User.current());
       projet.set('titre', document.getElementById('titre').value);
       projet.set('sujet', document.getElementById('sujet').value);
-      projet.set('ton', document.getElementById('ton').value);
+      projet.set('ton', obtenirTon());
       projet.set('publicCible', document.getElementById('public').value);
       projet.set('prenom', document.getElementById('prenom').value);
       projet.set('createur', document.getElementById('createur').value);
