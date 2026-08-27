@@ -143,6 +143,26 @@
   #screen-4 #generate-btn{ padding:12px 0; font-size:14px; }
   #screen-4 .step4-footer{ margin-top:12px; }
 
+  /* ÉTAPES 1, 2, 3 : mise en page compacte pour tenir sur un seul écran sans défilement */
+  #screen-1 h1, #screen-2 h1, #screen-3 h1{ font-size:18px; margin-bottom:3px; }
+  #screen-1 .lead, #screen-2 .lead, #screen-3 .lead{ font-size:12px; margin-bottom:14px; line-height:1.35; }
+  #screen-1 .eyebrow, #screen-2 .eyebrow, #screen-3 .eyebrow{ margin-bottom:3px; }
+  #screen-1 .step-progress, #screen-2 .step-progress, #screen-3 .step-progress{ margin-bottom:5px; }
+  #screen-1 .field, #screen-2 .field, #screen-3 .field{ margin-bottom:10px; }
+  #screen-1 .field label, #screen-2 .field label, #screen-3 .field label{ font-size:10.5px; margin-bottom:3px; }
+  #screen-1 .field input, #screen-1 .field select, #screen-1 .field textarea,
+  #screen-2 .field input, #screen-2 .field select, #screen-2 .field textarea,
+  #screen-3 .field input, #screen-3 .field select, #screen-3 .field textarea{ padding:8px 11px; font-size:13px; }
+  #screen-2 .field textarea{ min-height:90px; }
+  #screen-2 .textarea-large{ min-height:150px !important; }
+  #screen-1 .next-btn, #screen-2 .next-btn, #screen-3 .next-btn{ padding:12px 0; font-size:14px; }
+  #screen-1 .next-btn-large, #screen-2 .next-btn-large, #screen-3 .next-btn-large{ padding:12px 0 !important; font-size:14px !important; }
+  #screen-3 .style-grid{ gap:6px; }
+  #screen-3 .style-card{ padding:8px 5px; font-size:11px; }
+  #screen-3 .color-item input[type="color"]{ width:36px; height:36px; }
+  #screen-3 .modele-select-box, #screen-3 .palette-select-circle{ width:76px; height:76px; }
+
+
 
   .field{ margin-bottom:16px; }
   .field label{
@@ -240,6 +260,87 @@
     color:var(--grey);
     line-height:1.25;
   }
+
+  /* Case ronde "Palette" */
+  .palette-select-circle{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:96px;
+    height:96px;
+    border-radius:50%;
+    background:var(--black);
+    border:1px solid var(--line);
+    cursor:pointer;
+    background-image:conic-gradient(#0A0A0A, #C69B3C, #6B1F2B, #1E3A8A, #193A2A, #A65E46, #1A1A2E, #0A0A0A);
+  }
+  .palette-select-circle:hover{ border-color:var(--red); }
+  .palette-select-circle .palette-select-icon{
+    font-size:22px;
+    background:var(--black);
+    border-radius:50%;
+    width:44px;
+    height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .palette-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    z-index:110;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .palette-overlay.hidden{ display:none; }
+  .palette-overlay-panel{
+    background:var(--black);
+    border-top:1px solid var(--line);
+    border-radius:16px 16px 0 0;
+    width:100%;
+    max-width:560px;
+    max-height:78vh;
+    padding:20px 20px 26px;
+    overflow-y:auto;
+    position:relative;
+  }
+  .palette-overlay-panel h2{
+    font-family:'Archivo Black', sans-serif;
+    font-size:16px;
+    margin-bottom:14px;
+  }
+  .palette-liste{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .palette-card{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--white);
+    font-size:13px;
+    font-weight:600;
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+    text-align:left;
+  }
+  .palette-card:hover{ border-color:var(--red); }
+  .palette-swatches{ display:flex; flex-shrink:0; }
+  .palette-swatches span{
+    width:22px; height:22px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,0.25);
+    margin-left:-8px;
+  }
+  .palette-swatches span:first-child{ margin-left:0; }
 
   /* Overlay de la liste des 15 modèles */
   .modele-overlay{
@@ -1197,17 +1298,49 @@
           </div>
         </div>
         <div>
-          <label data-i18n="lbl_couleurs">Couleurs</label>
-          <div class="color-row">
-            <div class="color-item">
-              <input type="color" id="couleur-principale" value="#E8161C">
-              <span data-i18n="col_principale">Couleur principale</span>
-            </div>
-            <div class="color-item">
-              <input type="color" id="couleur-secondaire" value="#0A0A0B">
-              <span data-i18n="col_secondaire">Couleur secondaire</span>
-            </div>
+          <label data-i18n="lbl_palette_case">Palette</label>
+          <div class="palette-select-circle" onclick="ouvrirPaletteOverlay()">
+            <span class="palette-select-icon">🎡</span>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OVERLAY : liste des 15 palettes de couleurs prédéfinies -->
+    <div class="palette-overlay hidden" id="palette-overlay">
+      <div class="palette-overlay-panel">
+        <button type="button" class="modele-overlay-close" onclick="fermerPaletteOverlay()">✕</button>
+        <h2 data-i18n="lbl_choisir_palette">Choisir une palette</h2>
+        <div class="palette-liste" id="palette-liste">
+          <button type="button" class="palette-card" data-principale="#0A0A0A" data-secondaire="#C69B3C"><span class="palette-swatches"><span style="background:#0A0A0A"></span><span style="background:#C69B3C"></span></span><span>Noir &amp; Or</span></button>
+          <button type="button" class="palette-card" data-principale="#0F172A" data-secondaire="#BFC1C2"><span class="palette-swatches"><span style="background:#0F172A"></span><span style="background:#BFC1C2"></span></span><span>Bleu Nuit &amp; Platine</span></button>
+          <button type="button" class="palette-card" data-principale="#0B3D2E" data-secondaire="#F4EADE"><span class="palette-swatches"><span style="background:#0B3D2E"></span><span style="background:#F4EADE"></span></span><span>Émeraude &amp; Ivoire</span></button>
+          <button type="button" class="palette-card" data-principale="#6B1F2B" data-secondaire="#F4EADE"><span class="palette-swatches"><span style="background:#6B1F2B"></span><span style="background:#F4EADE"></span></span><span>Bordeaux &amp; Champagne</span></button>
+          <button type="button" class="palette-card" data-principale="#422941" data-secondaire="#F3F1EB"><span class="palette-swatches"><span style="background:#422941"></span><span style="background:#F3F1EB"></span></span><span>Prune &amp; Ivoire</span></button>
+          <button type="button" class="palette-card" data-principale="#1C1917" data-secondaire="#B76E79"><span class="palette-swatches"><span style="background:#1C1917"></span><span style="background:#B76E79"></span></span><span>Charbon &amp; Rose Gold</span></button>
+          <button type="button" class="palette-card" data-principale="#1E3A8A" data-secondaire="#F4EADE"><span class="palette-swatches"><span style="background:#1E3A8A"></span><span style="background:#F4EADE"></span></span><span>Bleu Royal &amp; Ivoire</span></button>
+          <button type="button" class="palette-card" data-principale="#193A2A" data-secondaire="#C69B3C"><span class="palette-swatches"><span style="background:#193A2A"></span><span style="background:#C69B3C"></span></span><span>Vert Forêt &amp; Or</span></button>
+          <button type="button" class="palette-card" data-principale="#EFEEED" data-secondaire="#8C1917"><span class="palette-swatches"><span style="background:#EFEEED"></span><span style="background:#8C1917"></span></span><span>Crème &amp; Rouge Carmin</span></button>
+          <button type="button" class="palette-card" data-principale="#0A0A0A" data-secondaire="#F4EADE"><span class="palette-swatches"><span style="background:#0A0A0A"></span><span style="background:#F4EADE"></span></span><span>Noir &amp; Ivoire</span></button>
+          <button type="button" class="palette-card" data-principale="#0A1931" data-secondaire="#C9A84C"><span class="palette-swatches"><span style="background:#0A1931"></span><span style="background:#C9A84C"></span></span><span>Marine &amp; Or</span></button>
+          <button type="button" class="palette-card" data-principale="#20252B" data-secondaire="#C69B3C"><span class="palette-swatches"><span style="background:#20252B"></span><span style="background:#C69B3C"></span></span><span>Ardoise &amp; Or</span></button>
+          <button type="button" class="palette-card" data-principale="#A65E46" data-secondaire="#EBDED4"><span class="palette-swatches"><span style="background:#A65E46"></span><span style="background:#EBDED4"></span></span><span>Terracotta &amp; Crème</span></button>
+          <button type="button" class="palette-card" data-principale="#D9B6A3" data-secondaire="#340A10"><span class="palette-swatches"><span style="background:#D9B6A3"></span><span style="background:#340A10"></span></span><span>Rose Poudré &amp; Bordeaux</span></button>
+          <button type="button" class="palette-card" data-principale="#1A1A2E" data-secondaire="#EFC07B"><span class="palette-swatches"><span style="background:#1A1A2E"></span><span style="background:#EFC07B"></span></span><span>Minuit &amp; Or Champagne</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="lbl_couleurs">Couleurs</label>
+      <div class="color-row">
+        <div class="color-item">
+          <input type="color" id="couleur-principale" value="#E8161C">
+          <span data-i18n="col_principale">Couleur principale</span>
+        </div>
+        <div class="color-item">
+          <input type="color" id="couleur-secondaire" value="#0A0A0B">
+          <span data-i18n="col_secondaire">Couleur secondaire</span>
         </div>
       </div>
     </div>
@@ -1389,6 +1522,7 @@
       s3_lead: "Choisissez le style, les couleurs et la mise en page de votre PDF.",
       lbl_style_pdf: "Style du PDF", style_pro: "Professionnel", style_luxe: "Luxe", style_min: "Minimaliste", style_mod: "Moderne", style_crea: "Créatif",
       lbl_modele_case: "Modèle", lbl_choisir_modele: "Choisir un modèle", badge_bientot: "Bientôt",
+      lbl_palette_case: "Palette", lbl_choisir_palette: "Choisir une palette",
       lbl_couleurs: "Couleurs", col_principale: "Couleur principale", col_secondaire: "Couleur secondaire",
       lbl_police: "Style de police", lbl_taille: "Taille du texte", taille_petit: "Petit", taille_moyen: "Moyen", taille_grand: "Grand",
       lbl_titre_couv: "Titre (couverture)", ph_titre_couv: "Repris automatiquement de l'étape 1",
@@ -1433,6 +1567,7 @@
       s3_lead: "Choose the style, colors and layout of your PDF.",
       lbl_style_pdf: "PDF style", style_pro: "Professional", style_luxe: "Luxury", style_min: "Minimalist", style_mod: "Modern", style_crea: "Creative",
       lbl_modele_case: "Model", lbl_choisir_modele: "Choose a model", badge_bientot: "Coming soon",
+      lbl_palette_case: "Palette", lbl_choisir_palette: "Choose a palette",
       lbl_couleurs: "Colors", col_principale: "Primary color", col_secondaire: "Secondary color",
       lbl_police: "Font style", lbl_taille: "Text size", taille_petit: "Small", taille_moyen: "Medium", taille_grand: "Large",
       lbl_titre_couv: "Title (cover)", ph_titre_couv: "Auto-filled from step 1",
@@ -1593,8 +1728,6 @@
 
       // --- Étape 4 : générer chaque chapitre avec uniquement sa mémoire pertinente ---
       var texteFinal = '[SOMMAIRE]\n' + titresChapitres.join('\n') + '\n[INTRODUCTION]\n' + planAnalyse.introduction + '\n';
-      var MOTS_MIN_CHAPITRE = 600; // ≈ 1,5 page
-      var MAX_COMPLEMENTS = 3;
       // Rotation des modèles : chaque chapitre utilise un modèle différent, peu importe leur nombre total
       var LISTE_MODELES_CHAPITRE = ['openai/gpt-oss-20b', 'qwen/qwen3.6-27b', 'openai/gpt-oss-120b'];
 
@@ -1620,21 +1753,6 @@
           listeChapitres: listeChapitresTexte, memoire: memoirePertinente
         });
         corpsChapitre = (corpsChapitre || '').trim();
-
-        // --- Étape 5 : vérifier la longueur, compléter automatiquement si besoin ---
-        var tentativesComplement = 0;
-        while (compterMots(corpsChapitre) < MOTS_MIN_CHAPITRE && tentativesComplement < MAX_COMPLEMENTS) {
-          tentativesComplement++;
-          btn.textContent = (estFr ? 'Développement du chapitre ' : 'Expanding chapter ') + (i + 1) + '/' + titresChapitres.length + '...';
-          var suite = await appellerIA({
-            titre: titre, sujet: sujet, ton: ton, publicCible: publicCible,
-            mode: 'suite', modeleForce: modeleChapitre,
-            chapitreTitre: titresChapitres[i], texteDejaEcrit: corpsChapitre, memoire: memoirePertinente
-          });
-          suite = (suite || '').trim();
-          if (!suite) break;
-          corpsChapitre += '\n' + suite;
-        }
 
         texteFinal += '[CHAPITRE ' + (i + 1) + ': ' + titresChapitres[i] + ']\n' + corpsChapitre + '\n';
       }
@@ -1863,6 +1981,9 @@
           console.error('Erreur de sauvegarde du lien PDF :', erreurSauvegardeLien.message);
         }
       }
+
+      // Redirection immédiate vers le Dashboard une fois le téléchargement lancé
+      setTimeout(function(){ window.location.href = 'dashboard.html'; }, 600);
     } catch (error) {
       msg.textContent = 'Erreur : ' + (error.message || 'impossible de générer le PDF.');
       msg.classList.add('error');
@@ -2451,6 +2572,21 @@
       var texteAffiche = card.querySelector('span') ? card.querySelector('span').textContent : card.textContent;
       document.getElementById('modele-select-valeur').textContent = texteAffiche.trim();
       fermerModeleOverlay();
+    });
+  });
+
+  // Sélection de la palette de couleurs prédéfinie
+  function ouvrirPaletteOverlay(){
+    document.getElementById('palette-overlay').classList.remove('hidden');
+  }
+  function fermerPaletteOverlay(){
+    document.getElementById('palette-overlay').classList.add('hidden');
+  }
+  document.querySelectorAll('.palette-card').forEach(function(carte){
+    carte.addEventListener('click', function(){
+      document.getElementById('couleur-principale').value = carte.getAttribute('data-principale');
+      document.getElementById('couleur-secondaire').value = carte.getAttribute('data-secondaire');
+      fermerPaletteOverlay();
     });
   });
 
