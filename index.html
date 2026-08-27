@@ -254,7 +254,7 @@
   .lang-switch-fixed{
     position:fixed;
     top:16px;
-    left:16px;
+    right:16px;
     z-index:20;
     background:rgba(255,255,255,0.06);
     border:1px solid var(--line);
@@ -303,12 +303,11 @@
     <div class="card">
 
       <div class="tabs">
-        <button class="tab active" id="tab-login" onclick="showForm('login')" data-i18n="tab_login">Se connecter</button>
-        <button class="tab" id="tab-signup" onclick="showForm('signup')" data-i18n="tab_signup">Créer un compte</button>
+        <button class="tab active" id="tab-signup" onclick="showForm('signup')" data-i18n="tab_signup">Créer un compte</button>
       </div>
 
       <!-- LOGIN FORM -->
-      <form id="form-login">
+      <form id="form-login" class="hidden">
         <h1 class="form-title" data-i18n="login_title">Content de vous revoir</h1>
         <p class="form-sub" data-i18n="login_sub">Connectez-vous pour accéder à vos créations.</p>
 
@@ -327,7 +326,7 @@
       </form>
 
       <!-- SIGNUP FORM -->
-      <form id="form-signup" class="hidden">
+      <form id="form-signup">
         <h1 class="form-title" data-i18n="signup_title">Créez votre compte</h1>
         <p class="form-sub" data-i18n="signup_sub">Votre expertise. Votre produit. En 2 minutes.</p>
 
@@ -408,8 +407,6 @@
   function showForm(which){
     document.getElementById('form-login').classList.toggle('hidden', which !== 'login');
     document.getElementById('form-signup').classList.toggle('hidden', which !== 'signup');
-    document.getElementById('tab-login').classList.toggle('active', which === 'login');
-    document.getElementById('tab-signup').classList.toggle('active', which === 'signup');
   }
 
   function setMsg(id, text, type){
