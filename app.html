@@ -337,7 +337,8 @@
   .palette-swatches span{
     width:22px; height:22px;
     border-radius:50%;
-    border:1px solid rgba(255,255,255,0.25);
+    border:2px solid rgba(255,255,255,0.55);
+    box-shadow:0 0 0 1px rgba(0,0,0,0.4);
     margin-left:-8px;
   }
   .palette-swatches span:first-child{ margin-left:0; }
@@ -1331,19 +1332,8 @@
       </div>
     </div>
 
-    <div class="field">
-      <label data-i18n="lbl_couleurs">Couleurs</label>
-      <div class="color-row">
-        <div class="color-item">
-          <input type="color" id="couleur-principale" value="#E8161C">
-          <span data-i18n="col_principale">Couleur principale</span>
-        </div>
-        <div class="color-item">
-          <input type="color" id="couleur-secondaire" value="#0A0A0B">
-          <span data-i18n="col_secondaire">Couleur secondaire</span>
-        </div>
-      </div>
-    </div>
+    <input type="hidden" id="couleur-principale" value="#E8161C">
+    <input type="hidden" id="couleur-secondaire" value="#0A0A0B">
 
     <!-- OVERLAY : liste complète des 15 modèles -->
     <div class="modele-overlay hidden" id="modele-overlay">
