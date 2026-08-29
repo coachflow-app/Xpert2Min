@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xpert2Min — Générations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+<script src="https://cdn.kkiapay.me/k.js"></script>
+<style>
+  :root{
+    --black:#0A0A0B;
+    --black-2:#141416;
+    --red:#E8161C;
+    --white:#F5F5F5;
+    --grey:#8A8A8F;
+    --line:#242426;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Inter', sans-serif;
+    background:var(--black-2);
+    color:var(--white);
+    min-height:100vh;
+  }
+  header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 18px;
+    background:var(--black);
+    border-bottom:1px solid var(--line);
+  }
+  .back-btn{
+    background:none;
+    border:none;
+    color:var(--grey);
+    font-size:20px;
+    cursor:pointer;
+    padding:4px 8px;
+  }
+  header .titre{
+    font-family:'Archivo Black', sans-serif;
+    font-size:15px;
+  }
+
+  main{ max-width:520px; margin:0 auto; padding:26px 20px 60px; }
+
+  .intro-titre{
+    font-family:'Archivo Black', sans-serif;
+    font-size:22px;
+    margin-bottom:6px;
+    text-align:center;
+  }
+  .intro-sub{
+    color:var(--grey);
+    font-size:13.5px;
+    text-align:center;
+    margin-bottom:28px;
+    line-height:1.5;
+  }
+
+  .plan-card{
+    position:relative;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:22px 20px;
+    margin-bottom:18px;
+  }
+  .plan-card.recommande{ border-color:var(--red); }
+  .badge-recommande{
+    position:absolute;
+    top:-11px;
+    right:20px;
+    background:var(--red);
+    color:#fff;
+    font-size:10.5px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding:4px 10px;
+    border-radius:20px;
+  }
+  .plan-nom{
+    font-family:'Archivo Black', sans-serif;
+    font-size:16px;
+    margin-bottom:4px;
+  }
+  .plan-desc{
+    color:var(--grey);
+    font-size:12.5px;
+    margin-bottom:16px;
+    line-height:1.4;
+  }
+  .plan-prix{
+    font-family:'Archivo Black', sans-serif;
+    font-size:32px;
+    color:var(--red);
+    margin-bottom:2px;
+  }
+  .plan-prix span{
+    font-size:13px;
+    color:var(--grey);
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+  }
+  .plan-btn{
+    width:100%;
+    margin-top:16px;
+    padding:13px 0;
+    background:var(--red);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:700;
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .plan-btn:hover{ background:#c9121a; }
+  .plan-btn:active{ transform:scale(0.98); }
+  .plan-btn:disabled{ opacity:0.6; cursor:not-allowed; }
+
+  .form-msg{
+    min-height:16px;
+    font-size:13px;
+    margin-top:14px;
+    text-align:center;
+  }
+  .form-msg.error{ color:var(--red); }
+  .form-msg.success{ color:#4CAF50; }
+</style>
+</head>
+<body>
+
+<header>
+  <button type="button" class="back-btn" onclick="window.location.href='dashboard.html'">←</button>
+  <div class="titre">Générations</div>
+</header>
+
+<main>
+  <div class="intro-titre">Choisissez votre offre</div>
+  <p class="intro-sub">Chaque génération de PDF utilise 1 crédit. Choisissez l'offre qui correspond à votre rythme de création.</p>
+
+  <div class="plan-card">
+    <div class="plan-nom">Expertise à l'unité</div>
+    <div class="plan-desc">1 génération de PDF, valable à tout moment.</div>
+    <div class="plan-prix">5 € <span>/ 1 génération</span></div>
+    <button type="button" class="plan-btn" onclick="lancerPaiement('unite', 5)">Choisir cette offre</button>
+  </div>
+
+  <div class="plan-card recommande">
+    <span class="badge-recommande">Recommandé</span>
+    <div class="plan-nom">Starter</div>
+    <div class="plan-desc">5 générations de PDF chaque mois, renouvelées automatiquement.</div>
+    <div class="plan-prix">29 € <span>/ mois</span></div>
+    <button type="button" class="plan-btn" onclick="lancerPaiement('starter', 29)">Choisir cette offre</button>
+  </div>
+
+  <p class="form-msg" id="msg-paiement"></p>
+</main>
+
+<script>
+  Parse.initialize("s1YvHg4CRjirbCydEjFLoBnkSxnNHBlXeBLSmJxq", "WgwearpWgCysVARQz6etPeujBL0ZspvkRCafYuZT");
+  Parse.serverURL = "https://parseapi.back4app.com/";
+
+  if (!Parse.User.current()) {
+    window.location.href = "index.html";
+  }
+
+  var KKIAPAY_CLE_PUBLIQUE = "68c04baa9c0f2a6b6e6cf49b";
+  var planEnCours = null;
+
+  function lancerPaiement(plan, montant){
+    planEnCours = plan;
+    var msg = document.getElementById('msg-paiement');
+    msg.textContent = '';
+    msg.className = 'form-msg';
+
+    openKkiapayWidget({
+      amount: montant,
+      key: KKIAPAY_CLE_PUBLIQUE,
+      sandbox: true,
+      data: plan
+    });
+  }
+
+  addSuccessListener(async function(response){
+    var msg = document.getElementById('msg-paiement');
+    msg.textContent = 'Paiement reçu, activation en cours...';
+    msg.className = 'form-msg';
+
+    try {
+      var resultat = await Parse.Cloud.run('confirmerPaiement', {
+        transactionId: response.transactionId,
+        plan: planEnCours
+      });
+      msg.textContent = 'Offre activée ! ' + resultat.generationsRestantes + ' génération(s) disponible(s).';
+      msg.classList.add('success');
+      setTimeout(function(){ window.location.href = 'dashboard.html'; }, 1800);
+    } catch (erreur) {
+      msg.textContent = 'Erreur lors de l\\'activation : ' + erreur.message;
+      msg.classList.add('error');
+    }
+  });
+
+  addFailedListener(function(){
+    var msg = document.getElementById('msg-paiement');
+    msg.textContent = 'Le paiement a échoué ou a été annulé.';
+    msg.className = 'form-msg error';
+  });
+</script>
+
+</body>
+</html>
