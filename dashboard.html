@@ -59,6 +59,34 @@
     cursor:pointer;
   }
   .icon-btn:hover{ border-color:var(--red); }
+  .credits-badge{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:32px;
+    height:32px;
+    padding:0 8px;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--white);
+    font-size:12.5px;
+    font-weight:800;
+    cursor:pointer;
+    transition:background .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .credits-badge:hover{ border-color:var(--red); }
+  .credits-badge.alerte{
+    background:rgba(232,22,28,0.12);
+    border-color:var(--red);
+    color:var(--red);
+    box-shadow:0 0 0 3px rgba(232,22,28,0.15);
+    animation:pulse-credits 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse-credits{
+    0%, 100%{ box-shadow:0 0 0 3px rgba(232,22,28,0.15); }
+    50%{ box-shadow:0 0 0 5px rgba(232,22,28,0.25); }
+  }
   .lang-switch{
     background:transparent;
     border:1px solid var(--line);
@@ -252,6 +280,9 @@
     XPERT<span>2</span>MIN
   </div>
   <nav>
+    <button type="button" class="credits-badge" id="credits-badge" onclick="window.location.href='pricing.html'" title="Générations restantes">
+      <span id="credits-valeur">—</span>
+    </button>
     <button type="button" class="icon-btn" onclick="ouvrirParametres()">⚙️</button>
     <button type="button" class="lang-switch" id="lang-switch" onclick="toggleLangue()">EN</button>
   </nav>
@@ -300,7 +331,7 @@
       <span class="settings-row-value" id="param-abonnement" data-i18n="aucun_abonnement">Aucun abonnement actif</span>
     </div>
 
-    <button type="button" class="settings-btn" disabled data-i18n="param_acheter">🛒 Acheter des générations — Bientôt disponible</button>
+    <button type="button" class="settings-btn" onclick="window.location.href='pricing.html'" data-i18n="param_acheter">🛒 Acheter des générations</button>
     <button type="button" class="settings-btn danger" onclick="deconnexion()" data-i18n="param_deconnexion">🚪 Déconnexion</button>
   </div>
 </div>
@@ -314,7 +345,7 @@
       lbl_pdf_enregistres: "PDF enregistrés",
       param_titre: "⚙️ Paramètres", param_email: "📧 E-mail", param_langue: "🌐 Langue", param_abonnement: "💳 Abonnement",
       aucun_abonnement: "Aucun abonnement actif",
-      param_acheter: "🛒 Acheter des générations — Bientôt disponible", param_deconnexion: "🚪 Déconnexion",
+      param_acheter: "🛒 Acheter des générations", param_deconnexion: "🚪 Déconnexion",
       bonjour: "Bonjour"
     },
     en: {
@@ -324,7 +355,7 @@
       lbl_pdf_enregistres: "PDFs saved",
       param_titre: "⚙️ Settings", param_email: "📧 Email", param_langue: "🌐 Language", param_abonnement: "💳 Subscription",
       aucun_abonnement: "No active subscription",
-      param_acheter: "🛒 Buy generations — Coming soon", param_deconnexion: "🚪 Log out",
+      param_acheter: "🛒 Buy generations", param_deconnexion: "🚪 Log out",
       bonjour: "Hello"
     }
   };
@@ -363,6 +394,19 @@
 
   async function chargerDashboard(){
     var langue = localStorage.getItem('xpert2min_langue') || 'fr';
+
+    // Affiche le nombre de générations restantes, en rouge si 2 ou moins
+    try {
+      await Parse.User.current().fetch();
+      var genRestantes = Parse.User.current().get('generationsRestantes');
+      if (genRestantes === undefined || genRestantes === null) genRestantes = 2;
+      var badge = document.getElementById('credits-badge');
+      document.getElementById('credits-valeur').textContent = genRestantes;
+      badge.classList.toggle('alerte', genRestantes <= 2);
+    } catch (erreurCredits) {
+      console.error('Erreur de chargement des générations restantes :', erreurCredits.message);
+    }
+
     var Project = Parse.Object.extend('Project');
     var query = new Parse.Query(Project);
     query.equalTo('utilisateur', Parse.User.current());
