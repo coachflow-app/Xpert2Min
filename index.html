@@ -429,6 +429,8 @@
 
     try {
       await user.signUp();
+      user.set('generationsRestantes', 2);
+      await user.save();
       var toast = document.getElementById('toast');
       toast.classList.add('show');
       setMsg('signup-msg', 'Compte créé avec succès !', 'success');
