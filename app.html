@@ -143,24 +143,19 @@
   #screen-4 #generate-btn{ padding:12px 0; font-size:14px; }
   #screen-4 .step4-footer{ margin-top:12px; }
 
-  /* ÉTAPES 1, 2, 3 : mise en page compacte pour tenir sur un seul écran sans défilement */
-  #screen-1 h1, #screen-2 h1, #screen-3 h1{ font-size:18px; margin-bottom:3px; }
-  #screen-1 .lead, #screen-2 .lead, #screen-3 .lead{ font-size:12px; margin-bottom:14px; line-height:1.35; }
-  #screen-1 .eyebrow, #screen-2 .eyebrow, #screen-3 .eyebrow{ margin-bottom:3px; }
-  #screen-1 .step-progress, #screen-2 .step-progress, #screen-3 .step-progress{ margin-bottom:5px; }
-  #screen-1 .field, #screen-2 .field, #screen-3 .field{ margin-bottom:10px; }
-  #screen-1 .field label, #screen-2 .field label, #screen-3 .field label{ font-size:10.5px; margin-bottom:3px; }
+  /* ÉTAPES 1, 2 : mise en page compacte pour tenir sur un seul écran sans défilement */
+  #screen-1 h1, #screen-2 h1{ font-size:18px; margin-bottom:3px; }
+  #screen-1 .lead, #screen-2 .lead{ font-size:12px; margin-bottom:14px; line-height:1.35; }
+  #screen-1 .eyebrow, #screen-2 .eyebrow{ margin-bottom:3px; }
+  #screen-1 .step-progress, #screen-2 .step-progress{ margin-bottom:5px; }
+  #screen-1 .field, #screen-2 .field{ margin-bottom:10px; }
+  #screen-1 .field label, #screen-2 .field label{ font-size:10.5px; margin-bottom:3px; }
   #screen-1 .field input, #screen-1 .field select, #screen-1 .field textarea,
-  #screen-2 .field input, #screen-2 .field select, #screen-2 .field textarea,
-  #screen-3 .field input, #screen-3 .field select, #screen-3 .field textarea{ padding:8px 11px; font-size:13px; }
+  #screen-2 .field input, #screen-2 .field select, #screen-2 .field textarea{ padding:8px 11px; font-size:13px; }
   #screen-2 .field textarea{ min-height:90px; }
   #screen-2 .textarea-large{ min-height:150px !important; }
-  #screen-1 .next-btn, #screen-2 .next-btn, #screen-3 .next-btn{ padding:12px 0; font-size:14px; }
-  #screen-1 .next-btn-large, #screen-2 .next-btn-large, #screen-3 .next-btn-large{ padding:12px 0 !important; font-size:14px !important; }
-  #screen-3 .style-grid{ gap:6px; }
-  #screen-3 .style-card{ padding:8px 5px; font-size:11px; }
-  #screen-3 .color-item input[type="color"]{ width:36px; height:36px; }
-  #screen-3 .modele-select-box, #screen-3 .palette-select-circle{ width:76px; height:76px; }
+  #screen-1 .next-btn, #screen-2 .next-btn{ padding:12px 0; font-size:14px; }
+  #screen-1 .next-btn-large, #screen-2 .next-btn-large{ padding:12px 0 !important; font-size:14px !important; }
 
 
 
@@ -1977,6 +1972,9 @@
     } catch (error) {
       msg.textContent = 'Erreur : ' + (error.message || 'impossible de générer le PDF.');
       msg.classList.add('error');
+      if (error.message && error.message.indexOf('plus de génération disponible') !== -1) {
+        setTimeout(function(){ window.location.href = 'pricing.html'; }, 1500);
+      }
     } finally {
       btn.disabled = false;
       btn.classList.remove('downloading');
