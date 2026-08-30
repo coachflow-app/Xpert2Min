@@ -280,7 +280,7 @@
     XPERT<span>2</span>MIN
   </div>
   <nav>
-    <button type="button" class="credits-badge" id="credits-badge" onclick="window.location.href='pricing.html'" title="Générations restantes">
+    <button type="button" class="credits-badge hidden" id="credits-badge" onclick="window.location.href='pricing.html'" title="Générations restantes">
       <span id="credits-valeur">—</span>
     </button>
     <button type="button" class="icon-btn" onclick="ouvrirParametres()">⚙️</button>
@@ -395,14 +395,19 @@
   async function chargerDashboard(){
     var langue = localStorage.getItem('xpert2min_langue') || 'fr';
 
-    // Affiche le nombre de générations restantes, en rouge si 2 ou moins
+    // La pastille de générations ne s'affiche que si un plan payant est actif
     try {
       await Parse.User.current().fetch();
-      var genRestantes = Parse.User.current().get('generationsRestantes');
-      if (genRestantes === undefined || genRestantes === null) genRestantes = 2;
+      var planActuel = Parse.User.current().get('planActuel');
       var badge = document.getElementById('credits-badge');
-      document.getElementById('credits-valeur').textContent = genRestantes;
-      badge.classList.toggle('alerte', genRestantes <= 2);
+      if (planActuel) {
+        var genRestantes = Parse.User.current().get('generationsRestantes') || 0;
+        badge.classList.remove('hidden');
+        document.getElementById('credits-valeur').textContent = genRestantes;
+        badge.classList.toggle('alerte', genRestantes <= 2);
+      } else {
+        badge.classList.add('hidden');
+      }
     } catch (erreurCredits) {
       console.error('Erreur de chargement des générations restantes :', erreurCredits.message);
     }
