@@ -429,10 +429,9 @@
 
     try {
       await user.signUp();
-      user.set('generationsRestantes', 2);
-      await user.save();
       var toast = document.getElementById('toast');
       toast.classList.add('show');
+      setTimeout(function(){ toast.classList.remove('show'); }, 4200);
       setMsg('signup-msg', 'Compte créé avec succès !', 'success');
       setTimeout(function(){ window.location.href = 'dashboard.html'; }, 2200);
     } catch (error) {
