@@ -1376,10 +1376,10 @@
     <div class="field">
       <label for="style-chapitres" data-i18n="lbl_style_chap">Style des chapitres</label>
       <select id="style-chapitres">
-        <option data-i18n="chap_numerotes">Numérotés</option>
-        <option data-i18n="chap_icones">Avec icônes</option>
-        <option data-i18n="chap_pleine">Titres pleine largeur</option>
-        <option data-i18n="chap_min">Minimaliste</option>
+        <option value="Numérotés" data-i18n="chap_numerotes">Numérotés</option>
+        <option value="Avec icônes" data-i18n="chap_icones">Avec icônes</option>
+        <option value="Titres pleine largeur" data-i18n="chap_pleine">Titres pleine largeur</option>
+        <option value="Minimaliste" data-i18n="chap_min">Minimaliste</option>
       </select>
     </div>
 
@@ -1616,6 +1616,7 @@
   }
 
   var dernierResultatIA = null; // texte brut renvoyé par l'IA, pour la sauvegarde
+  var titrePourPDF = null; // titre traduit en anglais par l'IA quand le mode EN est actif (null en mode FR : comportement inchangé)
   var idProjetActuel = null; // identifiant du projet sauvegardé, pour y rattacher le lien du PDF ensuite
 
   function obtenirTon(){
@@ -1726,6 +1727,7 @@
 
       var planAnalyse = analyserReponsePlan(reponsePlan);
       if (!planAnalyse || planAnalyse.titres.length === 0) { throw new Error('Réponse IA invalide (plan).'); }
+      titrePourPDF = planAnalyse.titreTraduit || null;
 
       var titresChapitres = planAnalyse.titres;
       var listeChapitresTexte = titresChapitres.join(', ');
@@ -1798,11 +1800,11 @@
     }
   }
 
-  // Analyse la réponse de l'étape "plan" : titres des chapitres + répartition des blocs + introduction
+  // Analyse la réponse de l'étape "plan" : titres des chapitres + répartition des blocs + introduction (+ titre traduit en mode EN)
   function analyserReponsePlan(texte){
     if (!texte || texte.indexOf('[SOMMAIRE]') === -1) return null;
-    var sections = texte.split(/\[(SOMMAIRE|MAPPING|INTRODUCTION)\]/);
-    var resultat = { titres: [], mapping: {}, introduction: '' };
+    var sections = texte.split(/\[(SOMMAIRE|MAPPING|INTRODUCTION|TITRE)\]/);
+    var resultat = { titres: [], mapping: {}, introduction: '', titreTraduit: '' };
 
     for (var i = 1; i < sections.length; i += 2){
       var etiquette = sections[i].trim();
@@ -1823,6 +1825,8 @@
         });
       } else if (etiquette === 'INTRODUCTION') {
         resultat.introduction = contenu;
+      } else if (etiquette === 'TITRE') {
+        resultat.titreTraduit = contenu.replace(/^["']|["']$/g, ''); // retire d'éventuels guillemets ajoutés par l'IA
       }
     }
     return resultat;
@@ -1919,15 +1923,17 @@
       if (!contenu) { throw new Error('Aucun contenu généré à mettre en PDF. Génère ton contenu avant de télécharger.'); }
 
       var resultat = await Parse.Cloud.run('genererPDFDeterministe', {
-        titre: document.getElementById('titre').value,
+        titre: titrePourPDF || document.getElementById('titre').value,
         couleurPrincipale: document.getElementById('couleur-principale').value,
         couleurSecondaire: document.getElementById('couleur-secondaire').value,
         police: document.getElementById('police').value,
         tailleTexte: document.getElementById('taille-texte').value,
         styleChoisi: document.querySelector('.style-card.selected') ? document.querySelector('.style-card.selected').getAttribute('data-value') : 'professionnel',
-        createur: document.getElementById('createur').value,
+        createur: nomComplet(),
         citation: document.getElementById('citation').value,
         styleChapitres: document.getElementById('style-chapitres').value,
+        numeroPages: document.getElementById('numero-pages').checked,
+        entetePied: document.getElementById('entete-pied').checked,
         copyright: document.getElementById('elt-copyright').checked,
         pageAuteur: document.getElementById('elt-page-auteur').checked,
         bioAuteur: document.getElementById('bio-auteur').value,
@@ -2229,7 +2235,7 @@
     var afficherCopyright = document.getElementById('elt-copyright').checked;
     var afficherNumeroPage = document.getElementById('numero-pages').checked;
     var afficherEntetePied = document.getElementById('entete-pied').checked;
-    var titreDoc = document.getElementById('titre').value;
+    var titreDoc = titrePourPDF || document.getElementById('titre').value;
 
     var styleCardSelectionnee = document.querySelector('.style-card.selected');
     var styleChoisi = styleCardSelectionnee ? styleCardSelectionnee.getAttribute('data-value') : 'professionnel';
@@ -2514,7 +2520,7 @@
     }
 
     // Pré-remplit le titre de couverture avec le titre saisi à l'étape 1
-    document.getElementById('titre-couverture').value = document.getElementById('titre').value;
+    document.getElementById('titre-couverture').value = titrePourPDF || document.getElementById('titre').value;
     goToStep(3);
   }
 
