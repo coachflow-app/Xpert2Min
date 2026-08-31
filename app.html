@@ -1945,7 +1945,8 @@
         linkedin: document.getElementById('reseau-linkedin').value,
         site: document.getElementById('reseau-site').value,
         introduction: contenu.introduction,
-        chapitres: contenu.chapitres
+        chapitres: contenu.chapitres,
+        langue: localStorage.getItem('xpert2min_langue') || 'fr'
       });
 
       // resultat.url = lien du fichier PDF hébergé sur Back4App (permanent, ne périme jamais)
@@ -2237,6 +2238,17 @@
     var afficherEntetePied = document.getElementById('entete-pied').checked;
     var titreDoc = titrePourPDF || document.getElementById('titre').value;
 
+    // Langue active de l'interface : aligne les textes fixes de l'aperçu (Sommaire, Contact, etc.)
+    // sur ce qui sera réellement écrit dans le PDF final généré par Back4App.
+    var langueApercu = localStorage.getItem('xpert2min_langue') || 'fr';
+    var Lp = (langueApercu === 'en') ? {
+      sommaire: 'Table of Contents', chapitre: 'Chapter', contact: 'Contact', reseaux: 'Find Me',
+      droitsReserves: 'All rights reserved.'
+    } : {
+      sommaire: 'Sommaire', chapitre: 'Chapitre', contact: 'Contact', reseaux: 'Réseaux',
+      droitsReserves: 'Tous droits réservés.'
+    };
+
     var styleCardSelectionnee = document.querySelector('.style-card.selected');
     var styleChoisi = styleCardSelectionnee ? styleCardSelectionnee.getAttribute('data-value') : 'professionnel';
 
@@ -2331,7 +2343,7 @@
       return { page: pageSommaire, conteneur: conteneurListe };
     }
 
-    var pageSommaireActuelle = creerPageSommaire('Sommaire');
+    var pageSommaireActuelle = creerPageSommaire(Lp.sommaire);
     var estPremierePageSommaire = true;
 
     itemsSommaireHTML.forEach(function(itemHTML){
@@ -2340,7 +2352,7 @@
       if (pageSommaireActuelle.page.scrollHeight > pageSommaireActuelle.page.clientHeight) {
         // Ça ne rentre plus : on retire cet élément et on le reporte sur une nouvelle page
         pageSommaireActuelle.conteneur.lastElementChild.remove();
-        pageSommaireActuelle = creerPageSommaire('Sommaire (suite)');
+        pageSommaireActuelle = creerPageSommaire(Lp.sommaire + (langueApercu === 'en' ? ' (continued)' : ' (suite)'));
         estPremierePageSommaire = false;
         pageSommaireActuelle.conteneur.insertAdjacentHTML('beforeend', itemHTML);
       }
@@ -2372,7 +2384,7 @@
         var enTeteHTML = estPremierePage
           ? ('<div class="chapter-num-bg" style="color:' + couleurPrincipale + '">' + String(index + 1).padStart(2, '0') + '</div>' +
              '<div class="' + titreClass + '" data-num="' + (index + 1) + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '">' + escapeHTML(ch.titre) + '</div>')
-          : ('<div class="' + titreClass + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '; opacity:0.6; font-size:13px;">' + escapeHTML(ch.titre) + ' (suite)</div>');
+          : ('<div class="' + titreClass + '" style="color:' + couleurPrincipale + '; border-color:' + couleurPrincipale + '; opacity:0.6; font-size:13px;">' + escapeHTML(ch.titre) + (langueApercu === 'en' ? ' (continued)' : ' (suite)') + '</div>');
         var conteneurCorps = document.createElement('div');
         page.innerHTML = enTeteHTML + motifSecoursHTML(couleurSecondaire) + headerFooterHTML(titreDoc, numPage, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
         page.insertBefore(conteneurCorps, page.querySelector('.page-header-x2m') || null);
@@ -2396,37 +2408,41 @@
 
     // --- Page optionnelle combinée : auteur / contact / réseaux / copyright ---
     var afficherReseaux = document.getElementById('elt-reseaux').checked;
-    if (afficherPageAuteur || afficherContact || afficherReseaux || afficherCopyright) {
+    var bioAuteurTexte = document.getElementById('bio-auteur').value;
+    var emailContact = document.getElementById('contact-email').value;
+    var telContact = document.getElementById('contact-tel').value;
+    var instaReseau = document.getElementById('reseau-instagram').value;
+    var linkedinReseau = document.getElementById('reseau-linkedin').value;
+    var siteReseau = document.getElementById('reseau-site').value;
+    // On ne crée cette page que s'il y a réellement quelque chose à afficher : cocher une case
+    // sans remplir le champ correspondant ne doit plus produire une page vide.
+    var auteurValideApercu = afficherPageAuteur && bioAuteurTexte;
+    var contactValideApercu = afficherContact && (emailContact || telContact);
+    var reseauxValideApercu = afficherReseaux && (instaReseau || linkedinReseau || siteReseau);
+
+    if (auteurValideApercu || contactValideApercu || reseauxValideApercu || afficherCopyright) {
       var pageInfos = document.createElement('div');
       pageInfos.className = 'pdf-page';
       pageInfos.style.fontFamily = police;
       var blocs = '';
 
-      if (afficherPageAuteur) {
-        var bio = document.getElementById('bio-auteur').value;
+      if (auteurValideApercu) {
         blocs += '<h2 class="section-title" style="color:' + couleurPrincipale + '">' + escapeHTML(nomComplet()) + '</h2>';
-        if (bio) blocs += '<div class="chapter-body" style="margin-bottom:18px">' + escapeHTML(bio) + '</div>';
+        blocs += '<div class="chapter-body" style="margin-bottom:18px">' + escapeHTML(bioAuteurTexte) + '</div>';
       }
-      if (afficherContact) {
-        var email = document.getElementById('contact-email').value;
-        var tel = document.getElementById('contact-tel').value;
-        blocs += '<p style="font-size:13px;margin-bottom:6px;color:' + couleurPrincipale + '"><b>Contact</b></p>';
-        if (email) blocs += '<p style="font-size:12.5px;margin-bottom:4px">' + escapeHTML(email) + '</p>';
-        if (tel) blocs += '<p style="font-size:12.5px;margin-bottom:16px">' + escapeHTML(tel) + '</p>';
+      if (contactValideApercu) {
+        blocs += '<p style="font-size:13px;margin-bottom:6px;color:' + couleurPrincipale + '"><b>' + Lp.contact + '</b></p>';
+        if (emailContact) blocs += '<p style="font-size:12.5px;margin-bottom:4px">' + escapeHTML(emailContact) + '</p>';
+        if (telContact) blocs += '<p style="font-size:12.5px;margin-bottom:16px">' + escapeHTML(telContact) + '</p>';
       }
-      if (afficherReseaux) {
-        var insta = document.getElementById('reseau-instagram').value;
-        var linkedin = document.getElementById('reseau-linkedin').value;
-        var site = document.getElementById('reseau-site').value;
-        if (insta || linkedin || site) {
-          blocs += '<p style="font-size:13px;margin-bottom:6px;color:' + couleurPrincipale + '"><b>Réseaux</b></p>';
-          if (insta) blocs += '<p style="font-size:12.5px;margin-bottom:4px">Instagram : ' + escapeHTML(insta) + '</p>';
-          if (linkedin) blocs += '<p style="font-size:12.5px;margin-bottom:4px">LinkedIn : ' + escapeHTML(linkedin) + '</p>';
-          if (site) blocs += '<p style="font-size:12.5px;margin-bottom:16px">Site : ' + escapeHTML(site) + '</p>';
-        }
+      if (reseauxValideApercu) {
+        blocs += '<p style="font-size:13px;margin-bottom:6px;color:' + couleurPrincipale + '"><b>' + Lp.reseaux + '</b></p>';
+        if (instaReseau) blocs += '<p style="font-size:12.5px;margin-bottom:4px">Instagram : ' + escapeHTML(instaReseau) + '</p>';
+        if (linkedinReseau) blocs += '<p style="font-size:12.5px;margin-bottom:4px">LinkedIn : ' + escapeHTML(linkedinReseau) + '</p>';
+        if (siteReseau) blocs += '<p style="font-size:12.5px;margin-bottom:16px">' + (langueApercu === 'en' ? 'Website' : 'Site') + ' : ' + escapeHTML(siteReseau) + '</p>';
       }
       if (afficherCopyright) {
-        blocs += '<p style="font-size:11px;opacity:0.6;margin-top:20px">© ' + new Date().getFullYear() + ' — ' + escapeHTML(nomComplet()) + '. Tous droits réservés.</p>';
+        blocs += '<p style="font-size:11px;opacity:0.6;margin-top:20px">© ' + new Date().getFullYear() + ' — ' + escapeHTML(nomComplet()) + '. ' + Lp.droitsReserves + '</p>';
       }
       var numInfos = prochainNumero();
       pageInfos.innerHTML = (blocs + headerFooterHTML(titreDoc, numInfos, couleurPrincipale, afficherEntetePied, afficherNumeroPage));
