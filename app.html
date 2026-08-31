@@ -74,6 +74,29 @@
   }
   .lang-switch:hover{ border-color:var(--red); }
 
+  .toast{
+    display:none;
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(120%);
+    background:var(--black);
+    border:1px solid var(--red);
+    color:var(--white);
+    padding:14px 20px;
+    border-radius:10px;
+    font-size:13.5px;
+    max-width:90vw;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+    transition:transform .35s cubic-bezier(.2,.9,.25,1);
+    z-index:200;
+    text-align:center;
+  }
+  .toast.show{
+    display:block;
+    transform:translateX(-50%) translateY(0);
+  }
+
   @media (max-width:420px){
     .logo{ font-size:12.5px; }
     header nav{ gap:12px; }
@@ -1645,12 +1668,45 @@
     return select.value;
   }
 
+  async function verifierCreditDisponible(){
+    try {
+      await Parse.User.current().fetch();
+      var user = Parse.User.current();
+      var planActuel = user.get('planActuel');
+      if (planActuel) {
+        var genRestantes = user.get('generationsRestantes') || 0;
+        return { autorise: genRestantes > 0 };
+      }
+      var gratuitesUtilisees = user.get('generationsGratuitesUtilisees') || 0;
+      return { autorise: gratuitesUtilisees < 2 };
+    } catch (erreur) {
+      console.error('Erreur de vérification du crédit :', erreur.message);
+      return { autorise: true }; // en cas d'erreur réseau, on ne bloque pas injustement
+    }
+  }
+
+  function afficherToastCredit(estFr){
+    var toast = document.getElementById('toast-credit');
+    document.getElementById('toast-credit-texte').textContent = estFr
+      ? 'Vos 2 générations gratuites ont été utilisées. Choisissez un plan pour continuer.'
+      : 'You have used your 2 free generations. Choose a plan to continue.';
+    toast.classList.add('show');
+  }
+
   async function genererContenu(){
     var btn = document.getElementById('generate-btn');
     var msg = document.getElementById('msg-4');
     var resultBox = document.getElementById('result-box');
     var preview = document.getElementById('pdf-preview');
     var actionsRow = document.getElementById('actions-row');
+    var estFrPrealable = document.getElementById('lang-switch').textContent === 'FR';
+
+    var creditInfo = await verifierCreditDisponible();
+    if (!creditInfo.autorise) {
+      afficherToastCredit(estFrPrealable);
+      setTimeout(function(){ window.location.href = 'pricing.html'; }, 1800);
+      return;
+    }
 
     msg.textContent = '';
     msg.className = 'form-msg';
@@ -2581,6 +2637,10 @@
   });
 
 </script>
+
+<div class="toast" id="toast-credit">
+  <span id="toast-credit-texte"></span>
+</div>
 
 </body>
 </html>
