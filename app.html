@@ -823,8 +823,8 @@
   }
   .pdf-page .chapter-title{
     font-family:'Archivo Black', sans-serif;
-    font-size:16px;
-    margin-bottom:10px;
+    font-size:24px;
+    margin-bottom:12px;
     position:relative;
     z-index:1;
   }
@@ -865,35 +865,6 @@
     font-size:2.6em;
     line-height:0.82;
     padding:2px 6px 0 0;
-  }
-
-  /* Encadrés premium : astuce / conseil / exemple / important */
-  .callout{
-    position:relative;
-    z-index:1;
-    margin:12px 0 14px;
-    padding:11px 13px;
-    border-radius:7px;
-    border-left:3px solid;
-    background:rgba(0,0,0,0.035);
-    font-size:12px;
-    line-height:1.55;
-  }
-  .callout-label{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-weight:800;
-    font-size:10.5px;
-    text-transform:uppercase;
-    letter-spacing:0.05em;
-    margin-bottom:4px;
-  }
-  .callout-icon{
-    width:14px; height:14px;
-    border-radius:3px;
-    display:inline-block;
-    flex-shrink:0;
   }
 
   /* En-tête / pied de page (identité cohérente sur toutes les pages de contenu) */
@@ -1269,15 +1240,6 @@
       </div>
     </div>
 
-    <div class="field">
-      <label data-i18n="lbl_langue_doc">Langue du document</label>
-      <div class="lang-choice">
-        <label><input type="radio" name="langue" value="fr" checked><span data-i18n="opt_francais">Français</span></label>
-        <label><input type="radio" name="langue" value="en"><span data-i18n="opt_anglais">Anglais</span></label>
-      </div>
-      <p class="field-note" data-i18n="note_langue_pdf">Le PDF sera généré entièrement dans la langue sélectionnée.</p>
-    </div>
-
     <button type="button" class="next-btn" onclick="validateStep1()"><span data-i18n="btn_continuer">Continuer</span> <span class="btn-arrow">→</span></button>
     <p class="form-msg" id="msg-1"></p>
   </div>
@@ -1518,11 +1480,9 @@
       ton_choisir: "Choisissez un ton", ton_pro: "Professionnel", ton_persuasif: "Persuasif", ton_inspirant: "Inspirant",
       ton_pedagogique: "Pédagogique", ton_conversationnel: "Conversationnel", ton_motivant: "Motivant", ton_direct: "Direct", ton_autre: "Autre",
       lbl_ton_autre: "Précisez le ton souhaité", ph_ton_autre: "Ex. : Ironique, poétique, familier...",
-      note_langue_pdf: "Le PDF sera généré entièrement dans la langue sélectionnée.",
       progres_25: "25 % terminé", progres_50: "50 % terminé", progres_75: "75 % terminé", progres_100: "100 % terminé",
       lbl_public: "Public cible", ph_public: "Ex. : Entrepreneurs et freelances débutants",
       lbl_prenom: "Prénom du créateur", ph_prenom: "Votre prénom", lbl_createur: "Nom de l'auteur", ph_createur: "Votre nom",
-      lbl_langue_doc: "Langue du document", opt_francais: "Français", opt_anglais: "Anglais",
       btn_continuer: "Continuer", btn_retour: "Retour",
       step_label_2: "Étape 2 / 4", s2_title: "Ajoutez vos connaissances",
       s2_lead: "C'est ici que votre expertise prend vie. Décrivez vos connaissances, vos méthodes, vos conseils. Plus les informations sont détaillées, plus l'IA pourra créer un PDF professionnel fidèle à votre expertise.",
@@ -1563,11 +1523,9 @@
       ton_choisir: "Choose a tone", ton_pro: "Professional", ton_persuasif: "Persuasive", ton_inspirant: "Inspiring",
       ton_pedagogique: "Educational", ton_conversationnel: "Conversational", ton_motivant: "Motivating", ton_direct: "Direct", ton_autre: "Other",
       lbl_ton_autre: "Specify the desired tone", ph_ton_autre: "E.g.: Ironic, poetic, casual...",
-      note_langue_pdf: "The PDF will be generated entirely in the selected language.",
       progres_25: "25% complete", progres_50: "50% complete", progres_75: "75% complete", progres_100: "100% complete",
       lbl_public: "Target audience", ph_public: "E.g.: Beginner entrepreneurs and freelancers",
       lbl_prenom: "Creator first name", ph_prenom: "Your first name", lbl_createur: "Author name", ph_createur: "Your name",
-      lbl_langue_doc: "Document language", opt_francais: "French", opt_anglais: "English",
       btn_continuer: "Continue", btn_retour: "Back",
       step_label_2: "Step 2 / 4", s2_title: "Add your knowledge",
       s2_lead: "This is where your expertise comes to life. Describe your knowledge, methods and advice. The more detailed the information, the better the AI can create a PDF true to your expertise.",
@@ -1717,6 +1675,9 @@
     document.getElementById('pdf-download-note').classList.add('hidden');
     btn.disabled = true;
     var estFr = document.getElementById('lang-switch').textContent === 'FR';
+    // Langue réellement active de l'interface (EN/FR) : c'est elle qui détermine la langue du PDF final,
+    // peu importe la langue dans laquelle le créateur a rempli ses champs ou son expertise.
+    var langueDoc = localStorage.getItem('xpert2min_langue') || 'fr';
 
     function pause(ms){ return new Promise(function(resolve){ setTimeout(resolve, ms); }); }
     function compterMots(texte){ return (texte || '').trim().split(/\s+/).filter(Boolean).length; }
@@ -1760,7 +1721,7 @@
       btn.textContent = estFr ? 'Préparation du plan...' : 'Preparing outline...';
       var reponsePlan = await appellerIA({
         titre: titre, sujet: sujet, ton: ton, publicCible: publicCible,
-        mode: 'plan', memoire: memoireComplete
+        mode: 'plan', memoire: memoireComplete, langue: langueDoc
       });
 
       var planAnalyse = analyserReponsePlan(reponsePlan);
@@ -1793,14 +1754,12 @@
           titre: titre, sujet: sujet, ton: ton, publicCible: publicCible,
           mode: 'chapitre', modeleForce: modeleChapitre,
           chapitreTitre: titresChapitres[i], chapitreIndex: i + 1, totalChapitres: titresChapitres.length,
-          listeChapitres: listeChapitresTexte, memoire: memoirePertinente
+          listeChapitres: listeChapitresTexte, memoire: memoirePertinente, langue: langueDoc
         });
         corpsChapitre = (corpsChapitre || '').trim();
 
         texteFinal += '[CHAPITRE ' + (i + 1) + ': ' + titresChapitres[i] + ']\n' + corpsChapitre + '\n';
       }
-
-      texteFinal += '[CONCLUSION]\n' + planAnalyse.conclusion;
 
       var resultat = texteFinal;
 
@@ -1839,11 +1798,11 @@
     }
   }
 
-  // Analyse la réponse de l'étape "plan" : titres des chapitres + répartition des blocs + intro/conclusion
+  // Analyse la réponse de l'étape "plan" : titres des chapitres + répartition des blocs + introduction
   function analyserReponsePlan(texte){
     if (!texte || texte.indexOf('[SOMMAIRE]') === -1) return null;
-    var sections = texte.split(/\[(SOMMAIRE|MAPPING|INTRODUCTION|CONCLUSION)\]/);
-    var resultat = { titres: [], mapping: {}, introduction: '', conclusion: '' };
+    var sections = texte.split(/\[(SOMMAIRE|MAPPING|INTRODUCTION)\]/);
+    var resultat = { titres: [], mapping: {}, introduction: '' };
 
     for (var i = 1; i < sections.length; i += 2){
       var etiquette = sections[i].trim();
@@ -1864,8 +1823,6 @@
         });
       } else if (etiquette === 'INTRODUCTION') {
         resultat.introduction = contenu;
-      } else if (etiquette === 'CONCLUSION') {
-        resultat.conclusion = contenu;
       }
     }
     return resultat;
@@ -1884,7 +1841,7 @@
       projet.set('publicCible', document.getElementById('public').value);
       projet.set('prenom', document.getElementById('prenom').value);
       projet.set('createur', document.getElementById('createur').value);
-      projet.set('langueDocument', document.querySelector('input[name="langue"]:checked').value);
+      projet.set('langueDocument', localStorage.getItem('xpert2min_langue') || 'fr');
       projet.set('expertise', document.getElementById('connaissances').value);
 
       var styleCardSelectionnee = document.querySelector('.style-card.selected');
@@ -1932,10 +1889,8 @@
       '.cover-quote{font-size:1em !important;}' +
       '.cover-auteur{font-size:0.85em !important;}' +
       '.section-title{font-size:1.7em !important;margin-bottom:14mm !important;}' +
-      '.chapter-title{font-size:1.5em !important;margin-bottom:8mm !important;}' +
+      '.chapter-title{font-size:1.9em !important;margin-bottom:8mm !important;}' +
       '.chapter-body{font-size:1.05em !important;line-height:1.7 !important;margin-bottom:5mm !important;}' +
-      '.callout{font-size:0.95em !important;padding:5mm 6mm !important;margin:6mm 0 7mm !important;}' +
-      '.callout-label{font-size:0.85em !important;}' +
       '.sommaire-item{font-size:1.05em !important;padding:3mm 0 !important;}' +
       '.drop-cap{font-size:2.8em !important;}' +
       '.chapter-num-bg{font-size:9em !important;}' +
@@ -1984,7 +1939,6 @@
         linkedin: document.getElementById('reseau-linkedin').value,
         site: document.getElementById('reseau-site').value,
         introduction: contenu.introduction,
-        conclusion: contenu.conclusion,
         chapitres: contenu.chapitres
       });
 
@@ -2067,12 +2021,12 @@
     document.getElementById('preview-overlay').classList.add('hidden');
   }
 
-  // Découpe le texte brut de l'IA en morceaux, à partir des balises [SOMMAIRE], [INTRODUCTION], [CHAPITRE X: titre], [CONCLUSION]
+  // Découpe le texte brut de l'IA en morceaux, à partir des balises [SOMMAIRE], [INTRODUCTION], [CHAPITRE X: titre]
   function decouperReponseIA(texte){
     if (!texte || texte.indexOf('[SOMMAIRE]') === -1) return null;
 
-    var sections = texte.split(/\[(SOMMAIRE|INTRODUCTION|CONCLUSION|CHAPITRE \d+:[^\]]*)\]/);
-    var resultat = { sommaire: '', introduction: '', conclusion: '', chapitres: [] };
+    var sections = texte.split(/\[(SOMMAIRE|INTRODUCTION|CHAPITRE \d+:[^\]]*)\]/);
+    var resultat = { sommaire: '', introduction: '', chapitres: [] };
 
     for (var i = 1; i < sections.length; i += 2){
       var etiquette = sections[i].trim();
@@ -2080,7 +2034,6 @@
 
       if (etiquette === 'SOMMAIRE') resultat.sommaire = contenu;
       else if (etiquette === 'INTRODUCTION') resultat.introduction = contenu;
-      else if (etiquette === 'CONCLUSION') resultat.conclusion = contenu;
       else if (etiquette.indexOf('CHAPITRE') === 0) {
         var titreChapitre = etiquette.split(':').slice(1).join(':').trim();
         resultat.chapitres.push({ titre: titreChapitre || ('Chapitre ' + (resultat.chapitres.length + 1)), texte: contenu });
@@ -2120,14 +2073,8 @@
   }
 
   // ----- Icône unique et cohérente pour tout le document (un seul style, jamais mélangé) -----
-  function iconeAccent(couleur){
-    return '<span class="callout-icon" style="background:' + couleur + '"></span>';
-  }
-
-  var ICONES_CALLOUT = { ASTUCE: '★', CONSEIL: '◆', EXEMPLE: '▸', IMPORTANT: '■' };
-  var LABELS_CALLOUT = { ASTUCE: 'Astuce', CONSEIL: 'Conseil', EXEMPLE: 'Exemple', IMPORTANT: 'Important' };
-
-  // ----- Découpe le texte d'un chapitre en paragraphes + encadrés premium, avec lettrine sur le tout premier paragraphe -----
+  // ----- Découpe le texte d'un chapitre en paragraphes + passages colorés (astuce/conseil/exemple/important),
+  // avec lettrine sur le tout premier paragraphe -----
   // Convertit le format **gras** (Markdown) utilisé parfois par l'IA en vrai gras HTML,
   // et retire tout astérisque isolé qui resterait (jamais d'astérisque visible à l'écran).
   function convertirGrasMarkdown(texteEchappe){
@@ -2139,7 +2086,7 @@
       .replace(/`/g, '');             // retire les apostrophes inversées isolées
   }
 
-  // Comme construireCorpsChapitre, mais retourne chaque paragraphe/encadré séparément
+  // Comme construireCorpsChapitre, mais retourne chaque paragraphe/passage coloré séparément
   // (nécessaire pour pouvoir répartir un chapitre trop long sur plusieurs pages).
   // Découpe un texte trop long en plusieurs morceaux raisonnables (≈180 mots chacun),
   // pour qu'un seul paragraphe géant ne puisse jamais dépasser la capacité d'une page à lui seul.
@@ -2183,10 +2130,10 @@
       if (avant.trim()) ajouterParagraphes(avant);
       var type = match[1];
       var contenuCallout = match[2].trim();
+      // Astuce / Conseil / Exemple / Important : plus d'encadré ni d'icône, le passage reste
+      // un paragraphe normal dans le flux du texte, simplement coloré.
       var couleurCallout = (type === 'ASTUCE' || type === 'IMPORTANT') ? couleurAccent : couleurAccent2;
-      fragments.push('<div class="callout" style="border-left-color:' + couleurCallout + '">' +
-        '<div class="callout-label" style="color:' + couleurCallout + '">' + iconeAccent(couleurCallout) + LABELS_CALLOUT[type] + '</div>' +
-        '<div>' + convertirGrasMarkdown(escapeHTML(contenuCallout)) + '</div></div>');
+      fragments.push('<div class="chapter-body" style="color:' + couleurCallout + '">' + convertirGrasMarkdown(escapeHTML(contenuCallout)) + '</div>');
       lastIndex = regex.lastIndex;
     }
     var reste = texte.slice(lastIndex);
@@ -2226,10 +2173,10 @@
       if (avant.trim()) html += rendreParagraphes(avant);
       var type = match[1];
       var contenuCallout = match[2].trim();
+      // Astuce / Conseil / Exemple / Important : plus d'encadré ni d'icône, le passage reste
+      // un paragraphe normal dans le flux du texte, simplement coloré.
       var couleurCallout = (type === 'ASTUCE' || type === 'IMPORTANT') ? couleurAccent : couleurAccent2;
-      html += '<div class="callout" style="border-left-color:' + couleurCallout + '">' +
-        '<div class="callout-label" style="color:' + couleurCallout + '">' + iconeAccent(couleurCallout) + LABELS_CALLOUT[type] + '</div>' +
-        '<div>' + convertirGrasMarkdown(escapeHTML(contenuCallout)) + '</div></div>';
+      html += '<div class="chapter-body" style="color:' + couleurCallout + '">' + convertirGrasMarkdown(escapeHTML(contenuCallout)) + '</div>';
       lastIndex = regex.lastIndex;
     }
     var reste = texte.slice(lastIndex);
@@ -2441,35 +2388,6 @@
       });
     });
 
-    // --- Page conclusion ---
-    if (contenu.conclusion) {
-      var titreConclClass = 'section-title';
-      function creerPageConclusion(estPremierePage){
-        var pageC = document.createElement('div');
-        pageC.className = 'pdf-page';
-        pageC.style.fontFamily = police;
-        var numPageC = prochainNumero();
-        var enTeteHTML = '<h2 class="' + titreConclClass + '" style="color:' + couleurPrincipale + '">' + (estPremierePage ? 'Conclusion' : 'Conclusion (suite)') + '</h2>';
-        var conteneurCorps = document.createElement('div');
-        pageC.innerHTML = enTeteHTML + headerFooterHTML(titreDoc, numPageC, couleurPrincipale, afficherEntetePied, afficherNumeroPage);
-        pageC.insertBefore(conteneurCorps, pageC.querySelector('.page-header-x2m') || null);
-        preview.appendChild(pageC);
-        return { page: pageC, conteneur: conteneurCorps };
-      }
-
-      var fragmentsConclusion = construireFragmentsChapitre(contenu.conclusion, couleurPrincipale, couleurSecondaire);
-      var pageConclusionActuelle = creerPageConclusion(true);
-
-      fragmentsConclusion.forEach(function(fragmentHTML){
-        pageConclusionActuelle.conteneur.insertAdjacentHTML('beforeend', fragmentHTML);
-        if (pageConclusionActuelle.page.scrollHeight > pageConclusionActuelle.page.clientHeight) {
-          pageConclusionActuelle.conteneur.lastElementChild.remove();
-          pageConclusionActuelle = creerPageConclusion(false);
-          pageConclusionActuelle.conteneur.insertAdjacentHTML('beforeend', fragmentHTML);
-        }
-      });
-    }
-
     // --- Page optionnelle combinée : auteur / contact / réseaux / copyright ---
     var afficherReseaux = document.getElementById('elt-reseaux').checked;
     if (afficherPageAuteur || afficherContact || afficherReseaux || afficherCopyright) {
@@ -2521,7 +2439,7 @@
     var echelles = { petit: 0.88, moyen: 1, grand: 1.16 };
     var echelle = echelles[taille] || 1;
     if (echelle === 1) return;
-    var selecteurs = '.chapter-body, .callout, .callout-label, .sommaire-item, .cover-title, .cover-quote, .section-title, .chapter-title, .cover-auteur';
+    var selecteurs = '.chapter-body, .sommaire-item, .cover-title, .cover-quote, .section-title, .chapter-title, .cover-auteur';
     document.querySelectorAll('#pdf-preview ' + selecteurs).forEach(function(el){
       var tailleActuelle = parseFloat(window.getComputedStyle(el).fontSize);
       el.style.fontSize = (tailleActuelle * echelle) + 'px';
@@ -2533,7 +2451,7 @@
     document.querySelectorAll('.pdf-page').forEach(function(page){
       var tentative = 0;
       while (page.scrollHeight > page.clientHeight + 3 && tentative < 14) {
-        var corps = page.querySelectorAll('.chapter-body, .callout, .sommaire-item, .cover-title, .cover-quote');
+        var corps = page.querySelectorAll('.chapter-body, .sommaire-item, .cover-title, .cover-quote');
         corps.forEach(function(el){
           var tailleActuelle = parseFloat(window.getComputedStyle(el).fontSize);
           if (tailleActuelle > 8) el.style.fontSize = (tailleActuelle - 0.35) + 'px';
