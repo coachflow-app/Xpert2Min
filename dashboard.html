@@ -328,7 +328,7 @@
     </div>
     <div class="settings-row">
       <span class="settings-row-label" data-i18n="param_abonnement">💳 Abonnement</span>
-      <span class="settings-row-value" id="param-abonnement" data-i18n="aucun_abonnement">Aucun abonnement actif</span>
+      <span class="settings-row-value" id="param-abonnement">Aucun abonnement actif</span>
     </div>
 
     <button type="button" class="settings-btn" onclick="window.location.href='pricing.html'" data-i18n="param_acheter">🛒 Acheter des générations</button>
@@ -467,6 +467,14 @@
 
   function ouvrirParametres(){
     document.getElementById('param-email').textContent = Parse.User.current() ? Parse.User.current().get('email') : '—';
+
+    var langueActive = localStorage.getItem('xpert2min_langue') || 'fr';
+    var planActuel = Parse.User.current() ? Parse.User.current().get('planActuel') : null;
+    var libellesPlan = (langueActive === 'en')
+      ? { starter: 'Starter — active subscription', unite: 'Pay-per-generation', aucun: 'No active subscription' }
+      : { starter: 'Starter — abonnement actif', unite: 'Paiement à l’unité', aucun: 'Aucun abonnement actif' };
+    document.getElementById('param-abonnement').textContent = libellesPlan[planActuel] || libellesPlan.aucun;
+
     document.getElementById('settings-overlay').classList.remove('hidden');
   }
   function fermerParametres(){
