@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
 <script src="https://unpkg.com/grapesjs"></script>
 <style>
@@ -570,6 +571,33 @@
     align-items:center;
     background:#3a3a3d;
     padding:14px 0;
+  }
+  /* Pages rendues par PDF.js (Mozilla) : rendu 100% fidèle du vrai PDF généré, page par page */
+  .pdfjs-page{
+    background:#fff;
+    width:100%;
+    max-width:420px;
+    margin-bottom:14px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.35);
+  }
+  .pdfjs-page canvas{
+    width:100%;
+    height:auto;
+    display:block;
+  }
+  .pdf-preview-loading{
+    color:#ddd;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    text-align:center;
+    padding:60px 20px;
+  }
+  .pdf-preview-erreur{
+    color:#ff8080;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    text-align:center;
+    padding:40px 20px;
   }
   .pdf-page{
     background:#fff;
@@ -1772,7 +1800,9 @@
         resultBox.value = resultat;
         resultBox.classList.remove('hidden');
       } else {
-        construirePrevisualisation(contenu);
+        // L'ancienne reconstruction HTML/CSS n'est plus nécessaire : la prévisualisation
+        // est désormais générée à la demande par PDF.js (voir ouvrirPrevisualisation), à partir
+        // du vrai PDF, au moment où l'utilisateur clique sur "Prévisualiser".
         preview.classList.remove('hidden');
         actionsRow.classList.remove('hidden');
         document.getElementById('pdf-download-note').classList.remove('hidden');
@@ -1922,30 +1952,7 @@
       var contenu = decouperReponseIA(dernierResultatIA);
       if (!contenu) { throw new Error('Aucun contenu généré à mettre en PDF. Génère ton contenu avant de télécharger.'); }
 
-      var resultat = await Parse.Cloud.run('genererPDFDeterministe', {
-        titre: titrePourPDF || document.getElementById('titre').value,
-        couleurPrincipale: document.getElementById('couleur-principale').value,
-        couleurSecondaire: document.getElementById('couleur-secondaire').value,
-        police: document.getElementById('police').value,
-        tailleTexte: document.getElementById('taille-texte').value,
-        styleChoisi: document.querySelector('.style-card.selected') ? document.querySelector('.style-card.selected').getAttribute('data-value') : 'professionnel',
-        createur: nomComplet(),
-        citation: document.getElementById('citation').value,
-        styleChapitres: document.getElementById('style-chapitres').value,
-        copyright: document.getElementById('elt-copyright').checked,
-        pageAuteur: document.getElementById('elt-page-auteur').checked,
-        bioAuteur: document.getElementById('bio-auteur').value,
-        pageContact: document.getElementById('elt-page-contact').checked,
-        contactEmail: document.getElementById('contact-email').value,
-        contactTel: document.getElementById('contact-tel').value,
-        reseaux: document.getElementById('elt-reseaux').checked,
-        instagram: document.getElementById('reseau-instagram').value,
-        linkedin: document.getElementById('reseau-linkedin').value,
-        site: document.getElementById('reseau-site').value,
-        introduction: contenu.introduction,
-        chapitres: contenu.chapitres,
-        langue: localStorage.getItem('xpert2min_langue') || 'fr'
-      });
+      var resultat = await Parse.Cloud.run('genererPDFDeterministe', construirePayloadPDF(contenu));
 
       // resultat.url = lien du fichier PDF hébergé sur Back4App (permanent, ne périme jamais)
       var nomFichier = nettoyerNomFichier(document.getElementById('titre').value) + '.pdf';
@@ -1999,31 +2006,93 @@
     }
   }
 
-  function ouvrirPrevisualisation(){
-    document.getElementById('preview-overlay').classList.add('is-opening');
-    document.getElementById('preview-overlay').classList.remove('hidden');
-    document.getElementById('preview-overlay-body').scrollTop = 0;
-    setTimeout(function(){
-      document.getElementById('preview-overlay').classList.remove('is-opening');
-      forcerHauteurPages();
-    }, 10);
+  // Construit l'objet envoyé à genererPDFDeterministe. Utilisée à la fois par la prévisualisation
+  // et le téléchargement, pour garantir qu'ils envoient TOUJOURS exactement les mêmes réglages
+  // (c'est ce qui garantit que l'aperçu correspond pixel pour pixel au PDF réellement téléchargé).
+  function construirePayloadPDF(contenu){
+    return {
+      titre: titrePourPDF || document.getElementById('titre').value,
+      couleurPrincipale: document.getElementById('couleur-principale').value,
+      couleurSecondaire: document.getElementById('couleur-secondaire').value,
+      police: document.getElementById('police').value,
+      tailleTexte: document.getElementById('taille-texte').value,
+      styleChoisi: document.querySelector('.style-card.selected') ? document.querySelector('.style-card.selected').getAttribute('data-value') : 'professionnel',
+      createur: nomComplet(),
+      citation: document.getElementById('citation').value,
+      styleChapitres: document.getElementById('style-chapitres').value,
+      copyright: document.getElementById('elt-copyright').checked,
+      pageAuteur: document.getElementById('elt-page-auteur').checked,
+      bioAuteur: document.getElementById('bio-auteur').value,
+      pageContact: document.getElementById('elt-page-contact').checked,
+      contactEmail: document.getElementById('contact-email').value,
+      contactTel: document.getElementById('contact-tel').value,
+      reseaux: document.getElementById('elt-reseaux').checked,
+      instagram: document.getElementById('reseau-instagram').value,
+      linkedin: document.getElementById('reseau-linkedin').value,
+      site: document.getElementById('reseau-site').value,
+      introduction: contenu.introduction,
+      chapitres: contenu.chapitres,
+      langue: localStorage.getItem('xpert2min_langue') || 'fr'
+    };
   }
 
-  // Calcule et applique en pixels la hauteur exacte de chaque page (format A4 : 210 x 297),
-  // pour éviter tout espace vide entre deux pages dû au CSS "aspect-ratio".
-  // Appelée uniquement une fois la prévisualisation réellement visible (largeur mesurable).
-  function forcerHauteurPages(){
-    document.querySelectorAll('#pdf-preview .pdf-page').forEach(function(page){
-      var largeur = page.offsetWidth;
-      if (largeur > 0) {
-        page.style.aspectRatio = 'auto';
-        page.style.height = Math.round(largeur * 297 / 210) + 'px';
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  var documentPdfjsActuel = null; // référence au document PDF.js actuellement affiché, pour le libérer proprement à la fermeture
+
+  // Prévisualisation : génère le vrai PDF (sans jamais consommer de génération, voir apercu:true
+  // côté Cloud Code) et l'affiche page par page avec PDF.js — donc rendu 100% identique au fichier téléchargé.
+  async function ouvrirPrevisualisation(){
+    var overlay = document.getElementById('preview-overlay');
+    var conteneur = document.getElementById('pdf-preview');
+    overlay.classList.add('is-opening');
+    overlay.classList.remove('hidden');
+    document.getElementById('preview-overlay-body').scrollTop = 0;
+    setTimeout(function(){ overlay.classList.remove('is-opening'); }, 10);
+
+    conteneur.innerHTML = '<div class="pdf-preview-loading">⏳ ' + (document.getElementById('lang-switch').textContent === 'FR' ? 'Preparing preview…' : 'Préparation de l’aperçu…') + '</div>';
+
+    try {
+      var contenu = decouperReponseIA(dernierResultatIA);
+      if (!contenu) { throw new Error('Aucun contenu généré. Génère ton contenu avant de prévisualiser.'); }
+
+      var payload = construirePayloadPDF(contenu);
+      payload.apercu = true; // ne consomme jamais de génération
+      var resultat = await Parse.Cloud.run('genererPDFDeterministe', payload);
+
+      var tacheChargement = pdfjsLib.getDocument(resultat.url);
+      var documentPdf = await tacheChargement.promise;
+      documentPdfjsActuel = documentPdf;
+
+      conteneur.innerHTML = '';
+      for (var num = 1; num <= documentPdf.numPages; num++) {
+        var page = await documentPdf.getPage(num);
+        var echelle = 2; // rendu net sur écrans haute densité (retina)
+        var vue = page.getViewport({ scale: echelle });
+
+        var enveloppe = document.createElement('div');
+        enveloppe.className = 'pdfjs-page';
+        var canvas = document.createElement('canvas');
+        canvas.width = vue.width;
+        canvas.height = vue.height;
+        enveloppe.appendChild(canvas);
+        conteneur.appendChild(enveloppe);
+
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport: vue }).promise;
       }
-    });
+    } catch (erreurApercu) {
+      console.error('Erreur de prévisualisation :', erreurApercu.message);
+      conteneur.innerHTML = '<div class="pdf-preview-erreur">⚠️ ' + (document.getElementById('lang-switch').textContent === 'FR' ? 'Could not load preview. Please try again.' : 'Impossible de charger l’aperçu. Réessaie.') + '</div>';
+    }
   }
 
   function fermerPrevisualisation(){
     document.getElementById('preview-overlay').classList.add('hidden');
+    if (documentPdfjsActuel) {
+      documentPdfjsActuel.destroy();
+      documentPdfjsActuel = null;
+    }
   }
 
   // Découpe le texte brut de l'IA en morceaux, à partir des balises [SOMMAIRE], [INTRODUCTION], [CHAPITRE X: titre]
