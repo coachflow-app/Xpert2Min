@@ -1356,7 +1356,7 @@
           <button type="button" class="style-card" data-value="minimaliste" data-i18n="style_min">Minimaliste</button>
           <button type="button" class="style-card" data-value="moderne" data-i18n="style_mod">Moderne</button>
           <button type="button" class="style-card" data-value="creatif" data-i18n="style_crea">Créatif</button>
-          <button type="button" class="style-card disabled" data-value="3d-hero" disabled><span>3D Hero</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
+          <button type="button" class="style-card" data-value="3d-hero"><span>3D Hero</span></button>
           <button type="button" class="style-card disabled" data-value="cinema-poster" disabled><span>Cinema Poster</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
           <button type="button" class="style-card disabled" data-value="visual-metaphor" disabled><span>Visual Metaphor</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
           <button type="button" class="style-card disabled" data-value="split-visual" disabled><span>Split Visual</span><span class="badge-bientot" data-i18n="badge_bientot">Bientôt</span></button>
@@ -1755,7 +1755,21 @@
 
       var planAnalyse = analyserReponsePlan(reponsePlan);
       if (!planAnalyse || planAnalyse.titres.length === 0) { throw new Error('Réponse IA invalide (plan).'); }
-      titrePourPDF = planAnalyse.titreTraduit || null;
+
+      // Traduction du titre en anglais : appel séparé et minuscule (jamais mêlé à une réponse
+      // plus longue), pour ne jamais risquer que la traduction soit coupée par une limite de tokens.
+      if (langueDoc === 'en') {
+        btn.textContent = estFr ? 'Traduction du titre...' : 'Translating title...';
+        try {
+          var titreTraduitBrut = await appellerIA({ titre: titre, mode: 'titre', langue: langueDoc });
+          titrePourPDF = (titreTraduitBrut || '').trim().replace(/^["']|["']$/g, '') || null;
+        } catch (erreurTitre) {
+          console.error('Traduction du titre impossible, on garde le titre original :', erreurTitre.message);
+          titrePourPDF = null;
+        }
+      } else {
+        titrePourPDF = null;
+      }
 
       var titresChapitres = planAnalyse.titres;
       var listeChapitresTexte = titresChapitres.join(', ');
@@ -1830,11 +1844,11 @@
     }
   }
 
-  // Analyse la réponse de l'étape "plan" : titres des chapitres + répartition des blocs + introduction (+ titre traduit en mode EN)
+  // Analyse la réponse de l'étape "plan" : titres des chapitres + répartition des blocs + introduction
   function analyserReponsePlan(texte){
     if (!texte || texte.indexOf('[SOMMAIRE]') === -1) return null;
-    var sections = texte.split(/\[(SOMMAIRE|MAPPING|INTRODUCTION|TITRE)\]/);
-    var resultat = { titres: [], mapping: {}, introduction: '', titreTraduit: '' };
+    var sections = texte.split(/\[(SOMMAIRE|MAPPING|INTRODUCTION)\]/);
+    var resultat = { titres: [], mapping: {}, introduction: '' };
 
     for (var i = 1; i < sections.length; i += 2){
       var etiquette = sections[i].trim();
@@ -1855,8 +1869,6 @@
         });
       } else if (etiquette === 'INTRODUCTION') {
         resultat.introduction = contenu;
-      } else if (etiquette === 'TITRE') {
-        resultat.titreTraduit = contenu.replace(/^["']|["']$/g, ''); // retire d'éventuels guillemets ajoutés par l'IA
       }
     }
     return resultat;
