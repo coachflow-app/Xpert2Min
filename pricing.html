@@ -172,7 +172,7 @@
     window.location.href = "index.html";
   }
 
-  var KKIAPAY_CLE_PUBLIQUE = "0d6711208d9411f0b9f45f62cefada29";
+  var KKIAPAY_CLE_PUBLIQUE = "fad0da655eadca98fe0a48d3fe39c14d7dd5c07d";
   var planEnCours = null;
 
   function lancerPaiement(plan, montant){
@@ -184,7 +184,7 @@
     openKkiapayWidget({
       amount: montant,
       key: KKIAPAY_CLE_PUBLIQUE,
-      sandbox: true,
+      sandbox: false,
       data: plan
     });
   }
