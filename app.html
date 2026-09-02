@@ -75,27 +75,38 @@
   }
   .lang-switch:hover{ border-color:var(--red); }
 
-  .toast{
+  .toast-overlay{
     display:none;
     position:fixed;
-    bottom:24px;
-    left:50%;
-    transform:translateX(-50%) translateY(120%);
+    inset:0;
+    background:rgba(0,0,0,0.55);
+    z-index:500;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .toast-overlay.show{
+    display:flex;
+  }
+  .toast{
     background:var(--black);
     border:1px solid var(--red);
     color:var(--white);
-    padding:14px 20px;
-    border-radius:10px;
-    font-size:13.5px;
-    max-width:90vw;
-    box-shadow:0 10px 30px rgba(0,0,0,.5);
-    transition:transform .35s cubic-bezier(.2,.9,.25,1);
-    z-index:200;
+    padding:24px 26px;
+    border-radius:14px;
+    font-size:14px;
+    line-height:1.5;
+    max-width:360px;
+    width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
     text-align:center;
+    transform:scale(0.9);
+    opacity:0;
+    transition:transform .25s cubic-bezier(.2,.9,.25,1), opacity .25s ease;
   }
-  .toast.show{
-    display:block;
-    transform:translateX(-50%) translateY(0);
+  .toast-overlay.show .toast{
+    transform:scale(1);
+    opacity:1;
   }
 
   @media (max-width:420px){
@@ -1671,11 +1682,10 @@
   }
 
   function afficherToastCredit(estFr){
-    var toast = document.getElementById('toast-credit');
     document.getElementById('toast-credit-texte').textContent = estFr
       ? 'Vos 2 générations gratuites ont été utilisées. Choisissez un plan pour continuer.'
       : 'You have used your 2 free generations. Choose a plan to continue.';
-    toast.classList.add('show');
+    document.getElementById('toast-credit-overlay').classList.add('show');
   }
 
   async function genererContenu(){
@@ -1775,7 +1785,7 @@
       // --- Étape 4 : générer chaque chapitre avec uniquement sa mémoire pertinente ---
       var texteFinal = '[SOMMAIRE]\n' + titresChapitres.join('\n') + '\n[INTRODUCTION]\n' + planAnalyse.introduction + '\n';
       // Rotation des modèles : chaque chapitre utilise un modèle différent, peu importe leur nombre total
-      var LISTE_MODELES_CHAPITRE = ['openai/gpt-oss-20b', 'qwen/qwen3.6-27b', 'openai/gpt-oss-120b'];
+      var LISTE_MODELES_CHAPITRE = ['openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-120b'];
 
       for (var i = 0; i < titresChapitres.length; i++) {
         btn.textContent = (estFr ? 'Rédaction du chapitre ' : 'Writing chapter ') + (i + 1) + '/' + titresChapitres.length + '...';
@@ -2655,8 +2665,10 @@
 
 </script>
 
-<div class="toast" id="toast-credit">
-  <span id="toast-credit-texte"></span>
+<div class="toast-overlay" id="toast-credit-overlay">
+  <div class="toast" id="toast-credit">
+    <span id="toast-credit-texte"></span>
+  </div>
 </div>
 
 </body>
