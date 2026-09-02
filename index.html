@@ -227,27 +227,39 @@
   .form-msg.error{ color:var(--red); }
   .form-msg.success{ color:#4CAF50; }
 
-  /* welcome toast : invisible tant qu'aucun compte n'est créé */
-  .toast{
+  /* welcome toast : notification centrée à l'écran, invisible tant qu'aucun compte n'est créé */
+  .toast-overlay{
     display:none;
     position:fixed;
-    bottom:24px;
-    left:50%;
-    transform:translateX(-50%) translateY(120%);
+    inset:0;
+    background:rgba(0,0,0,0.55);
+    z-index:500;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .toast-overlay.show{
+    display:flex;
+  }
+  .toast{
     background:var(--black);
     border:1px solid var(--red);
     color:var(--white);
-    padding:14px 20px;
-    border-radius:10px;
-    font-size:13.5px;
-    max-width:90vw;
-    box-shadow:0 10px 30px rgba(0,0,0,.5);
-    transition:transform .35s cubic-bezier(.2,.9,.25,1);
-    z-index:50;
+    padding:24px 26px;
+    border-radius:14px;
+    font-size:14px;
+    line-height:1.5;
+    max-width:360px;
+    width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    text-align:center;
+    transform:scale(0.9);
+    opacity:0;
+    transition:transform .25s cubic-bezier(.2,.9,.25,1), opacity .25s ease;
   }
-  .toast.show{
-    display:block;
-    transform:translateX(-50%) translateY(0);
+  .toast-overlay.show .toast{
+    transform:scale(1);
+    opacity:1;
   }
   .toast b{ color:var(--red); }
 
@@ -343,8 +355,10 @@
     </div>
   </div>
 
-  <div class="toast" id="toast">
-    <span data-i18n="toast_text">Bienvenue sur Xpert2Min. Vous avez reçu 2 générations de PDF offertes pour votre premier mois.</span>
+  <div class="toast-overlay" id="toast-overlay">
+    <div class="toast" id="toast">
+      <span data-i18n="toast_text">Bienvenue sur Xpert2Min. Vous avez reçu 2 générations de PDF offertes pour votre premier mois.</span>
+    </div>
   </div>
 
 <script>
@@ -429,9 +443,9 @@
 
     try {
       await user.signUp();
-      var toast = document.getElementById('toast');
-      toast.classList.add('show');
-      setTimeout(function(){ toast.classList.remove('show'); }, 4200);
+      var toastOverlay = document.getElementById('toast-overlay');
+      toastOverlay.classList.add('show');
+      setTimeout(function(){ toastOverlay.classList.remove('show'); }, 4200);
       setMsg('signup-msg', 'Compte créé avec succès !', 'success');
       setTimeout(function(){ window.location.href = 'dashboard.html'; }, 2200);
     } catch (error) {
