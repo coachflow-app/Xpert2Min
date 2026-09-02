@@ -395,6 +395,16 @@
   async function chargerDashboard(){
     var langue = localStorage.getItem('xpert2min_langue') || 'fr';
 
+    // Vérifie automatiquement, à chaque ouverture du dashboard, si la date fixe de purge
+    // mensuelle est dépassée — si oui, tous les projets de tous les comptes sont supprimés
+    // et la prochaine date est programmée un mois plus tard. 100% automatique, aucune
+    // configuration à faire côté Back4App.
+    try {
+      await Parse.Cloud.run('verifierPurgeMensuelle');
+    } catch (erreurPurge) {
+      console.error('Erreur de vérification de la purge mensuelle :', erreurPurge.message);
+    }
+
     // La pastille de générations ne s'affiche que si un plan payant est actif
     try {
       await Parse.User.current().fetch();
