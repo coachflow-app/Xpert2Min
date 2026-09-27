@@ -1363,16 +1363,13 @@
         <h2 data-i18n="lbl_choisir_modele">Choisir un modèle</h2>
         <div class="modele-liste" id="style-grid">
           <button type="button" class="style-card selected" data-value="professionnel" data-i18n="style_pro">Professionnel</button>
-          <button type="button" class="style-card" data-value="luxe" data-i18n="style_luxe">Luxe</button>
           <button type="button" class="style-card" data-value="minimaliste" data-i18n="style_min">Minimaliste</button>
           <button type="button" class="style-card" data-value="moderne" data-i18n="style_mod">Moderne</button>
-          <button type="button" class="style-card" data-value="creatif" data-i18n="style_crea">Créatif</button>
           <button type="button" class="style-card" data-value="3d-hero"><span>3D Hero</span></button>
           <button type="button" class="style-card" data-value="cinema-poster"><span>Cinema Poster</span></button>
           <button type="button" class="style-card" data-value="visual-metaphor"><span>Visual Metaphor</span></button>
           <button type="button" class="style-card" data-value="split-visual"><span>Split Visual</span></button>
           <button type="button" class="style-card" data-value="typographic-art"><span>Typographic Art</span></button>
-          <button type="button" class="style-card" data-value="luxury-object"><span>Luxury Object</span></button>
           <button type="button" class="style-card" data-value="editorial-art"><span>Editorial Art</span></button>
           <button type="button" class="style-card" data-value="transformation"><span>Transformation</span></button>
           <button type="button" class="style-card" data-value="fiche-pro"><span>Fiche Pro</span></button>
@@ -1418,7 +1415,7 @@
       <input type="text" id="citation" placeholder="Une citation à afficher sur la couverture" data-i18n-placeholder="ph_citation">
     </div>
 
-    <div class="field">
+    <div class="field" id="champ-style-chapitres">
       <label for="style-chapitres" data-i18n="lbl_style_chap">Style des chapitres</label>
       <select id="style-chapitres">
         <option value="Numérotés" data-i18n="chap_numerotes">Numérotés</option>
@@ -2645,6 +2642,19 @@
   function fermerModeleOverlay(){
     document.getElementById('modele-overlay').classList.add('hidden');
   }
+  // Formats complets : chacun impose son propre titre de chapitre, donc le champ "Style des
+  // chapitres" n'a plus aucun effet une fois l'un d'eux choisi — on le masque pour ne pas laisser
+  // croire à l'utilisateur qu'il change quelque chose. Cette liste DOIT rester identique à
+  // "formatsCompletsConnus" côté main.js : si un format y est ajouté d'un côté, l'ajouter aussi
+  // de l'autre. Seul ce champ est concerné (Couleur secondaire reste toujours visible, à la
+  // demande explicite de Halik).
+  var formatsCompletsConnus = ['fiche-pro', 'dark-bleed', 'bold-tag', 'report-ledger', 'ghost-numeral', 'classic-frame', 'dual-column', 'dark-watermark'];
+  function mettreAJourVisibiliteChampsFormat(styleValue){
+    var champStyleChapitres = document.getElementById('champ-style-chapitres');
+    if (!champStyleChapitres) return;
+    champStyleChapitres.style.display = formatsCompletsConnus.includes(styleValue) ? 'none' : '';
+  }
+
   document.querySelectorAll('.style-card').forEach(function(card){
     if (card.disabled) return;
     card.addEventListener('click', function(){
@@ -2652,9 +2662,12 @@
       card.classList.add('selected');
       var texteAffiche = card.querySelector('span') ? card.querySelector('span').textContent : card.textContent;
       document.getElementById('modele-select-valeur').textContent = texteAffiche.trim();
+      mettreAJourVisibiliteChampsFormat(card.getAttribute('data-value'));
       fermerModeleOverlay();
     });
   });
+  // État initial (au chargement de la page, selon la carte déjà sélectionnée par défaut)
+  mettreAJourVisibiliteChampsFormat(document.querySelector('.style-card.selected') ? document.querySelector('.style-card.selected').getAttribute('data-value') : 'professionnel');
 
   // Sélection de la palette de couleurs prédéfinie
   function ouvrirPaletteOverlay(){
