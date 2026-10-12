@@ -8,6 +8,48 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+<script>
+  // ----- Persistance de session selon "Se souvenir de moi" -----
+  // Par défaut, le SDK Parse garde la session indéfiniment dans localStorage. Quand l'utilisateur
+  // décoche "Se souvenir de moi" à la connexion, on déplace ses clefs Parse vers un cookie DE
+  // SESSION (sans date d'expiration -> supprimé à la fermeture du navigateur, partagé entre les
+  // onglets). Ce script, identique sur index.html/app.html/dashboard.html, restaure ces clefs dans
+  // localStorage AVANT toute vérification de connexion sur la page, puis les y laisse jusqu'à la
+  // fermeture du navigateur (le cookie disparaît alors, donc elles ne seront plus restaurées).
+  (function () {
+    function listerClefsParse(storage) {
+      var out = [];
+      for (var i = 0; i < storage.length; i++) { var k = storage.key(i); if (k && k.indexOf('Parse/') === 0) out.push(k); }
+      return out;
+    }
+    function lireCookie(nom) {
+      var m = document.cookie.match('(?:^|; )' + nom + '=([^;]*)');
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+    if (lireCookie('xp2m_session_only') === '1') {
+      document.cookie.split('; ').forEach(function (paire) {
+        var idx = paire.indexOf('=');
+        if (idx === -1) return;
+        var nomCookie = paire.substring(0, idx);
+        if (nomCookie.indexOf('xp2m_p_') !== 0) return;
+        var clefOriginale = decodeURIComponent(nomCookie.substring('xp2m_p_'.length));
+        var valeur = decodeURIComponent(paire.substring(idx + 1));
+        if (!localStorage.getItem(clefOriginale)) localStorage.setItem(clefOriginale, valeur);
+      });
+    }
+    window.xp2mAppliquerSouvenirDeMoi = function (memoriser) {
+      function effacerCookie(nom) { document.cookie = nom + '=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; }
+      if (memoriser) { effacerCookie('xp2m_session_only'); return; }
+      var clefs = listerClefsParse(window.localStorage);
+      clefs.forEach(function (clef) {
+        document.cookie = 'xp2m_p_' + encodeURIComponent(clef) + '=' + encodeURIComponent(localStorage.getItem(clef)) + '; path=/';
+      });
+      document.cookie = 'xp2m_session_only=1; path=/';
+      clefs.forEach(function (clef) { localStorage.removeItem(clef); });
+    };
+  })();
+</script>
+
 <style>
   :root{
     --black:#0A0A0B;
@@ -119,6 +161,26 @@
   .card{
     width:100%;
     max-width:380px;
+  }
+
+  .login-badge{
+    width:64px; height:64px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, rgba(232,22,28,0.35), var(--black) 70%);
+    border:1px solid var(--red-dim);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 20px;
+  }
+  .login-badge svg{ width:26px; height:26px; }
+
+  .remember-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin:-6px 0 18px; font-size:12.5px; color:var(--grey);
+  }
+  .remember-check{ display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .remember-check input{ accent-color:var(--red); width:14px; height:14px; cursor:pointer; }
+  .forgot-link{
+    background:none; border:none; padding:0; cursor:pointer;
+    color:var(--red); font-size:12.5px; font-weight:600; font-family:inherit;
   }
 
   .tabs{
@@ -282,9 +344,7 @@
 
   @media (max-width:860px){
     body{ flex-direction:column; }
-    .brand{ padding:36px 24px; min-height:0; }
-    .x-mark{ width:100px; height:100px; margin-bottom:18px; }
-    .brand-strip{ display:none; }
+    .brand{ display:none; }
   }
 </style>
 </head>
@@ -314,6 +374,14 @@
   <div class="panel">
     <div class="card">
 
+      <!-- BADGE LOGO ROND (commun aux deux formulaires) -->
+      <div class="login-badge">
+        <svg viewBox="0 0 200 200" fill="none">
+          <polygon points="30,30 85,30 170,170 115,170" fill="#E8161C"/>
+          <polygon points="170,30 115,30 30,170 85,170" fill="#F5F5F5"/>
+        </svg>
+      </div>
+
       <!-- LOGIN FORM -->
       <form id="form-login" class="hidden">
         <h1 class="form-title" data-i18n="login_title">Content de vous revoir</h1>
@@ -326,6 +394,11 @@
         <div class="field">
           <label for="login-password" data-i18n="lbl_password">Mot de passe</label>
           <input type="password" id="login-password" placeholder="••••••••" required>
+        </div>
+
+        <div class="remember-row">
+          <label class="remember-check"><input type="checkbox" id="remember-me" checked> <span data-i18n="remember_me">Se souvenir de moi</span></label>
+          <button type="button" class="forgot-link" id="forgot-link" data-i18n="forgot_password">Mot de passe oublié ?</button>
         </div>
 
         <button type="submit" class="submit-btn" data-i18n="btn_login">Se connecter</button>
@@ -373,7 +446,11 @@
       btn_login: "Se connecter", no_account: "Pas encore de compte ?",
       signup_title: "Créez votre compte", signup_sub: "Votre expertise. Votre produit. En 2 minutes.",
       btn_signup: "Créer mon compte", have_account: "Déjà un compte ?",
-      toast_text: "Bienvenue sur Xpert2Min. Vous avez reçu 2 générations de PDF offertes pour votre premier mois."
+      toast_text: "Bienvenue sur Xpert2Min. Vous avez reçu 2 générations de PDF offertes pour votre premier mois.",
+      remember_me: "Se souvenir de moi", forgot_password: "Mot de passe oublié ?",
+      forgot_need_email: "Entrez votre e-mail ci-dessus pour recevoir le lien.",
+      forgot_sent: "Si un compte existe pour cet e-mail, un lien de réinitialisation vient d'être envoyé.",
+      forgot_error: "Impossible d'envoyer le lien pour le moment. Réessayez plus tard."
     },
     en: {
       brand_line1: "Your expertise. Your product.", brand_line2: "In 2 minutes.",
@@ -384,7 +461,11 @@
       btn_login: "Log in", no_account: "Don't have an account yet?",
       signup_title: "Create your account", signup_sub: "Your expertise. Your product. In 2 minutes.",
       btn_signup: "Create my account", have_account: "Already have an account?",
-      toast_text: "Welcome to Xpert2Min. You've received 2 free PDF generations for your first month."
+      toast_text: "Welcome to Xpert2Min. You've received 2 free PDF generations for your first month.",
+      remember_me: "Remember me", forgot_password: "Forgot password?",
+      forgot_need_email: "Enter your email above to receive the link.",
+      forgot_sent: "If an account exists for this email, a reset link was just sent.",
+      forgot_error: "Couldn't send the link right now. Please try again later."
     }
   };
 
@@ -469,6 +550,7 @@
 
     try {
       await Parse.User.logIn(email, password);
+      xp2mAppliquerSouvenirDeMoi(document.getElementById('remember-me').checked);
       setMsg('login-msg', 'Connexion réussie !', 'success');
       setTimeout(function(){ window.location.href = 'dashboard.html'; }, 1200);
     } catch (error) {
@@ -476,6 +558,34 @@
     } finally {
       btn.disabled = false;
       btn.textContent = 'Se connecter';
+    }
+  });
+
+  // ----- Mot de passe oublié -----
+  document.getElementById('forgot-link').addEventListener('click', async function(){
+    var email = document.getElementById('login-email').value.trim();
+    var t = traductions[localStorage.getItem('xpert2min_langue') || 'fr'];
+    if (!email) {
+      setMsg('login-msg', t.forgot_need_email, '');
+      document.getElementById('login-email').focus();
+      return;
+    }
+    var lien = this;
+    lien.disabled = true;
+    try {
+      await Parse.User.requestPasswordReset(email);
+      setMsg('login-msg', t.forgot_sent, 'success');
+    } catch (error) {
+      // NOTE : Parse renvoie aussi une erreur si l'e-mail n'existe pas (code 205 côté
+      // documentation Back4App, non vérifié directement ici). Pour ne pas révéler si un compte
+      // existe, on affiche le même message de succès sauf en cas d'échec réseau manifeste.
+      if (error && error.message && /network|connection|unable to connect/i.test(error.message)) {
+        setMsg('login-msg', t.forgot_error, 'error');
+      } else {
+        setMsg('login-msg', t.forgot_sent, 'success');
+      }
+    } finally {
+      lien.disabled = false;
     }
   });
 </script>

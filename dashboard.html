@@ -8,6 +8,48 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+<script>
+  // ----- Persistance de session selon "Se souvenir de moi" -----
+  // Par défaut, le SDK Parse garde la session indéfiniment dans localStorage. Quand l'utilisateur
+  // décoche "Se souvenir de moi" à la connexion, on déplace ses clefs Parse vers un cookie DE
+  // SESSION (sans date d'expiration -> supprimé à la fermeture du navigateur, partagé entre les
+  // onglets). Ce script, identique sur index.html/app.html/dashboard.html, restaure ces clefs dans
+  // localStorage AVANT toute vérification de connexion sur la page, puis les y laisse jusqu'à la
+  // fermeture du navigateur (le cookie disparaît alors, donc elles ne seront plus restaurées).
+  (function () {
+    function listerClefsParse(storage) {
+      var out = [];
+      for (var i = 0; i < storage.length; i++) { var k = storage.key(i); if (k && k.indexOf('Parse/') === 0) out.push(k); }
+      return out;
+    }
+    function lireCookie(nom) {
+      var m = document.cookie.match('(?:^|; )' + nom + '=([^;]*)');
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+    if (lireCookie('xp2m_session_only') === '1') {
+      document.cookie.split('; ').forEach(function (paire) {
+        var idx = paire.indexOf('=');
+        if (idx === -1) return;
+        var nomCookie = paire.substring(0, idx);
+        if (nomCookie.indexOf('xp2m_p_') !== 0) return;
+        var clefOriginale = decodeURIComponent(nomCookie.substring('xp2m_p_'.length));
+        var valeur = decodeURIComponent(paire.substring(idx + 1));
+        if (!localStorage.getItem(clefOriginale)) localStorage.setItem(clefOriginale, valeur);
+      });
+    }
+    window.xp2mAppliquerSouvenirDeMoi = function (memoriser) {
+      function effacerCookie(nom) { document.cookie = nom + '=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; }
+      if (memoriser) { effacerCookie('xp2m_session_only'); return; }
+      var clefs = listerClefsParse(window.localStorage);
+      clefs.forEach(function (clef) {
+        document.cookie = 'xp2m_p_' + encodeURIComponent(clef) + '=' + encodeURIComponent(localStorage.getItem(clef)) + '; path=/';
+      });
+      document.cookie = 'xp2m_session_only=1; path=/';
+      clefs.forEach(function (clef) { localStorage.removeItem(clef); });
+    };
+  })();
+</script>
+
 <style>
   :root{
     --black:#0A0A0B;
