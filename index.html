@@ -172,14 +172,12 @@
   }
   .login-badge svg{ width:26px; height:26px; }
 
-  .remember-row{
-    display:flex; align-items:center; justify-content:space-between;
-    margin:-6px 0 18px; font-size:12.5px; color:var(--grey);
-  }
+  .remember-row{ margin:-6px 0 16px; font-size:12.5px; color:var(--grey); }
   .remember-check{ display:flex; align-items:center; gap:6px; cursor:pointer; }
   .remember-check input{ accent-color:var(--red); width:14px; height:14px; cursor:pointer; }
   .forgot-link{
-    background:none; border:none; padding:0; cursor:pointer;
+    display:block; width:100%; text-align:right;
+    background:none; border:none; padding:0; margin-top:12px; cursor:pointer;
     color:var(--red); font-size:12.5px; font-weight:600; font-family:inherit;
   }
 
@@ -231,10 +229,11 @@
   }
   .field input{
     width:100%;
-    padding:12px 14px;
+    padding:13px 18px;
     background:var(--black);
     border:1px solid var(--line);
-    border-radius:8px;
+    border-radius:999px;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.45);
     color:var(--white);
     font-size:14.5px;
     font-family:'Inter', sans-serif;
@@ -245,13 +244,15 @@
   .field input::placeholder{ color:#55555a; }
 
   .submit-btn{
-    width:100%;
-    padding:13px 0;
-    margin-top:6px;
+    display:block;
+    width:auto;
+    min-width:160px;
+    padding:12px 36px;
+    margin:6px auto 0;
     background:var(--red);
     color:#fff;
     border:none;
-    border-radius:8px;
+    border-radius:999px;
     font-size:14.5px;
     font-weight:700;
     font-family:'Inter', sans-serif;
@@ -398,10 +399,10 @@
 
         <div class="remember-row">
           <label class="remember-check"><input type="checkbox" id="remember-me" checked> <span data-i18n="remember_me">Se souvenir de moi</span></label>
-          <button type="button" class="forgot-link" id="forgot-link" data-i18n="forgot_password">Mot de passe oublié ?</button>
         </div>
 
         <button type="submit" class="submit-btn" data-i18n="btn_login">Se connecter</button>
+        <button type="button" class="forgot-link" id="forgot-link" data-i18n="forgot_password">Mot de passe oublié ?</button>
         <p class="form-msg" id="login-msg"></p>
         <p class="switch-line"><span data-i18n="no_account">Pas encore de compte ?</span> <button type="button" onclick="showForm('signup')" data-i18n="tab_signup">Créer un compte</button></p>
       </form>
